@@ -1,0 +1,5 @@
+Desarrollar una plataforma integral de Seguridad y Salud en el Trabajo (SST) que permita a la organizacion D'Luchos gestionar de manera centralizada los procesos relacionados con la prevención de riesgos laborales, la salud ocupacional, la gestión documental, la capacitación del personal y el cumplimiento de la normativa vigente.
+
+El sistema estará compuesto por una aplicación web orientada a la administración y gestión operativa, y una aplicación móvil destinada a trabajadores y supervisores para facilitar el registro y consulta de información en campo, ambas integradas mediante una API centralizada y una base de datos en la nube.
+
+La plataforma buscará optimizar los procesos internos, mejorar la trazabilidad de la información y proporcionar una arquitectura escalable que permita incorporar nuevos módulos conforme evolucionen las necesidades de la organización.

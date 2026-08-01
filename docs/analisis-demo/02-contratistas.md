@@ -1,0 +1,3 @@
+##  Inducciones
+##  Eventuales 
+##  Permanentes
