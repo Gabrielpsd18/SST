@@ -12,11 +12,9 @@ Planificar, ejecutar y realizar el seguimiento de las capacitaciones impartidas 
 
 - Tema
 - Tipo de capacitación
-- Empresa / Razón Social
-- Unidad
 - Sede
 - Área
-- Grupo de capacitación
+- Grupo de capacitación 
 - Fecha de registro
 
 ---
@@ -34,8 +32,10 @@ Planificar, ejecutar y realizar el seguimiento de las capacitaciones impartidas 
 # Responsables
 
 - Capacitador
+- Empresa / Razón Social del Capacitor
 - Responsable de asistencia
-- Responsable de certificación
+- Responsable de certificación (Depende)
+
 
 ---
 
@@ -62,9 +62,7 @@ Cada trabajador tendrá un estado:
 
 Durante la capacitación podrán adjuntarse:
 
-- Fotografías
 - Lista de asistencia
-- Archivos
 - Certificados
 
 Los metadatos (fecha, usuario que registró, etc.) pueden generarse automáticamente.
