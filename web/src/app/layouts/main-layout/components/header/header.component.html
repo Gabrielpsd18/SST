@@ -1,0 +1,47 @@
+<header class="header">
+
+    <div class="header__left">
+
+        <button class="header__menu-button" (click)="menuClick.emit()">
+            ☰
+
+        </button>
+
+        <div class="header__title">
+
+            <h1>Dashboard</h1>
+
+            <span>Bienvenido al Sistema SST</span>
+
+        </div>
+
+    </div>
+
+    <div class="header__right">
+
+        <button class="header__profile">
+
+            <div class="header__avatar">
+
+                GS
+
+            </div>
+
+            <div class="header__user">
+
+                <strong>Gabriel</strong>
+
+                <span>Administrador</span>
+                
+                <button class="logout-button" (click)="logout()">
+
+                    Cerrar sesión
+
+                </button>
+            </div>
+
+        </button>
+
+    </div>
+
+</header>

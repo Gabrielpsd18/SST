@@ -5,7 +5,7 @@ import { Observable } from 'rxjs';
 import { LoginRequest } from '../models/login-request';
 import { JwtResponse } from '../models/jwt-response';
 import { ApiResponse } from '../models/api-response';
-import { STORAGE } from '../constants/storage.constants';
+import { STORAGE } from '../../../core/constants/storage.constants';
 
 @Injectable({
   providedIn: 'root'

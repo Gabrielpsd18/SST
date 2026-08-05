@@ -1,0 +1,56 @@
+<aside class="sidebar" [class.sidebar--collapsed]="collapsed()">
+
+    <div class="sidebar__logo">
+
+        <div class="sidebar__logo-icon">
+            <lucide-icon [img]="Shield"></lucide-icon>
+        </div>
+
+        @if(!collapsed()){
+
+        <div>
+
+            <h2>SST</h2>
+
+            <span>Seguridad y Salud</span>
+
+        </div>
+
+        }
+
+    </div>
+
+    <nav class="sidebar__menu">
+
+        @for(item of menuItems; track item.route){
+
+        <a [routerLink]="item.route" routerLinkActive="active">
+
+            <lucide-icon [img]="icons[item.icon]">
+            </lucide-icon>
+
+            <span>
+                @if(!collapsed()){
+                {{item.label}}
+                }
+            </span>
+
+        </a>
+
+        }
+
+    </nav>
+
+    <div class="sidebar__footer">
+
+        @if(!collapsed()){
+
+        <strong>Gabriel</strong>
+
+        <span>Administrador</span>
+
+        }
+
+    </div>
+
+</aside>
