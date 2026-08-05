@@ -3,7 +3,7 @@ package pe.edu.sst.backend.modules.identity.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-import pe.edu.sst.backend.modules.identity.constants.ApiPaths;
+import pe.edu.sst.backend.config.constants.ApiPaths;
 import pe.edu.sst.backend.modules.identity.dto.JwtResponse;
 import pe.edu.sst.backend.modules.identity.dto.LoginRequest;
 import pe.edu.sst.backend.modules.identity.service.AuthService;

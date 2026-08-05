@@ -3,7 +3,7 @@ package pe.edu.sst.backend.security.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.*;
 import org.springframework.stereotype.Service;
-import pe.edu.sst.backend.modules.identity.repository.UsuarioRepository;
+import pe.edu.sst.backend.modules.identity.entity.repository.UsuarioRepository;
 
 @Service
 @RequiredArgsConstructor

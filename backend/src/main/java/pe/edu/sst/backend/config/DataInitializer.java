@@ -7,8 +7,8 @@ import org.springframework.stereotype.Component;
 import pe.edu.sst.backend.modules.identity.entity.Rol;
 import pe.edu.sst.backend.modules.identity.entity.Usuario;
 import pe.edu.sst.backend.modules.identity.enums.RoleName;
-import pe.edu.sst.backend.modules.identity.repository.RolRepository;
-import pe.edu.sst.backend.modules.identity.repository.UsuarioRepository;
+import pe.edu.sst.backend.modules.identity.entity.repository.RolRepository;
+import pe.edu.sst.backend.modules.identity.entity.repository.UsuarioRepository;
 
 @Component
 @RequiredArgsConstructor

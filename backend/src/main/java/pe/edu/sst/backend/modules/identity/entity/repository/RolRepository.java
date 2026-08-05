@@ -1,4 +1,4 @@
-package pe.edu.sst.backend.modules.identity.repository;
+package pe.edu.sst.backend.modules.identity.entity.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import pe.edu.sst.backend.modules.identity.entity.Rol;
