@@ -46,4 +46,4 @@ CREATE TABLE trabajadores (
 );
 INSERT INTO sedes (nombre) VALUES ('Sede Principal'), ('Sede Norte'), ('Planta Industrial');
 INSERT INTO areas (nombre) VALUES ('Operaciones'), ('Recursos Humanos'), ('Mantenimiento'), ('SST');
-INSERT INTO cargos (nombre) VALUES ('Técnico de Campo'), ('Analista SST'), ('Supervisor de Planta'), ('Operario');
+INSERT INTO cargos (nombre) VALUES ('Técnico de Campo'), ('Analista SST'), ('Supervisor de Planta'), ('Operario');  

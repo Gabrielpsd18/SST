@@ -1,47 +1,27 @@
 <header class="header">
-
     <div class="header__left">
-
         <button class="header__menu-button" (click)="menuClick.emit()">
             ☰
-
         </button>
-
         <div class="header__title">
-
             <h1>Dashboard</h1>
-
             <span>Bienvenido al Sistema SST</span>
-
         </div>
-
     </div>
 
     <div class="header__right">
-
-        <button class="header__profile">
-
+        <!-- Añadimos el evento de clic para ir al perfil -->
+        <div class="header__profile" (click)="goToProfile()" style="cursor: pointer;">
             <div class="header__avatar">
-
-                GS
-
+                {{ userInitials() }}
             </div>
-
             <div class="header__user">
-
-                <strong>Gabriel</strong>
-
-                <span>Administrador</span>
-                
-                <button class="logout-button" (click)="logout()">
-
+                <strong>{{ userName() }}</strong>
+                <!-- Importante: $event.stopPropagation() evita que al cerrar sesión también te mande al perfil -->
+                <button class="logout-button" (click)="logout(); $event.stopPropagation()">
                     Cerrar sesión
-
                 </button>
             </div>
-
-        </button>
-
+        </div>
     </div>
-
 </header>

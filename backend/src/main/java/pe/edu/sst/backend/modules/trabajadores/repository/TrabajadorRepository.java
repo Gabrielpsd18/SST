@@ -11,4 +11,6 @@ public interface TrabajadorRepository extends JpaRepository<Trabajador, Long> {
     boolean existsByNumeroDocumento(String numeroDocumento);
     
     Optional<Trabajador> findByNumeroDocumento(String numeroDocumento);
+
+    Optional<Trabajador> findByUsuarioId(Long usuarioId);
 }

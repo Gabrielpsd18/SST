@@ -1,0 +1,119 @@
+<div class="profile-container">
+
+  @if (loadingData()) {
+    <div class="profile-container__loading">
+      <lucide-icon [img]="Loader2" class="spin"></lucide-icon>
+      <p>Cargando información del perfil...</p>
+    </div>
+  } @else if (profileData()) {
+
+    <header class="profile-container__header">
+      <div class="profile-container__avatar">
+        {{ profileData()!.nombres[0] }}{{ profileData()!.apellidos[0] }}
+      </div>
+      <div class="profile-container__info">
+        <h2>{{ profileData()!.nombres }} {{ profileData()!.apellidos }}</h2>
+        <span class="badge">{{ profileData()!.cargo }}</span>
+      </div>
+    </header>
+
+    @if (successMessage()) {
+      <div class="alert alert--success">{{ successMessage() }}</div>
+    }
+
+    @if (errorMessage()) {
+      <div class="alert alert--danger">{{ errorMessage() }}</div>
+    }
+
+    <form [formGroup]="profileForm" (ngSubmit)="saveProfile()" class="profile-container__grid">
+      
+      <!-- Contacto editable -->
+      <section class="card">
+        <div class="card__header">
+          <lucide-icon [img]="Mail"></lucide-icon>
+          <h3>Canales de Notificación SST (Editables)</h3>
+        </div>
+        <p class="card__subtext">A estas vías llegará la información de capacitaciones e inspecciones.</p>
+
+        <div class="form-group">
+          <label>Correo Electrónico de Notificaciones</label>
+          <input type="email" formControlName="correoNotificaciones" class="form-control" />
+        </div>
+
+        <div class="form-group">
+          <label>Teléfono de Contacto</label>
+          <input type="text" formControlName="telefono" class="form-control" maxlength="9" />
+        </div>
+      </section>
+
+      <!-- Ubicación y Puesto -->
+      <section class="card">
+        <div class="card__header">
+          <lucide-icon [img]="Building2"></lucide-icon>
+          <h3>Ubicación y Puesto de Trabajo</h3>
+        </div>
+
+        <div class="form-group">
+          <label>Sede Asignada</label>
+          <input type="text" formControlName="sede" class="form-control form-control--disabled" />
+        </div>
+
+        <div class="form-group">
+          <label>Área Operativa</label>
+          <input type="text" formControlName="area" class="form-control form-control--disabled" />
+        </div>
+
+        <div class="form-group">
+          <label>Cargo / Función SST</label>
+          <input type="text" formControlName="cargo" class="form-control form-control--disabled" />
+        </div>
+      </section>
+
+      <!-- Identificación -->
+      <section class="card">
+        <div class="card__header">
+          <lucide-icon [img]="Shield"></lucide-icon>
+          <h3>Identificación Institucional</h3>
+        </div>
+
+        <div class="form-group">
+          <label>DNI / Documento</label>
+          <input type="text" formControlName="dni" class="form-control form-control--disabled" />
+        </div>
+
+        <div class="form-group">
+          <label>Correo Corporativo</label>
+          <input type="email" formControlName="correoCorporativo" class="form-control form-control--disabled" />
+        </div>
+      </section>
+
+      <!-- Estado SST -->
+      <section class="card">
+        <div class="card__header">
+          <lucide-icon [img]="Award"></lucide-icon>
+          <h3>Estado de Capacitación SST</h3>
+        </div>
+
+        <div class="metrics-grid">
+          <div class="metric-box metric-box--success">
+            <strong>{{ profileData()?.capacitacionesCompletadas ?? 0 }}</strong>
+            <span>Cursos Aprobados</span>
+          </div>
+          <div class="metric-box metric-box--warning">
+            <strong>{{ profileData()?.capacitacionesPendientes ?? 0 }}</strong>
+            <span>Pendientes</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Botón -->
+      <div class="profile-container__actions">
+        <button type="submit" class="btn btn--primary" [disabled]="profileForm.invalid || saving()">
+          <lucide-icon [img]="Save"></lucide-icon>
+          {{ saving() ? 'Guardando...' : 'Guardar Cambios' }}
+        </button>
+      </div>
+
+    </form>
+  }
+</div>

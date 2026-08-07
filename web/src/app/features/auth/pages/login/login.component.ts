@@ -48,12 +48,12 @@ export class LoginComponent implements OnInit {
       next: (response) => {
         this.loading = false;
 
-        if (!response.success) {
-          this.errorMessage = response.message;
+        if (!response.success || !response.data) {
+          this.errorMessage = response.message || 'Error al iniciar sesión.';
+          this.cdr.detectChanges();
           return;
         }
 
-        this.authService.saveToken(response.data.accessToken);
         this.router.navigate(['/home']);
       },
       error: (err) => {

@@ -15,4 +15,7 @@ public class JwtResponse {
 
     private Long expiresIn;
 
+    private String email;
+    private String nombreCompleto;
+    private String role;
 }

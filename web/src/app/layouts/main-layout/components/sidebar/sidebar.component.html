@@ -1,56 +1,42 @@
 <aside class="sidebar" [class.sidebar--collapsed]="collapsed()">
-
-    <div class="sidebar__logo">
-
-        <div class="sidebar__logo-icon">
-            <lucide-icon [img]="Shield"></lucide-icon>
-        </div>
-
-        @if(!collapsed()){
-
-        <div>
-
-            <h2>SST</h2>
-
-            <span>Seguridad y Salud</span>
-
-        </div>
-
-        }
-
+  <div class="sidebar__logo">
+    <div class="sidebar__logo-icon">
+      <lucide-icon [img]="Shield"></lucide-icon>
     </div>
 
-    <nav class="sidebar__menu">
+    @if (!collapsed()) {
+      <div>
+        <h2>SST</h2>
+        <span>Seguridad y Salud</span>
+      </div>
+    }
+  </div>
 
-        @for(item of menuItems; track item.route){
-
-        <a [routerLink]="item.route" routerLinkActive="active">
-
-            <lucide-icon [img]="icons[item.icon]">
-            </lucide-icon>
-
-            <span>
-                @if(!collapsed()){
-                {{item.label}}
-                }
-            </span>
-
-        </a>
-
+  <nav class="sidebar__menu">
+    @for (item of menuItems; track item.route) {
+      <a 
+        [routerLink]="item.route" 
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: item.route === '/home' }">
+        <lucide-icon [img]="icons[item.icon]"></lucide-icon>
+        @if (!collapsed()) {
+          <span>{{ item.label }}</span>
         }
+      </a>
+    }
+  </nav>
 
-    </nav>
-
-    <div class="sidebar__footer">
-
-        @if(!collapsed()){
-
-        <strong>Gabriel</strong>
-
-        <span>Administrador</span>
-
-        }
-
-    </div>
-
+  <div class="sidebar__footer">
+    <a routerLink="/profile" class="sidebar__user-link">
+      @if (!collapsed()) {
+        <strong>{{ userName() }}</strong>
+        <br/>
+        <span>{{ userRole() }}</span>
+      } @else {
+        <div class="sidebar__avatar-mini">
+          {{ userName().substring(0, 2).toUpperCase() }}
+        </div>
+      }
+    </a>
+  </div>
 </aside>
