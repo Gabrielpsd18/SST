@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 import { ApiResponse } from '../../auth/models/api-response';
-import { UserProfile, UpdateProfileRequest } from '../../profile/models/user-profile.model';
+import { UserProfile, UpdateProfileRequest } from '../models/user-profile.model';
 
 @Injectable({
   providedIn: 'root'

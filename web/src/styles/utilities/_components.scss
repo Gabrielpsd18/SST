@@ -1,0 +1,175 @@
+/* ==========================================================================
+   GLOBAL REUSABLE UI COMPONENTS AND UTILITIES
+   ========================================================================== */
+
+/* --- Card Container --- */
+.card {
+  background-color: var(--color-surface, #ffffff);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-5);
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.2s ease;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin-bottom: var(--space-3);
+
+    h3 {
+      font-size: var(--font-size-md);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-text-primary);
+      margin: 0;
+    }
+
+    lucide-icon, svg {
+      width: 20px;
+      height: 20px;
+      color: var(--color-primary);
+    }
+  }
+
+  &__subtext {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+    margin-bottom: var(--space-4);
+  }
+}
+
+/* --- Form Controls --- */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+
+  label, .form-label {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-primary);
+  }
+}
+
+.form-control {
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background-color: var(--color-surface, #ffffff);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-sm);
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+  &:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+  }
+
+  &--disabled, &:disabled {
+    background-color: var(--gray-100);
+    color: var(--color-text-secondary);
+    cursor: not-allowed;
+    border-color: var(--gray-200);
+  }
+}
+
+/* --- Buttons --- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-5);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease, opacity 0.2s ease;
+
+  lucide-icon, svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  &--primary {
+    background-color: var(--color-primary);
+    color: #ffffff;
+
+    &:hover:not(:disabled) {
+      background-color: var(--color-primary-hover);
+    }
+  }
+
+  &--secondary {
+    background-color: var(--gray-100);
+    color: var(--color-text-primary);
+
+    &:hover:not(:disabled) {
+      background-color: var(--gray-200);
+    }
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+/* --- Alerts --- */
+.alert {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  margin-bottom: var(--space-4);
+
+  &--success {
+    background-color: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    color: #15803d;
+  }
+
+  &--danger {
+    background-color: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #dc2626;
+  }
+}
+
+/* --- Badges --- */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  background-color: var(--blue-50);
+  color: var(--color-primary);
+
+  &--success {
+    background-color: #dcfce7;
+    color: #15803d;
+  }
+
+  &--warning {
+    background-color: #fef3c7;
+    color: #b45309;
+  }
+}
+
+/* --- Animations & Loaders --- */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}

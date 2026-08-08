@@ -1,0 +1,363 @@
+<div class="capacitaciones-container">
+
+  <!-- Encabezado -->
+  <header class="page-header">
+    <div class="page-header__title">
+      <div class="page-header__icon">
+        <lucide-icon [img]="GraduationCap"></lucide-icon>
+      </div>
+      <div>
+        <h2>Módulo de Capacitaciones SST</h2>
+        <p>Programación de charlas de 5 minutos, inducciones, capacitaciones y gestión de capacitadores.</p>
+      </div>
+    </div>
+
+    <div class="page-header__actions">
+      <!-- Badge de Rol Activo -->
+      <span class="role-badge" [class.role-badge--admin]="isAdmin()" [class.role-badge--supervisor]="!isAdmin()">
+        <div><lucide-icon [img]="Shield"></lucide-icon></div>
+        <div>{{ isAdmin() ? 'Modo Administrador (Escritura)' : 'Modo Supervisor (Solo Lectura)' }}</div>
+      </span>
+
+      @if (isAdmin()) {
+        @if (activeMainTab() === 'sesiones') {
+          <button class="btn btn--primary" (click)="openCapacitacionModal()">
+            <lucide-icon [img]="Plus"></lucide-icon>
+            Programar Capacitación
+          </button>
+        } @else {
+          <button class="btn btn--primary" (click)="openCapacitadorModal()">
+            <lucide-icon [img]="Plus"></lucide-icon>
+            Nuevo Capacitador
+          </button>
+        }
+      }
+    </div>
+  </header>
+
+  <!-- Pestañas Principales del Módulo -->
+  <nav class="module-tabs">
+    <button [class.active]="activeMainTab() === 'sesiones'" (click)="setMainTab('sesiones')">
+      <lucide-icon [img]="Calendar"></lucide-icon>
+      Programación de Capacitaciones
+    </button>
+    <button [class.active]="activeMainTab() === 'capacitadores'" (click)="setMainTab('capacitadores')">
+      <lucide-icon [img]="UserCheck"></lucide-icon>
+      Gestión de Capacitadores (Instructores)
+    </button>
+  </nav>
+
+  <!-- Pestaña 1: Sesiones Programadas -->
+  @if (activeMainTab() === 'sesiones') {
+    <div class="card table-card">
+      @if (loadingCapacitaciones()) {
+        <div class="state-container">
+          <lucide-icon [img]="Loader2" class="spin state-icon"></lucide-icon>
+          <p>Cargando capacitaciones programadas...</p>
+        </div>
+      } @else if (capacitaciones().length === 0) {
+        <div class="state-container">
+          <lucide-icon [img]="GraduationCap" class="state-icon"></lucide-icon>
+          <p>No hay capacitaciones programadas por el momento.</p>
+        </div>
+      } @else {
+        <div class="table-wrapper">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Tema / Asunto</th>
+                <th>Tipo</th>
+                <th>Fecha y Hora</th>
+                <th>Duración</th>
+                <th>Capacitador / Empresa</th>
+                <th>Programado por</th>
+                <th>Trabajadores Asignados</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (cap of capacitaciones(); track cap.id) {
+                <tr>
+                  <td>
+                    <strong class="tema-title">{{ cap.tema }}</strong>
+                  </td>
+                  <td>
+                    <span class="cap-type-badge" [class.cap-type-badge--5min]="cap.tipo === 'CHARLA_5_MINUTOS'" [class.cap-type-badge--ind]="cap.tipo === 'INDUCCION'">
+                      {{ cap.tipo }}
+                    </span>
+                  </td>
+                  <td>
+                    <div class="meta-cell">
+                      <lucide-icon [img]="Calendar"></lucide-icon>
+                      <span>{{ cap.fechaProgramada | date:'dd/MM/yyyy HH:mm' }}</span>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="meta-cell">
+                      <lucide-icon [img]="Clock"></lucide-icon>
+                      <span>{{ cap.duracionHoras }} hora(s)</span>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="trainer-cell">
+                      <strong>{{ cap.capacitadorNombre }}</strong>
+                      <span class="trainer-empresa">{{ cap.capacitadorEmpresa }}</span>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="user-audit"><lucide-icon [img]="Shield"></lucide-icon> {{ cap.creadoPor || 'Sistema' }}</span>
+                  </td>
+                  <td>
+                    <span class="badge badge--success">
+                      <lucide-icon [img]="Users"></lucide-icon> {{ cap.totalTrabajadores }} trabajador(es)
+                    </span>
+                  </td>
+                  <td>
+                    <span class="badge badge--success">{{ cap.estado }}</span>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Paginador -->
+        <footer class="pagination-footer">
+          <span class="pagination-info">
+            Mostrando página <strong>{{ currentPage() + 1 }}</strong> de <strong>{{ totalPages() }}</strong> (Total: {{ totalElements() }} capacitaciones)
+          </span>
+          <div class="pagination-controls">
+            <button class="btn btn--secondary btn--sm" (click)="prevPage()" [disabled]="currentPage() === 0">
+              <lucide-icon [img]="ChevronLeft"></lucide-icon> Anterior
+            </button>
+            <button class="btn btn--secondary btn--sm" (click)="nextPage()" [disabled]="currentPage() >= totalPages() - 1">
+              Siguiente <lucide-icon [img]="ChevronRight"></lucide-icon>
+            </button>
+          </div>
+        </footer>
+      }
+    </div>
+  }
+
+  <!-- Pestaña 2: Gestión de Capacitadores -->
+  @if (activeMainTab() === 'capacitadores') {
+    <div class="card table-card">
+      @if (loadingCapacitadores()) {
+        <div class="state-container">
+          <lucide-icon [img]="Loader2" class="spin state-icon"></lucide-icon>
+          <p>Cargando lista de capacitadores...</p>
+        </div>
+      } @else if (capacitadores().length === 0) {
+        <div class="state-container">
+          <lucide-icon [img]="UserCheck" class="state-icon"></lucide-icon>
+          <p>No se encontraron capacitadores registrados.</p>
+        </div>
+      } @else {
+        <div class="table-wrapper">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Capacitador / Instructor</th>
+                <th>Empresa u Organización</th>
+                <th>Contacto</th>
+                <th>Correo Electrónico</th>
+                <th>Especialidad SST</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (c of capacitadores(); track c.id) {
+                <tr>
+                  <td>
+                    <div class="trainer-avatar-cell">
+                      <div class="trainer-avatar">{{ c.nombres[0] }}</div>
+                      <strong>{{ c.nombres }} {{ c.apellidos || '' }}</strong>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="empresa-badge"><lucide-icon [img]="Building2"></lucide-icon> {{ c.empresa }}</span>
+                  </td>
+                  <td>
+                    <span class="meta-cell"><lucide-icon [img]="Phone"></lucide-icon> {{ c.telefono }}</span>
+                  </td>
+                  <td>
+                    <span class="meta-cell"><lucide-icon [img]="Mail"></lucide-icon> {{ c.correo || 'No registrado' }}</span>
+                  </td>
+                  <td>
+                    <span class="especialidad-tag"><lucide-icon [img]="Award"></lucide-icon> {{ c.especialidad || 'General' }}</span>
+                  </td>
+                  <td>
+                    <span class="badge" [class.badge--success]="c.estado" [class.badge--warning]="!c.estado">
+                      {{ c.estado ? 'ACTIVO' : 'INACTIVO' }}
+                    </span>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Modal 1: Programar Capacitación (Admin Solo) -->
+  @if (showCapacitacionModal()) {
+    <div class="modal-backdrop" (click)="closeCapacitacionModal()"></div>
+    <div class="modal card">
+      <header class="modal__header">
+        <h3>Programar Nueva Capacitación SST</h3>
+        <button (click)="closeCapacitacionModal()"><lucide-icon [img]="X"></lucide-icon></button>
+      </header>
+
+      @if (capSuccessMsg()) {
+        <div class="alert alert--success">{{ capSuccessMsg() }}</div>
+      }
+      @if (capErrorMsg()) {
+        <div class="alert alert--danger">{{ capErrorMsg() }}</div>
+      }
+
+      <form [formGroup]="capacitacionForm" (ngSubmit)="submitCapacitacion()" class="modal__form">
+        <div class="form-grid">
+          
+          <div class="form-group grid-span-2">
+            <label class="form-label">Tema / Asunto de la Capacitación</label>
+            <input type="text" formControlName="tema" class="form-control" placeholder="ej. Charla de 5 Minutos: Prevención de Caídas" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Tipo de Capacitación</label>
+            <select formControlName="tipo" class="form-control">
+              <option value="CHARLA_5_MINUTOS">Charla de 5 Minutos</option>
+              <option value="INDUCCION">Inducción General</option>
+              <option value="CAPACITACION">Capacitación Especializada</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Capacitador / Instructor</label>
+            <select formControlName="capacitadorId" class="form-control">
+              @for (c of capacitadores(); track c.id) {
+                <option [value]="c.id">{{ c.nombres }} {{ c.apellidos || '' }} ({{ c.empresa }})</option>
+              }
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Fecha y Hora Programada</label>
+            <input type="datetime-local" formControlName="fechaProgramada" class="form-control" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Duración (Horas)</label>
+            <input type="number" step="0.25" formControlName="duracionHoras" class="form-control" placeholder="1.0" />
+          </div>
+
+        </div>
+
+        <!-- Sección de Asignación Masiva por Grupos -->
+        <fieldset class="group-assignment-box">
+          <legend><lucide-icon [img]="Users"></lucide-icon> Grupo de Trabajadores a Capacitar</legend>
+          <p class="box-desc">Permite asignar masivamente a todos los trabajadores de una sede o área específica.</p>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">Filtrar por Sede</label>
+              <select formControlName="sedeIdFilter" class="form-control" (change)="onSedeFilterChange($event)">
+                <option value="">Todas las Sedes (General)</option>
+                @for (s of sedes(); track s.id) {
+                  <option [value]="s.id">{{ s.nombre }}</option>
+                }
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Filtrar por Área Operativa</label>
+              <select formControlName="areaIdFilter" class="form-control" (change)="onAreaFilterChange($event)">
+                <option value="">Todas las Áreas</option>
+                @for (a of areas(); track a.id) {
+                  <option [value]="a.id">{{ a.nombre }}</option>
+                }
+              </select>
+            </div>
+          </div>
+
+          <div class="assignment-summary">
+            <lucide-icon [img]="CheckCircle"></lucide-icon>
+            <span>Total de Trabajadores Asignados en este Grupo: <strong>{{ totalAsignadosCount() }} personas</strong></span>
+          </div>
+        </fieldset>
+
+        <footer class="modal__footer">
+          <button type="button" class="btn btn--secondary" (click)="closeCapacitacionModal()">Cancelar</button>
+          <button type="submit" class="btn btn--primary" [disabled]="capacitacionForm.invalid || savingCapacitacion()">
+            <lucide-icon [img]="Plus"></lucide-icon>
+            {{ savingCapacitacion() ? 'Guardando...' : 'Programar Capacitación' }}
+          </button>
+        </footer>
+      </form>
+    </div>
+  }
+
+  <!-- Modal 2: Crear Capacitador (Admin Solo) -->
+  @if (showCapacitadorModal()) {
+    <div class="modal-backdrop" (click)="closeCapacitadorModal()"></div>
+    <div class="modal card">
+      <header class="modal__header">
+        <h3>Registrar Nuevo Capacitador / Instructor</h3>
+        <button (click)="closeCapacitadorModal()"><lucide-icon [img]="X"></lucide-icon></button>
+      </header>
+
+      @if (trainerSuccessMsg()) {
+        <div class="alert alert--success">{{ trainerSuccessMsg() }}</div>
+      }
+      @if (trainerErrorMsg()) {
+        <div class="alert alert--danger">{{ trainerErrorMsg() }}</div>
+      }
+
+      <form [formGroup]="capacitadorForm" (ngSubmit)="submitCapacitador()" class="modal__form">
+        <div class="form-grid">
+          
+          <div class="form-group">
+            <label class="form-label">Nombres del Capacitador</label>
+            <input type="text" formControlName="nombres" class="form-control" placeholder="Ing. Roberto" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Apellidos</label>
+            <input type="text" formControlName="apellidos" class="form-control" placeholder="Gómez" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Empresa / Entidad Externa o Interna</label>
+            <input type="text" formControlName="empresa" class="form-control" placeholder="SST Consultores SAC" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Teléfono de Contacto</label>
+            <input type="text" formControlName="telefono" class="form-control" placeholder="987111222" maxlength="9" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Correo Electrónico</label>
+            <input type="email" formControlName="correo" class="form-control" placeholder="rgomez@empresa.com" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Especialidad SST</label>
+            <input type="text" formControlName="especialidad" class="form-control" placeholder="Prevención de Riesgos Industriales" />
+          </div>
+
+        </div>
+
+        <footer class="modal__footer">
+          <button type="button" class="btn btn--secondary" (click)="closeCapacitadorModal()">Cancelar</button>
+          <button type="submit" class="btn btn--primary" [disabled]="capacitadorForm.invalid || savingCapacitador()">
+            <lucide-icon [img]="UserCheck"></lucide-icon>
+            {{ savingCapacitador() ? 'Guardando...' : 'Registrar Capacitador' }}
+          </button>
+        </footer>
+      </form>
+    </div>
+  }
+
+</div>

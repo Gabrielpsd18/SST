@@ -3,8 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { LucideAngularModule, Shield, Building2, Mail, Award, Save, Loader2 } from 'lucide-angular';
 
-import { UserService } from '../services/user.service'; // Ajusta la ruta a tu UserService
-import { UserProfile, UpdateProfileRequest } from '../models/user-profile.model';
+import { UserService } from '../../services/user.service';
+import { UserProfile, UpdateProfileRequest } from '../../models/user-profile.model';
 
 @Component({
   selector: 'app-profile',
@@ -15,7 +15,7 @@ import { UserProfile, UpdateProfileRequest } from '../models/user-profile.model'
 })
 export class ProfileComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
-  private readonly userService = inject(UserService); // Servicio correcto
+  private readonly userService = inject(UserService);
 
   // Iconos
   protected readonly Shield = Shield;
@@ -54,11 +54,11 @@ export class ProfileComponent implements OnInit {
 
   private loadUserProfile(): void {
     this.loadingData.set(true);
+    this.errorMessage.set('');
 
-    // CORREGIDO: Llamada a userService.getProfile()
     this.userService.getProfile().subscribe({
       next: (response) => {
-        if (response.data) {
+        if (response && response.data) {
           const data = response.data;
           this.profileData.set(data);
 
@@ -94,7 +94,6 @@ export class ProfileComponent implements OnInit {
       telefono: this.profileForm.value.telefono
     };
 
-    // CORREGIDO: Llamada a userService.updateProfile()
     this.userService.updateProfile(request).subscribe({
       next: () => {
         this.saving.set(false);

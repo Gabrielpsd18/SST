@@ -4,7 +4,7 @@
         [collapsed]="collapsed()">
     </app-sidebar>
 
-    <div class="layout__content">
+    <div class="layout__content" [class.layout__content--collapsed]="collapsed()">
 
         <app-header
             (menuClick)="toggleSidebar()">

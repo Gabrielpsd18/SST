@@ -8,17 +8,16 @@
   flex-direction: column;
   flex: 1;
   min-width: 0;
-  transition: margin-left 0.3s ease;
+  margin-left: 260px;
+  transition: margin-left 0.25s ease;
+
+  &--collapsed {
+    margin-left: 80px;
+  }
 }
 
-.layout__main{
-
-    flex:1;
-
-    padding:32px;
-
-    background:var(--color-background);
-
-    overflow:auto;
-
+.layout__main {
+  flex: 1;
+  padding: 32px;
+  background: var(--color-background);
 }

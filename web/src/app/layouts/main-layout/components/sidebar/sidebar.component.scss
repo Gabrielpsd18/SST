@@ -4,6 +4,11 @@
 
   width: 260px;
   height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  z-index: 100;
 
   background: var(--color-surface);
 
