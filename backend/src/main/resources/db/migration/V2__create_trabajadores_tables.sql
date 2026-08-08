@@ -25,6 +25,7 @@ CREATE TABLE trabajadores (
     nombres VARCHAR(100) NOT NULL,
     apellidos VARCHAR(100) NOT NULL,
     telefono VARCHAR(20),
+    correo_notificaciones VARCHAR(128),
     tipo_contrato VARCHAR(30) NOT NULL, -- PERMANENTE, TEMPORAL, PRACTICANTE, RESPONSABLE
     
     -- Relaciones con Tablas Maestras
@@ -44,6 +45,3 @@ CREATE TABLE trabajadores (
     CONSTRAINT fk_trabajador_cargo FOREIGN KEY (cargo_id) REFERENCES cargos(id),
     CONSTRAINT fk_trabajador_usuario FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
 );
-INSERT INTO sedes (nombre) VALUES ('Sede Principal'), ('Sede Norte'), ('Planta Industrial');
-INSERT INTO areas (nombre) VALUES ('Operaciones'), ('Recursos Humanos'), ('Mantenimiento'), ('SST');
-INSERT INTO cargos (nombre) VALUES ('Técnico de Campo'), ('Analista SST'), ('Supervisor de Planta'), ('Operario');  

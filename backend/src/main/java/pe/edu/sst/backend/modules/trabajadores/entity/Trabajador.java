@@ -30,6 +30,9 @@ public class Trabajador {
     @Column(length = 20)
     private String telefono;
 
+    @Column(name = "correo_notificaciones", length = 128)
+    private String correoNotificaciones;
+    
     @Column(name = "tipo_contrato", nullable = false, length = 30)
     private String tipoContrato;
 

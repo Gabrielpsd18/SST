@@ -15,6 +15,7 @@ public class TrabajadorResponse {
     private String nombres;
     private String apellidos;
     private String telefono;
+    private String correoNotificaciones;
     private String tipoContrato;
     private String estado;
 

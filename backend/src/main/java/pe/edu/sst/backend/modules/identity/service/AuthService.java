@@ -43,6 +43,12 @@ public class AuthService {
 
                 String role = (usuario.getRol() != null) ? usuario.getRol().getNombre().name() : RoleName.TRABAJADOR.name();
 
+                if (RoleName.TRABAJADOR.name().equalsIgnoreCase(role)) {
+                    throw new pe.edu.sst.backend.shared.exception.BadRequestException(
+                            "Acceso restringido: El portal web está reservado para Administradores y Supervisores. Los trabajadores deben ingresar desde la aplicación móvil."
+                    );
+                }
+
                 return JwtResponse.builder()
                                 .accessToken(token)
                                 .tokenType("Bearer")

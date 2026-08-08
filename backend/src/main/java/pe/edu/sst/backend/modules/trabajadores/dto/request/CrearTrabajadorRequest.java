@@ -23,6 +23,7 @@ public class CrearTrabajadorRequest {
     private String apellidos;
 
     private String telefono;
+    private String correoNotificaciones;
 
     @NotBlank(message = "El tipo de contrato es obligatorio")
     private String tipoContrato;

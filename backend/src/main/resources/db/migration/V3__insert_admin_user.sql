@@ -7,7 +7,7 @@ INSERT INTO cargos (nombre) VALUES ('Técnico de Campo'), ('Analista SST'), ('Su
 INSERT INTO usuarios (email, password, activo, rol_id, created_at, updated_at)
 VALUES (
     'admin@sst.com',
-    '$2a$10$e88yR.3mK0L.9K7o/1.z2.X.X1Z9g/7S.x0N5k1Z2g/7S.x0N5k1Z',
+    '$2a$12$uGrolbHdng6nc62nccr2QebqrHu20Zv9Knz3tqr7FTIyHP7rSUmwq',
     TRUE,
     (SELECT id FROM roles WHERE nombre = 'ADMINISTRADOR'),
     CURRENT_TIMESTAMP,
@@ -15,21 +15,15 @@ VALUES (
 )
 ON CONFLICT (email) DO NOTHING;
 
--- 3. Insertar Trabajador vinculado al Usuario
-ALTER TABLE trabajadores ADD COLUMN correo_notificaciones VARCHAR(128);
 
-INSERT INTO trabajadores (tipo_documento, numero_documento, nombres, apellidos, telefono, tipo_contrato, sede_id, area_id, cargo_id, usuario_id, estado)
-VALUES (
-    'DNI',
-    '00000000',
-    'Gabriel',
-    'Salgado',
-    '999999999',
-    'PERMANENTE',
-    1,
-    1,
-    1,
-    (SELECT id FROM usuarios WHERE email = 'admin@sst.com'),
-    'ACTIVO'
-)
-ON CONFLICT (numero_documento) DO NOTHING;
+
+-- 3. Creamos tu trabajador y lo vinculamos al usuario_id y a los catálogos
+INSERT INTO trabajadores (
+    tipo_documento, numero_documento, nombres, apellidos, 
+    telefono, correo_notificaciones, tipo_contrato, 
+    sede_id, area_id, cargo_id, usuario_id
+) VALUES (
+    'DNI', '74839201', 'Gabriel', 'Salgado Durán', 
+    '987654321', 'gabrielsalgadoduran@gmail.com', 'PERMANENTE', 
+    1, 4, 2, 1 -- Sede Principal (1), SST (4), Analista SST (2), usuario_id (1)
+);

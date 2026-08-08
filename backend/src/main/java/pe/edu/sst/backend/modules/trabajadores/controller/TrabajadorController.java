@@ -15,8 +15,10 @@ import pe.edu.sst.backend.modules.trabajadores.service.TrabajadorService;
 
 import java.util.List;
 
+import pe.edu.sst.backend.config.constants.ApiPaths;
+
 @RestController
-@RequestMapping("ApiPaths.TRABAJADORES")
+@RequestMapping(ApiPaths.TRABAJADORES)
 @RequiredArgsConstructor
 public class TrabajadorController {
 

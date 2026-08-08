@@ -13,4 +13,6 @@ public interface TrabajadorRepository extends JpaRepository<Trabajador, Long> {
     Optional<Trabajador> findByNumeroDocumento(String numeroDocumento);
 
     Optional<Trabajador> findByUsuarioId(Long usuarioId);
+
+ 
 }
