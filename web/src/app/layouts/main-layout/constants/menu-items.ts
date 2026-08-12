@@ -17,6 +17,11 @@ export const MENU_ITEMS: MenuItem[] = [
     route: '/capacitaciones'
   },
   {
+    label: 'Inspecciones',
+    icon: 'clipboard-list',
+    route: '/inspecciones'
+  },
+  {
     label: 'Documentos',
     icon: 'file-text',
     route: '/documentos'
@@ -24,6 +29,6 @@ export const MENU_ITEMS: MenuItem[] = [
   {
     label: 'Estadísticas',
     icon: 'chart-column',
-    route: '/estadisticas'
+    route: '/reportes'
   }
 ];

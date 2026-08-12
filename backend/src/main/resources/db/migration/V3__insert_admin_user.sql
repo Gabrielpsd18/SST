@@ -1,7 +1,8 @@
 -- 1. Insertar Catálogos de Trabajadores
-INSERT INTO sedes (nombre) VALUES ('Sede Principal'), ('Sede Norte'), ('Planta Industrial') ON CONFLICT DO NOTHING;
-INSERT INTO areas (nombre) VALUES ('Operaciones'), ('Recursos Humanos'), ('Mantenimiento'), ('SST') ON CONFLICT DO NOTHING;
-INSERT INTO cargos (nombre) VALUES ('Técnico de Campo'), ('Analista SST'), ('Supervisor de Planta'), ('Operario') ON CONFLICT DO NOTHING;
+INSERT INTO sedes (nombre) VALUES ('HUSARES'), ('MUNDO MAGICO'), ('LARCO'), ('QUINTANAS'), ('HUAYNA CAPAC'), ('LAZARTE'), ('MOCHE'), ('COVICORTI'), ('HUANCHACO'), ('BUENOS AIRES'), ('CHICLAYO'), ('CASA DEL BEBE'), ('HELADERIA YAMBOLY'), ('HOTEL HUAKARUTE') ON CONFLICT DO NOTHING;
+INSERT INTO cargos (nombre) VALUES ('Cajero'), ('Call Center'), ('Azafata'), ('Mozo'), ('Analista de SST'), ('Vendedor de Postres'), ('Vajillero'), ('Hornero'), ('Seguridad'), ('Encargado de Reservas'), ('Administrador'), ('Vigilante'), ('Ensaladero'), ('Vajillera'), ('Parrillero'), ('Mantenimiento'), ('Asistente de Contabilidad'), ('Jefe de Tienda'), ('Jefe de Logística'), ('Gerente General'), ('Limpieza'), ('Asistente de Auditoría'), ('Corredor'), ('Motorizado'), ('Asistente de Recursos Humanos'), ('Bartender'), ('Cocinero'), ('Descansero'), ('Barman'), ('Chofer'), ('Ayudante de Horno'), ('Jefe de Auditoría') ON CONFLICT DO NOTHING;
+--HUSARES - MUNDO MAGICO - LARCO - QUINTANAS - HUAYNA CAPAC - LAZARTE - MOCHE - COVICORTI - HUANCHACO - BUENOS AIRES - CHICLAYO - CASA DEL BEBE - HELADERIA YAMBOLY -  HOTEL HUAKARUTE
+--Cajero, Call Center, Azafata, Mozo, Analista de Ssoma, Vendedor de Postres, Vajillero, Hornero, Seguridad, Encargado de Reservas, Administrador, Vigilante, Ensaladero, Vajillera, Parrillero, Mantenimiento, Asistente de Contabilidad, Jefe de Tienda, Jefe de Logística, Gerente General, Limpieza, Asistente de Auditoria, Corredor, Motorizado, Asistente de Recursos Humanos, Bartender, Cocinero, Descansero, Barman, Chofer, Ayudante de Horno, Jefe de Auditoría.
 
 -- 2. Insertar Usuario Admin (Usando la FK rol_id que apunta a ADMINISTRADOR)
 INSERT INTO usuarios (email, password, activo, rol_id, created_at, updated_at)
@@ -21,9 +22,9 @@ ON CONFLICT (email) DO NOTHING;
 INSERT INTO trabajadores (
     tipo_documento, numero_documento, nombres, apellidos, 
     telefono, correo_notificaciones, tipo_contrato, 
-    sede_id, area_id, cargo_id, usuario_id
+    sede_id, cargo_id, usuario_id
 ) VALUES (
     'DNI', '74839201', 'Gabriel', 'Salgado Durán', 
     '987654321', 'gabrielsalgadoduran@gmail.com', 'PERMANENTE', 
-    1, 4, 2, 1 -- Sede Principal (1), SST (4), Analista SST (2), usuario_id (1)
+    1, 2, 1
 );

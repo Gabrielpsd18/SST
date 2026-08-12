@@ -50,12 +50,11 @@ public class CapacitacionServiceImpl implements CapacitacionService {
             trabajadoresAAsignar.addAll(trabajadorRepository.findAllById(request.getTrabajadoresIds()));
         }
 
-        if (request.getSedeIdFilter() != null || request.getAreaIdFilter() != null) {
+        if (request.getSedeIdFilter() != null) {
             List<Trabajador> todos = trabajadorRepository.findAll();
             for (Trabajador t : todos) {
-                boolean matchSede = request.getSedeIdFilter() == null || (t.getSede() != null && t.getSede().getId().equals(request.getSedeIdFilter()));
-                boolean matchArea = request.getAreaIdFilter() == null || (t.getArea() != null && t.getArea().getId().equals(request.getAreaIdFilter()));
-                if (matchSede && matchArea && "ACTIVO".equalsIgnoreCase(t.getEstado())) {
+                boolean matchSede = t.getSede() != null && t.getSede().getId().equals(request.getSedeIdFilter());
+                if (matchSede && "ACTIVO".equalsIgnoreCase(t.getEstado())) {
                     trabajadoresAAsignar.add(t);
                 }
             }

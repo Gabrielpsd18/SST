@@ -1,6 +1,5 @@
 <div class="trabajadores-container">
 
-  <!-- Encabezado de la Sección -->
   <header class="page-header">
     <div class="page-header__title">
       <div class="page-header__icon">
@@ -13,337 +12,239 @@
     </div>
 
     <div class="page-header__actions">
-      <!-- Badge de Rol Activo -->
       <span class="role-badge" [class.role-badge--admin]="isAdmin()" [class.role-badge--supervisor]="!isAdmin()">
         <lucide-icon [img]="Shield"></lucide-icon>
         {{ isAdmin() ? 'Modo Administrador (Escritura)' : 'Modo Supervisor (Solo Lectura)' }}
       </span>
 
-      <!-- Botón Registrar Trabajador (Solo Admin) -->
+      <!-- Agrega el botón de crear aquí -->
       @if (isAdmin()) {
-        <button class="btn btn--primary" (click)="openCreateModal()">
-          <lucide-icon [img]="Plus"></lucide-icon>
-          Nuevo Trabajador
-        </button>
+      <button class="btn btn--primary" (click)="goToNuevoTrabajador()">
+        <lucide-icon [img]="Plus" size="20"></lucide-icon>
+        Nuevo Trabajador
+      </button>
+
+      <button class="btn btn--primary" (click)="goToImportarTrabajadores()">
+        <lucide-icon [img]="Plus" size="20"></lucide-icon>
+        Importar Trabajadores
+      </button>
       }
     </div>
   </header>
 
-  <!-- Barra de Filtros y Búsqueda -->
   <div class="toolbar card">
     <div class="toolbar__search">
       <lucide-icon [img]="Search" class="toolbar__search-icon"></lucide-icon>
-      <input
-        type="text"
-        class="form-control"
-        placeholder="Buscar por nombre, apellidos, DNI, área o cargo..."
-        [ngModel]="searchTerm()"
-        (ngModelChange)="searchTerm.set($event)"
-      />
+      <input type="text" class="form-control" placeholder="Buscar por nombre, DNI, sede o cargo..."
+        [ngModel]="searchTerm()" (ngModelChange)="searchTerm.set($event)" />
     </div>
   </div>
 
-  <!-- Tabla de Trabajadores -->
   <div class="card table-card">
     @if (loading()) {
-      <div class="state-container">
-        <lucide-icon [img]="Loader2" class="spin state-icon"></lucide-icon>
-        <p>Cargando listado de trabajadores...</p>
-      </div>
+    <div class="state-container">
+      <lucide-icon [img]="Loader2" class="spin state-icon"></lucide-icon>
+      <p>Cargando listado de trabajadores...</p>
+    </div>
     } @else if (filteredTrabajadores().length === 0) {
-      <div class="state-container">
-        <lucide-icon [img]="Users" class="state-icon"></lucide-icon>
-        <p>No se encontraron trabajadores que coincidan con la búsqueda.</p>
-      </div>
+    <div class="state-container">
+      <lucide-icon [img]="Users" class="state-icon"></lucide-icon>
+      <p>No se encontraron trabajadores que coincidan con la búsqueda.</p>
+    </div>
     } @else {
-      <div class="table-wrapper">
-        <table class="table">
-          <thead>
-            <tr>
-              <th>Trabajador</th>
-              <th>Documento</th>
-              <th>Sede / Área</th>
-              <th>Cargo SST</th>
-              <th>Contacto</th>
-              <th>Estado</th>
-              <th class="text-right">Acciones y documentos</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (trabajador of filteredTrabajadores(); track trabajador.id) {
-              <tr>
-                <td>
-                  <div class="trabajador-cell">
-                    <div class="trabajador-avatar">
-                      {{ trabajador.nombres[0] }}{{ trabajador.apellidos[0] }}
-                    </div>
-                    <div>
-                      <strong class="trabajador-name">{{ trabajador.nombres }} {{ trabajador.apellidos }}</strong>
-                      <span class="trabajador-sub">{{ trabajador.tipoContrato }}</span>
-                    </div>
-                  </div>
-                </td>
-                <td>
-                  <span class="doc-badge">{{ trabajador.tipoDocumento }}: {{ trabajador.numeroDocumento }}</span>
-                </td>
-                <td>
-                  <div class="meta-column">
-                    <span class="meta-primary"><lucide-icon [img]="Building2"></lucide-icon> {{ trabajador.sedeNombre }}</span>
-                    <span class="meta-secondary">{{ trabajador.areaNombre }}</span>
-                  </div>
-                </td>
-                <td>
-                  <span class="cargo-tag"><lucide-icon [img]="Briefcase"></lucide-icon> {{ trabajador.cargoNombre }}</span>
-                </td>
-                <td>
-                  <div class="contact-info">
-                    <span><lucide-icon [img]="Phone"></lucide-icon> {{ trabajador.telefono || 'Sin celular' }}</span>
-                    <span class="email-sub">{{ trabajador.correoNotificaciones || 'Sin email' }}</span>
-                  </div>
-                </td>
-                <td>
-                  <span class="badge" [class.badge--success]="trabajador.estado === 'ACTIVO'" [class.badge--warning]="trabajador.estado !== 'ACTIVO'">
-                    {{ trabajador.estado }}
-                  </span>
-                </td>
-                <td class="text-right">
-                  <div class="action-buttons">
-                    <button class="btn btn--secondary btn--sm" (click)="inspectTrabajador(trabajador, 'perfil')" title="Ver Ficha y Perfil">
-                      <lucide-icon [img]="Eye"></lucide-icon> Perfil
-                    </button>
-                    <button class="btn btn--secondary btn--sm" (click)="inspectTrabajador(trabajador, 'capacitaciones')" title="Inspeccionar Capacitaciones">
-                      <lucide-icon [img]="BookOpen"></lucide-icon>
-                    </button>
-                    <button class="btn btn--secondary btn--sm" (click)="inspectTrabajador(trabajador, 'documentos')" title="Inspeccionar Documentos">
-                      <lucide-icon [img]="FileText"></lucide-icon>
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      </div>
+    <div class="table-wrapper">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Trabajador</th>
+            <th>Documento</th>
+            <th>Sede</th>
+            <th>Cargo SST</th>
+            <th>Contacto</th>
+            <th>Estado</th>
+            <th class="text-right">Acciones y documentos</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (trabajador of filteredTrabajadores(); track trabajador.id) {
+          <tr>
+            <td>
+              <div class="trabajador-cell">
+                <div class="trabajador-avatar">
+                  {{ getInitials(trabajador.nombreCompleto) }}
+                </div>
+                <div>
+                  <strong class="trabajador-name">{{ trabajador.nombreCompleto }}</strong>
+                  <span class="trabajador-sub">{{ trabajador.tipoContrato }}</span>
+                </div>
+              </div>
+            </td>
+            <td>
+              <span class="doc-badge">{{ trabajador.tipoDocumento }}: {{ trabajador.numeroDocumento }}</span>
+            </td>
+            <td>
+              <div class="meta-column">
+                <span class="meta-primary"><lucide-icon [img]="Building2"></lucide-icon> {{ trabajador.sedeNombre
+                  }}</span>
+              </div>
+            </td>
+            <td>
+              <span class="cargo-tag"><lucide-icon [img]="Briefcase"></lucide-icon> {{ trabajador.cargoNombre }}</span>
+            </td>
+            <td>
+              <div class="contact-info">
+                <span><lucide-icon [img]="Phone"></lucide-icon> {{ trabajador.telefono || 'Sin celular' }}</span>
+                <span class="email-sub">{{ trabajador.correoNotificaciones || 'Sin email' }}</span>
+              </div>
+            </td>
+            <td>
+              <span class="badge" [class.badge--success]="trabajador.estado === 'ACTIVO'"
+                [class.badge--warning]="trabajador.estado !== 'ACTIVO'">
+                {{ trabajador.estado }}
+              </span>
+            </td>
+            <td class="text-right">
+              <div class="action-buttons">
+                <button class="btn btn--secondary btn--sm" (click)="inspectTrabajador(trabajador, 'perfil')"
+                  title="Ver Ficha y Perfil">
+                  <lucide-icon [img]="Eye"></lucide-icon> Perfil
+                </button>
+                <button class="btn btn--secondary btn--sm" (click)="inspectTrabajador(trabajador, 'capacitaciones')"
+                  title="Inspeccionar Capacitaciones">
+                  <lucide-icon [img]="BookOpen"></lucide-icon>
+                </button>
+                <button class="btn btn--secondary btn--sm" (click)="inspectTrabajador(trabajador, 'documentos')"
+                  title="Inspeccionar Documentos">
+                  <lucide-icon [img]="FileText"></lucide-icon>
+                </button>
+              </div>
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
 
-      <!-- Paginador -->
-      <footer class="pagination-footer">
-        <span class="pagination-info">
-          Mostrando página <strong>{{ currentPage() + 1 }}</strong> de <strong>{{ totalPages() }}</strong> (Total: {{ totalElements() }} trabajadores)
-        </span>
-        <div class="pagination-controls">
-          <button class="btn btn--secondary btn--sm" (click)="prevPage()" [disabled]="currentPage() === 0">
-            <lucide-icon [img]="ChevronLeft"></lucide-icon> Anterior
-          </button>
-          <button class="btn btn--secondary btn--sm" (click)="nextPage()" [disabled]="currentPage() >= totalPages() - 1">
-            Siguiente <lucide-icon [img]="ChevronRight"></lucide-icon>
-          </button>
-        </div>
-      </footer>
+    <footer class="pagination-footer">
+      <span class="pagination-info">
+        Mostrando página <strong>{{ currentPage() + 1 }}</strong> de <strong>{{ totalPages() }}</strong> (Total: {{
+        totalElements() }} trabajadores)
+      </span>
+      <div class="pagination-controls">
+        <button class="btn btn--secondary btn--sm" (click)="prevPage()" [disabled]="currentPage() === 0">
+          <lucide-icon [img]="ChevronLeft"></lucide-icon> Anterior
+        </button>
+        <button class="btn btn--secondary btn--sm" (click)="nextPage()" [disabled]="currentPage() >= totalPages() - 1">
+          Siguiente <lucide-icon [img]="ChevronRight"></lucide-icon>
+        </button>
+      </div>
+    </footer>
     }
   </div>
 
-  <!-- Drawer / Modal de Inspección del Trabajador -->
   @if (selectedTrabajador()) {
-    <div class="drawer-backdrop" (click)="closeDrawer()"></div>
-    <aside class="drawer">
-      <header class="drawer__header">
-        <div class="drawer__user">
-          <div class="drawer__avatar">
-            {{ selectedTrabajador()!.nombres[0] }}{{ selectedTrabajador()!.apellidos[0] }}
+  <div class="drawer-backdrop" (click)="closeDrawer()"></div>
+  <aside class="drawer">
+    <header class="drawer__header">
+      <div class="drawer__user">
+        <div class="drawer__avatar">
+          {{ getInitials(selectedTrabajador()!.nombreCompleto) }}
+        </div>
+        <div>
+          <h3>{{ selectedTrabajador()!.nombreCompleto }}</h3>
+          <p>{{ selectedTrabajador()!.cargoNombre }} - {{ selectedTrabajador()!.sedeNombre }}</p>
+        </div>
+      </div>
+      <button class="drawer__close" (click)="closeDrawer()">
+        <lucide-icon [img]="X"></lucide-icon>
+      </button>
+    </header>
+
+    <nav class="drawer__tabs">
+      <button [class.active]="activeDrawerTab() === 'perfil'" (click)="setDrawerTab('perfil')">
+        <lucide-icon [img]="Eye"></lucide-icon> Perfil
+      </button>
+      <button [class.active]="activeDrawerTab() === 'capacitaciones'" (click)="setDrawerTab('capacitaciones')">
+        <lucide-icon [img]="BookOpen"></lucide-icon> Capacitaciones
+      </button>
+      <button [class.active]="activeDrawerTab() === 'documentos'" (click)="setDrawerTab('documentos')">
+        <lucide-icon [img]="FileText"></lucide-icon> Documentos
+      </button>
+    </nav>
+
+    <div class="drawer__body">
+      @if (activeDrawerTab() === 'perfil') {
+      <div class="detail-section card">
+        <h4><lucide-icon [img]="Shield"></lucide-icon> Información Institucional</h4>
+        <ul class="detail-list">
+          <li><span>Tipo y N° Documento:</span> <strong>{{ selectedTrabajador()!.tipoDocumento }} - {{
+              selectedTrabajador()!.numeroDocumento }}</strong></li>
+          <li><span>Tipo de Contrato:</span> <strong>{{ selectedTrabajador()!.tipoContrato }}</strong></li>
+          <li><span>Estado laboral:</span> <strong class="text-success">{{ selectedTrabajador()!.estado }}</strong></li>
+        </ul>
+      </div>
+
+      <div class="detail-section card">
+        <h4><lucide-icon [img]="Building2"></lucide-icon> Asignación SST</h4>
+        <ul class="detail-list">
+          <li><span>Sede Asignada:</span> <strong>{{ selectedTrabajador()!.sedeNombre }}</strong></li>
+          <li><span>Cargo / Función:</span> <strong>{{ selectedTrabajador()!.cargoNombre }}</strong></li>
+        </ul>
+      </div>
+
+      <div class="detail-section card">
+        <h4><lucide-icon [img]="Mail"></lucide-icon> Contacto y Notificaciones</h4>
+        <ul class="detail-list">
+          <li><span>Celular / Teléfono:</span> <strong>{{ selectedTrabajador()!.telefono || 'No registrado' }}</strong>
+          </li>
+          <li><span>Correo Notificaciones:</span> <strong>{{ selectedTrabajador()!.correoNotificaciones || 'No
+              registrado' }}</strong></li>
+        </ul>
+      </div>
+      }
+
+      @if (activeDrawerTab() === 'capacitaciones') {
+      <div class="capacitaciones-list">
+        <h4>Cursos y Charlas de Seguridad Registradas</h4>
+        @for (cap of capacitaciones(); track cap.id) {
+        <div class="cap-card">
+          <div class="cap-card__header">
+            <span class="cap-tag" [class.cap-tag--5min]="cap.tipo === '5 MINUTOS'"
+              [class.cap-tag--ind]="cap.tipo === 'INDUCCION'">
+              {{ cap.tipo }}
+            </span>
+            <span class="cap-date">{{ cap.fecha }}</span>
           </div>
-          <div>
-            <h3>{{ selectedTrabajador()!.nombres }} {{ selectedTrabajador()!.apellidos }}</h3>
-            <p>{{ selectedTrabajador()!.cargoNombre }} - {{ selectedTrabajador()!.sedeNombre }}</p>
+          <h5 class="cap-title">{{ cap.titulo }}</h5>
+          <div class="cap-card__footer">
+            <span class="cap-hours"><lucide-icon [img]="Award"></lucide-icon> {{ cap.horas }} hora(s)</span>
+            <span class="badge" [class.badge--success]="cap.estado === 'APROBADO'">{{ cap.estado }}</span>
           </div>
         </div>
-        <button class="drawer__close" (click)="closeDrawer()">
-          <lucide-icon [img]="X"></lucide-icon>
-        </button>
-      </header>
-
-      <!-- Tabs del Drawer -->
-      <nav class="drawer__tabs">
-        <button [class.active]="activeDrawerTab() === 'perfil'" (click)="setDrawerTab('perfil')">
-          <lucide-icon [img]="Eye"></lucide-icon> Perfil
-        </button>
-        <button [class.active]="activeDrawerTab() === 'capacitaciones'" (click)="setDrawerTab('capacitaciones')">
-          <lucide-icon [img]="BookOpen"></lucide-icon> Capacitaciones
-        </button>
-        <button [class.active]="activeDrawerTab() === 'documentos'" (click)="setDrawerTab('documentos')">
-          <lucide-icon [img]="FileText"></lucide-icon> Documentos
-        </button>
-      </nav>
-
-      <div class="drawer__body">
-        @if (activeDrawerTab() === 'perfil') {
-          <div class="detail-section card">
-            <h4><lucide-icon [img]="Shield"></lucide-icon> Información Institucional</h4>
-            <ul class="detail-list">
-              <li><span>Tipo y N° Documento:</span> <strong>{{ selectedTrabajador()!.tipoDocumento }} - {{ selectedTrabajador()!.numeroDocumento }}</strong></li>
-              <li><span>Tipo de Contrato:</span> <strong>{{ selectedTrabajador()!.tipoContrato }}</strong></li>
-              <li><span>Estado laboral:</span> <strong class="text-success">{{ selectedTrabajador()!.estado }}</strong></li>
-            </ul>
-          </div>
-
-          <div class="detail-section card">
-            <h4><lucide-icon [img]="Building2"></lucide-icon> Asignación SST</h4>
-            <ul class="detail-list">
-              <li><span>Sede Asignada:</span> <strong>{{ selectedTrabajador()!.sedeNombre }}</strong></li>
-              <li><span>Área Operativa:</span> <strong>{{ selectedTrabajador()!.areaNombre }}</strong></li>
-              <li><span>Cargo / Función:</span> <strong>{{ selectedTrabajador()!.cargoNombre }}</strong></li>
-            </ul>
-          </div>
-
-          <div class="detail-section card">
-            <h4><lucide-icon [img]="Mail"></lucide-icon> Contacto y Notificaciones</h4>
-            <ul class="detail-list">
-              <li><span>Celular / Teléfono:</span> <strong>{{ selectedTrabajador()!.telefono || 'No registrado' }}</strong></li>
-              <li><span>Correo Notificaciones:</span> <strong>{{ selectedTrabajador()!.correoNotificaciones || 'No registrado' }}</strong></li>
-            </ul>
-          </div>
-        }
-
-        @if (activeDrawerTab() === 'capacitaciones') {
-          <div class="capacitaciones-list">
-            <h4>Cursos y Charlas de Seguridad Registradas</h4>
-            @for (cap of capacitaciones(); track cap.id) {
-              <div class="cap-card">
-                <div class="cap-card__header">
-                  <span class="cap-tag" [class.cap-tag--5min]="cap.tipo === '5 MINUTOS'" [class.cap-tag--ind]="cap.tipo === 'INDUCCION'">
-                    {{ cap.tipo }}
-                  </span>
-                  <span class="cap-date">{{ cap.fecha }}</span>
-                </div>
-                <h5 class="cap-title">{{ cap.titulo }}</h5>
-                <div class="cap-card__footer">
-                  <span class="cap-hours"><lucide-icon [img]="Award"></lucide-icon> {{ cap.horas }} hora(s)</span>
-                  <span class="badge" [class.badge--success]="cap.estado === 'APROBADO'">{{ cap.estado }}</span>
-                </div>
-              </div>
-            }
-          </div>
-        }
-
-        @if (activeDrawerTab() === 'documentos') {
-          <div class="documentos-list">
-            <h4>Expediente de Documentos SST</h4>
-            @for (doc of documentos(); track doc.id) {
-              <div class="doc-card">
-                <div class="doc-card__icon">
-                  <lucide-icon [img]="FileText"></lucide-icon>
-                </div>
-                <div class="doc-card__info">
-                  <h5>{{ doc.nombre }}</h5>
-                  <span>Categoría: {{ doc.categoria }} | Emisión: {{ doc.fechaEmision }}</span>
-                </div>
-                <span class="badge badge--success">{{ doc.estado }}</span>
-              </div>
-            }
-          </div>
         }
       </div>
-    </aside>
-  }
-
-  <!-- Modal Registrar Trabajador (Admin Solo) -->
-  @if (showCreateModal()) {
-    <div class="modal-backdrop" (click)="closeCreateModal()"></div>
-    <div class="modal card">
-      <header class="modal__header">
-        <h3>Registrar Nuevo Trabajador</h3>
-        <button (click)="closeCreateModal()"><lucide-icon [img]="X"></lucide-icon></button>
-      </header>
-
-      @if (modalSuccessMsg()) {
-        <div class="alert alert--success">{{ modalSuccessMsg() }}</div>
-      }
-      @if (modalErrorMsg()) {
-        <div class="alert alert--danger">{{ modalErrorMsg() }}</div>
       }
 
-      <form [formGroup]="createForm" (ngSubmit)="submitCreateTrabajador()" class="modal__form">
-        <div class="form-grid">
-          <div class="form-group">
-            <label class="form-label">Tipo Documento</label>
-            <select formControlName="tipoDocumento" class="form-control">
-              <option value="DNI">DNI</option>
-              <option value="CE">Carnet de Extranjería</option>
-              <option value="PASAPORTE">Pasaporte</option>
-            </select>
+      @if (activeDrawerTab() === 'documentos') {
+      <div class="documentos-list">
+        <h4>Expediente de Documentos SST</h4>
+        @for (doc of documentos(); track doc.id) {
+        <div class="doc-card">
+          <div class="doc-card__icon">
+            <lucide-icon [img]="FileText"></lucide-icon>
           </div>
-
-          <div class="form-group">
-            <label class="form-label">Número de Documento</label>
-            <input type="text" formControlName="numeroDocumento" class="form-control" placeholder="45891234" />
+          <div class="doc-card__info">
+            <h5>{{ doc.nombre }}</h5>
+            <span>Categoría: {{ doc.categoria }} | Emisión: {{ doc.fechaEmision }}</span>
           </div>
-
-          <div class="form-group">
-            <label class="form-label">Nombres</label>
-            <input type="text" formControlName="nombres" class="form-control" placeholder="Carlos Alberto" />
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">Apellidos</label>
-            <input type="text" formControlName="apellidos" class="form-control" placeholder="Mendoza Quispe" />
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">Teléfono</label>
-            <input type="text" formControlName="telefono" class="form-control" placeholder="984512301" />
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">Correo Notificaciones</label>
-            <input type="email" formControlName="correoNotificaciones" class="form-control" placeholder="cmendoza@empresa.com" />
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">Sede</label>
-            <select formControlName="sedeId" class="form-control">
-              @for (s of sedes(); track s.id) {
-                <option [value]="s.id">{{ s.nombre }}</option>
-              }
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">Área</label>
-            <select formControlName="areaId" class="form-control">
-              @for (a of areas(); track a.id) {
-                <option [value]="a.id">{{ a.nombre }}</option>
-              }
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">Cargo</label>
-            <select formControlName="cargoId" class="form-control">
-              @for (c of cargos(); track c.id) {
-                <option [value]="c.id">{{ c.nombre }}</option>
-              }
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">Tipo Contrato</label>
-            <select formControlName="tipoContrato" class="form-control">
-              <option value="PERMANENTE">PERMANENTE</option>
-              <option value="TEMPORAL">TEMPORAL</option>
-              <option value="PRACTICANTE">PRACTICANTE</option>
-              <option value="RESPONSABLE">RESPONSABLE</option>
-            </select>
-          </div>
+          <span class="badge badge--success">{{ doc.estado }}</span>
         </div>
-
-        <footer class="modal__footer">
-          <button type="button" class="btn btn--secondary" (click)="closeCreateModal()">Cancelar</button>
-          <button type="submit" class="btn btn--primary" [disabled]="createForm.invalid || savingTrabajador()">
-            <lucide-icon [img]="Plus"></lucide-icon>
-            {{ savingTrabajador() ? 'Guardando...' : 'Registrar Trabajador' }}
-          </button>
-        </footer>
-      </form>
+        }
+      </div>
+      }
     </div>
+  </aside>
   }
+
 
 </div>

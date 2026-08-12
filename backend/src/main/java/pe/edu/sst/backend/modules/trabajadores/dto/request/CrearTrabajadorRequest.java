@@ -2,6 +2,7 @@ package pe.edu.sst.backend.modules.trabajadores.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
@@ -9,33 +10,21 @@ import lombok.Setter;
 @Getter @Setter
 public class CrearTrabajadorRequest {
 
-    @NotBlank(message = "El tipo de documento es obligatorio")
-    private String tipoDocumento;
-
     @NotBlank(message = "El número de documento es obligatorio")
-    @Size(min = 8, max = 20, message = "El número de documento debe tener entre 8 y 20 caracteres")
+    @Pattern(regexp = "^[0-9]{8}$", message = "El DNI debe contener exactamente 8 dígitos")
     private String numeroDocumento;
 
-    @NotBlank(message = "Los nombres son obligatorios")
-    private String nombres;
-
-    @NotBlank(message = "Los apellidos son obligatorios")
-    private String apellidos;
+    @NotBlank(message = "El nombre completo es obligatorio")
+    @Size(max = 200, message = "El nombre completo no puede superar 200 caracteres")
+    private String nombreCompleto;
 
     private String telefono;
-    private String correoNotificaciones;
 
-    @NotBlank(message = "El tipo de contrato es obligatorio")
-    private String tipoContrato;
+    private String correoNotificaciones;
 
     @NotNull(message = "La sede es obligatoria")
     private Long sedeId;
 
-    @NotNull(message = "El área es obligatoria")
-    private Long areaId;
-
     @NotNull(message = "El cargo es obligatorio")
     private Long cargoId;
-
-    private Long usuarioId;
 }

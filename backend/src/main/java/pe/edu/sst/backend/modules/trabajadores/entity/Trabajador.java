@@ -21,28 +21,21 @@ public class Trabajador {
     @Column(name = "numero_documento", nullable = false, unique = true, length = 20)
     private String numeroDocumento;
 
-    @Column(nullable = false, length = 100)
-    private String nombres;
-
-    @Column(nullable = false, length = 100)
-    private String apellidos;
+    @Column(name = "nombre_completo", nullable = false, length = 200)
+    private String nombreCompleto;
 
     @Column(length = 20)
     private String telefono;
 
     @Column(name = "correo_notificaciones", length = 128)
     private String correoNotificaciones;
-    
+
     @Column(name = "tipo_contrato", nullable = false, length = 30)
     private String tipoContrato;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "sede_id", nullable = false)
     private Sede sede;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "area_id", nullable = false)
-    private Area area;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cargo_id", nullable = false)

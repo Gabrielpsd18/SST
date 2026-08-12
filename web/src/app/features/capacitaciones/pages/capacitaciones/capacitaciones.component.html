@@ -257,28 +257,18 @@
         <!-- Sección de Asignación Masiva por Grupos -->
         <fieldset class="group-assignment-box">
           <legend><lucide-icon [img]="Users"></lucide-icon> Grupo de Trabajadores a Capacitar</legend>
-          <p class="box-desc">Permite asignar masivamente a todos los trabajadores de una sede o área específica.</p>
+          <p class="box-desc">Permite asignar masivamente a todos los trabajadores activos de una sede específica.</p>
 
           <div class="form-grid">
-            <div class="form-group">
-              <label class="form-label">Filtrar por Sede</label>
-              <select formControlName="sedeIdFilter" class="form-control" (change)="onSedeFilterChange($event)">
-                <option value="">Todas las Sedes (General)</option>
-                @for (s of sedes(); track s.id) {
-                  <option [value]="s.id">{{ s.nombre }}</option>
-                }
-              </select>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label">Filtrar por Área Operativa</label>
-              <select formControlName="areaIdFilter" class="form-control" (change)="onAreaFilterChange($event)">
-                <option value="">Todas las Áreas</option>
-                @for (a of areas(); track a.id) {
-                  <option [value]="a.id">{{ a.nombre }}</option>
-                }
-              </select>
-            </div>
+            <app-searchable-select
+              formControlName="sedeIdFilter"
+              label="Filtrar por Sede"
+              placeholder="Todas las Sedes (General)"
+              searchPlaceholder="Buscar sede..."
+              allOptionLabel="Todas las Sedes (General)"
+              [showAllOption]="true"
+              [options]="sedes()"
+            />
           </div>
 
           <div class="assignment-summary">

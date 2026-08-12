@@ -17,7 +17,6 @@ export class ProfileComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly userService = inject(UserService);
 
-  // Iconos
   protected readonly Shield = Shield;
   protected readonly Building2 = Building2;
   protected readonly Mail = Mail;
@@ -41,12 +40,10 @@ export class ProfileComponent implements OnInit {
   private buildForm(): void {
     this.profileForm = this.fb.group({
       dni: [{ value: '', disabled: true }],
-      nombres: [{ value: '', disabled: true }],
+      nombreCompleto: [{ value: '', disabled: true }],
       correoCorporativo: [{ value: '', disabled: true }],
       sede: [{ value: '', disabled: true }],
-      area: [{ value: '', disabled: true }],
       cargo: [{ value: '', disabled: true }],
-      // Campos editables por el trabajador
       correoNotificaciones: ['', [Validators.required, Validators.email]],
       telefono: ['', [Validators.required, Validators.pattern('^[0-9]{9}$')]]
     });
@@ -64,10 +61,9 @@ export class ProfileComponent implements OnInit {
 
           this.profileForm.patchValue({
             dni: data.dni,
-            nombres: `${data.nombres} ${data.apellidos}`,
+            nombreCompleto: data.nombreCompleto,
             correoCorporativo: data.correoCorporativo,
             sede: data.sede,
-            area: data.area,
             cargo: data.cargo,
             correoNotificaciones: data.correoNotificaciones,
             telefono: data.telefono
@@ -80,6 +76,13 @@ export class ProfileComponent implements OnInit {
         this.loadingData.set(false);
       }
     });
+  }
+
+  getInitials(nombreCompleto: string): string {
+    const parts = nombreCompleto.trim().split(/\s+/);
+    if (parts.length === 0) return '?';
+    if (parts.length === 1) return parts[0][0]?.toUpperCase() ?? '?';
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
   }
 
   saveProfile(): void {

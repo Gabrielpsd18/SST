@@ -1,0 +1,66 @@
+<div class="searchable-select" [class.searchable-select--open]="open()" [class.searchable-select--disabled]="isDisabled()">
+  @if (label) {
+    <label class="form-label">{{ label }}</label>
+  }
+
+  <button
+    type="button"
+    class="searchable-select__trigger"
+    (click)="toggleDropdown()"
+    [disabled]="isDisabled()"
+    [attr.aria-expanded]="open()"
+  >
+    <span [class.searchable-select__placeholder]="!selectedLabel()">
+      {{ selectedLabel() || placeholder }}
+    </span>
+    <lucide-icon [img]="ChevronDown" class="searchable-select__chevron"></lucide-icon>
+  </button>
+
+  @if (open()) {
+    <div class="searchable-select__panel">
+      <div class="searchable-select__search">
+        <lucide-icon [img]="Search" class="searchable-select__search-icon"></lucide-icon>
+        <input
+          type="text"
+          class="searchable-select__search-input"
+          [placeholder]="searchPlaceholder"
+          [value]="searchTerm()"
+          (input)="onSearchInput($any($event.target).value)"
+          (click)="$event.stopPropagation()"
+        />
+      </div>
+
+      <ul class="searchable-select__list" role="listbox">
+        @if (showAllOption && !searchTerm()) {
+          <li>
+            <button
+              type="button"
+              class="searchable-select__option"
+              [class.searchable-select__option--selected]="selectedId() === null"
+              (click)="selectAllOption()"
+            >
+              {{ allOptionLabel }}
+            </button>
+          </li>
+        }
+
+        @if (filteredOptions().length === 0) {
+          <li class="searchable-select__empty">{{ emptyMessage }}</li>
+        } @else {
+          @for (option of filteredOptions(); track option.id) {
+            <li>
+              <button
+                type="button"
+                class="searchable-select__option"
+                [class.searchable-select__option--selected]="option.id === selectedId()"
+                (click)="selectOption(option)"
+              >
+                {{ option.nombre }}
+              </button>
+            </li>
+          }
+        }
+      </ul>
+    </div>
+  }
+</div>

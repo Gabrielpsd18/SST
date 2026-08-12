@@ -27,6 +27,7 @@ import {
 import { CapacitacionService } from '../../services/capacitacion.service';
 import { TrabajadorService } from '../../../trabajadores/services/trabajador.service';
 import { AuthService } from '../../../auth/services/auth.service';
+import { SearchableSelectComponent } from '../../../../shared/components/ui/searchable-select/searchable-select.component';
 import {
   Capacitacion,
   Capacitador,
@@ -38,7 +39,7 @@ import { MaestraItem, Trabajador } from '../../../trabajadores/models/trabajador
 @Component({
   selector: 'app-capacitaciones',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, LucideAngularModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, LucideAngularModule, SearchableSelectComponent],
   templateUrl: './capacitaciones.component.html',
   styleUrl: './capacitaciones.component.scss'
 })
@@ -104,26 +105,20 @@ export class CapacitacionesComponent implements OnInit {
 
   // Listas auxiliares para formulario de capacitación
   protected sedes = signal<MaestraItem[]>([]);
-  protected areas = signal<MaestraItem[]>([]);
   protected trabajadores = signal<Trabajador[]>([]);
 
-  // Selección masiva de trabajadores
   protected selectedSedeFilter = signal<number | null>(null);
-  protected selectedAreaFilter = signal<number | null>(null);
   protected selectedTrabajadorIds = signal<number[]>([]);
 
-  // Conteo dinámico de trabajadores asignados
   protected totalAsignadosCount = computed(() => {
     if (this.selectedTrabajadorIds().length > 0) {
       return this.selectedTrabajadorIds().length;
     }
     const sId = this.selectedSedeFilter();
-    const aId = this.selectedAreaFilter();
     let count = 0;
     for (const t of this.trabajadores()) {
       const matchSede = !sId || t.sedeId === sId;
-      const matchArea = !aId || t.areaId === aId;
-      if (matchSede && matchArea) count++;
+      if (matchSede) count++;
     }
     return count > 0 ? count : this.trabajadores().length;
   });
@@ -145,8 +140,11 @@ export class CapacitacionesComponent implements OnInit {
       fechaProgramada: ['', Validators.required],
       duracionHoras: [1.0, [Validators.required, Validators.min(0.25)]],
       capacitadorId: ['', Validators.required],
-      sedeIdFilter: [''],
-      areaIdFilter: ['']
+      sedeIdFilter: [null as number | null]
+    });
+
+    this.capacitacionForm.get('sedeIdFilter')?.valueChanges.subscribe((value: number | null) => {
+      this.selectedSedeFilter.set(value);
     });
 
     this.capacitadorForm = this.fb.group({
@@ -193,7 +191,6 @@ export class CapacitacionesComponent implements OnInit {
 
   private loadCatalogos(): void {
     this.trabajadorService.getSedes().subscribe(res => this.sedes.set(res));
-    this.trabajadorService.getAreas().subscribe(res => this.areas.set(res));
     this.trabajadorService.getTrabajadores(0, 100).subscribe(res => {
       if (res && res.content) this.trabajadores.set(res.content);
     });
@@ -214,7 +211,6 @@ export class CapacitacionesComponent implements OnInit {
     this.capSuccessMsg.set('');
     this.capErrorMsg.set('');
     this.selectedSedeFilter.set(null);
-    this.selectedAreaFilter.set(null);
     this.selectedTrabajadorIds.set([]);
 
     // Fecha actual formateada para input datetime-local
@@ -228,8 +224,7 @@ export class CapacitacionesComponent implements OnInit {
       fechaProgramada: formattedDate,
       duracionHoras: 1.0,
       capacitadorId: this.capacitadores()[0]?.id || '',
-      sedeIdFilter: '',
-      areaIdFilter: ''
+      sedeIdFilter: null
     });
 
     this.showCapacitacionModal.set(true);
@@ -237,16 +232,6 @@ export class CapacitacionesComponent implements OnInit {
 
   closeCapacitacionModal(): void {
     this.showCapacitacionModal.set(false);
-  }
-
-  onSedeFilterChange(event: Event): void {
-    const val = (event.target as HTMLSelectElement).value;
-    this.selectedSedeFilter.set(val ? Number(val) : null);
-  }
-
-  onAreaFilterChange(event: Event): void {
-    const val = (event.target as HTMLSelectElement).value;
-    this.selectedAreaFilter.set(val ? Number(val) : null);
   }
 
   submitCapacitacion(): void {
@@ -264,8 +249,7 @@ export class CapacitacionesComponent implements OnInit {
       fechaProgramada: formVal.fechaProgramada,
       duracionHoras: Number(formVal.duracionHoras),
       capacitadorId: Number(formVal.capacitadorId),
-      sedeIdFilter: formVal.sedeIdFilter ? Number(formVal.sedeIdFilter) : undefined,
-      areaIdFilter: formVal.areaIdFilter ? Number(formVal.areaIdFilter) : undefined,
+      sedeIdFilter: formVal.sedeIdFilter ?? undefined,
       trabajadoresIds: this.selectedTrabajadorIds().length > 0 ? this.selectedTrabajadorIds() : undefined
     };
 

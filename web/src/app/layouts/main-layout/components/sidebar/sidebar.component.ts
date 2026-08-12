@@ -9,6 +9,7 @@ import {
   Shield,
   LucideAngularModule,
   LucideIconData,
+  ClipboardList,
 } from 'lucide-angular';
 import { MENU_ITEMS } from '../../constants/menu-items';
 import { AuthService } from '../../../../features/auth/services/auth.service';
@@ -36,7 +37,9 @@ export class SidebarComponent implements OnInit {
     'users': Users,
     'graduation-cap': GraduationCap,
     'file-text': FileText,
-    'chart-column': ChartColumn
+    'chart-column': ChartColumn,
+    'shield': Shield,
+    'clipboard-list': ClipboardList,
   };
   ngOnInit(): void {
     this.userName.set(this.authService.getUserName());

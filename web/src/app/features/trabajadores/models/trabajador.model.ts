@@ -2,16 +2,13 @@ export interface Trabajador {
   id: number;
   tipoDocumento: string;
   numeroDocumento: string;
-  nombres: string;
-  apellidos: string;
+  nombreCompleto: string;
   telefono?: string;
   correoNotificaciones?: string;
   tipoContrato: string;
   estado: string;
   sedeId: number;
   sedeNombre: string;
-  areaId: number;
-  areaNombre: string;
   cargoId: number;
   cargoNombre: string;
   usuarioId?: number;
@@ -29,27 +26,19 @@ export interface PaginatedResponse<T> {
 }
 
 export interface CrearTrabajadorRequest {
-  tipoDocumento: string;
   numeroDocumento: string;
-  nombres: string;
-  apellidos: string;
+  nombreCompleto: string;
   telefono?: string;
   correoNotificaciones?: string;
-  tipoContrato: string;
   sedeId: number;
-  areaId: number;
   cargoId: number;
-  usuarioId?: number;
 }
 
 export interface ActualizarTrabajadorRequest {
-  nombres: string;
-  apellidos: string;
+  nombreCompleto: string;
   telefono?: string;
   correoNotificaciones?: string;
-  tipoContrato: string;
   sedeId: number;
-  areaId: number;
   cargoId: number;
   estado: string;
 }

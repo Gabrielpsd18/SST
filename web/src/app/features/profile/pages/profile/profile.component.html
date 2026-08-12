@@ -9,10 +9,10 @@
 
     <header class="profile-container__header">
       <div class="profile-container__avatar">
-        {{ profileData()!.nombres[0] }}{{ profileData()!.apellidos[0] }}
+        {{ getInitials(profileData()!.nombreCompleto) }}
       </div>
       <div class="profile-container__info">
-        <h2>{{ profileData()!.nombres }} {{ profileData()!.apellidos }}</h2>
+        <h2>{{ profileData()!.nombreCompleto }}</h2>
         <span class="badge badge--success">{{ profileData()!.cargo }}</span>
       </div>
     </header>
@@ -60,11 +60,6 @@
         <div class="form-group">
           <label class="form-label">Sede Asignada</label>
           <input type="text" formControlName="sede" class="form-control form-control--disabled" />
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Área Operativa</label>
-          <input type="text" formControlName="area" class="form-control form-control--disabled" />
         </div>
 
         <div class="form-group">

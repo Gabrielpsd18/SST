@@ -3,12 +3,12 @@ package pe.edu.sst.backend.modules.identity.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 import pe.edu.sst.backend.modules.identity.dto.JwtResponse;
 import pe.edu.sst.backend.modules.identity.dto.LoginRequest;
 import pe.edu.sst.backend.modules.identity.entity.repository.UsuarioRepository;
 import pe.edu.sst.backend.modules.identity.enums.RoleName;
+import pe.edu.sst.backend.modules.trabajadores.entity.Trabajador;
 import pe.edu.sst.backend.modules.trabajadores.repository.TrabajadorRepository;
 import pe.edu.sst.backend.security.jwt.JwtService;
 import pe.edu.sst.backend.shared.exception.ResourceNotFoundException;
@@ -38,7 +38,7 @@ public class AuthService {
 
                 // Obtener el nombre desde el trabajador asociado (o email como fallback)
                 String nombreCompleto = trabajadorRepository.findByUsuarioId(usuario.getId())
-                                .map(t -> t.getNombres() + " " + t.getApellidos())
+                                .map(Trabajador::getNombreCompleto)
                                 .orElse(usuario.getEmail());
 
                 String role = (usuario.getRol() != null) ? usuario.getRol().getNombre().name() : RoleName.TRABAJADOR.name();

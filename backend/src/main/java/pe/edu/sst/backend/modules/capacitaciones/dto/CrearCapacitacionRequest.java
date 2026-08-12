@@ -29,9 +29,8 @@ public class CrearCapacitacionRequest {
     @NotNull(message = "El capacitador es obligatorio")
     private Long capacitadorId;
 
-    // Filtros de asignación masiva de grupos
+    // Filtro de asignación masiva por sede
     private Long sedeIdFilter;
-    private Long areaIdFilter;
 
     // Lista explícita de IDs de trabajadores a asignar
     private List<Long> trabajadoresIds;

@@ -10,7 +10,7 @@ El usuario ha solicitado un conjunto de mejoras estructurales y funcionales:
    - `SUPERVISOR`: Permiso de solo lectura.
 4. **Módulo de Trabajadores**:
    - Seeders de base de datos (`V4__seed_trabajadores.sql`) con registros de prueba representativos.
-   - Listado paginado de trabajadores en el Backend y Frontend (búsqueda, filtros por sede/área, paginador).
+   - Listado paginado de trabajadores en el Backend y Frontend (búsqueda, filtros por sede, paginador).
    - Modal/Drawer de detalle del trabajador con botones de inspección rápida para "Capacitaciones" y "Documentos".
 
 ---
@@ -49,7 +49,7 @@ El usuario ha solicitado un conjunto de mejoras estructurales y funcionales:
 ### 3. Base de Datos (Seeders Flyway)
 
 #### [NEW] [V4__seed_trabajadores.sql](file:///d:/PROYECTOS/SST/backend/src/main/resources/db/migration/V4__seed_trabajadores.sql)
-- Insertar 15 trabajadores de prueba distribuidos en diversas sedes, áreas y cargos con estados `ACTIVO` e `INACTIVO`.
+- Insertar 15 trabajadores de prueba distribuidos en diversas sedes y cargos con estados `ACTIVO` e `INACTIVO`.
 
 ---
 

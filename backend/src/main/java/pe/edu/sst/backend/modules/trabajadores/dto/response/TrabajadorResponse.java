@@ -12,19 +12,14 @@ public class TrabajadorResponse {
     private Long id;
     private String tipoDocumento;
     private String numeroDocumento;
-    private String nombres;
-    private String apellidos;
+    private String nombreCompleto;
     private String telefono;
     private String correoNotificaciones;
     private String tipoContrato;
     private String estado;
 
-    // Datos descriptivos de tablas maestras
     private Long sedeId;
     private String sedeNombre;
-
-    private Long areaId;
-    private String areaNombre;
 
     private Long cargoId;
     private String cargoNombre;

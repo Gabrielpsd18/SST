@@ -1,0 +1,93 @@
+<div class="trabajadores-container">
+
+  <!-- Nueva Cabecera de la Página -->
+  <header class="page-header">
+    <div class="page-header__title">
+      <div class="page-header__icon">
+        <lucide-icon [img]="Plus"></lucide-icon>
+      </div>
+      <div>
+        <h2>Registrar Nuevo Trabajador</h2>
+        <p>Complete los datos para ingresar un nuevo trabajador al sistema.</p>
+      </div>
+    </div>
+  </header>
+
+  <div class="card" style="padding: 2rem;">
+    <!-- Alertas de éxito o error adaptadas -->
+    @if (modalSuccessMsg()) {
+      <div class="alert alert--success" style="margin-bottom: 1.5rem;">{{ modalSuccessMsg() }}</div>
+    }
+    @if (modalErrorMsg()) {
+      <div class="alert alert--danger" style="margin-bottom: 1.5rem;">{{ modalErrorMsg() }}</div>
+    }
+
+    <!-- Formulario principal -->
+    <form [formGroup]="createForm" (ngSubmit)="submitCreateTrabajador()">
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Tipo Documento</label>
+          <input type="text" class="form-control form-control--disabled" value="DNI" readonly />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Número de DNI</label>
+          <input type="text" formControlName="numeroDocumento" class="form-control" placeholder="45891234" maxlength="8" />
+        </div>
+
+        <div class="form-group form-group--full">
+          <label class="form-label">Nombres y Apellidos</label>
+          <input type="text" formControlName="nombreCompleto" class="form-control" placeholder="Gabriel Salgado Durán" />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Teléfono</label>
+          <input type="text" formControlName="telefono" class="form-control" placeholder="984512301" maxlength="9" />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Correo Notificaciones (opcional)</label>
+          <input type="email" formControlName="correoNotificaciones" class="form-control" placeholder="notificaciones@empresa.com" />
+        </div>
+
+        <div class="form-group">
+          <app-searchable-select
+            formControlName="sedeId"
+            label="Sede"
+            placeholder="Seleccionar sede"
+            searchPlaceholder="Buscar sede..."
+            [options]="sedes()"
+          />
+        </div>
+
+        <div class="form-group">
+          <app-searchable-select
+            formControlName="cargoId"
+            label="Cargo"
+            placeholder="Seleccionar cargo"
+            searchPlaceholder="Buscar cargo..."
+            [options]="cargos()"
+          />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Tipo Contrato</label>
+          <input type="text" class="form-control form-control--disabled" value="TEMPORAL" readonly />
+        </div>
+      </div>
+
+      <!-- Pie del formulario (Botones) -->
+      <footer style="margin-top: 2rem; display: flex; justify-content: flex-end; gap: 1rem; border-top: 1px solid #eee; padding-top: 1.5rem;">
+        <!-- El botón cancelar ahora redirige a la tabla -->
+        <button type="button" class="btn btn--secondary" routerLink="/trabajadores">
+          Cancelar
+        </button>
+        <button type="submit" class="btn btn--primary" [disabled]="createForm.invalid || savingTrabajador()">
+          <lucide-icon [img]="Plus"></lucide-icon>
+          {{ savingTrabajador() ? 'Guardando...' : 'Registrar Trabajador' }}
+        </button>
+      </footer>
+    </form>
+  </div>
+
+</div>

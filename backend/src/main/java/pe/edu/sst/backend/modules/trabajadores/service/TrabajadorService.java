@@ -15,8 +15,6 @@ public interface TrabajadorService {
     Page<TrabajadorResponse> listarPaginado(Pageable pageable);
     void cambiarEstado(Long id, String nuevoEstado);
 
-    // Métodos para cargar combos en el Frontend
     List<MaestraResponse> listarSedes();
-    List<MaestraResponse> listarAreas();
     List<MaestraResponse> listarCargos();
 }

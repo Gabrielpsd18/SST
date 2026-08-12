@@ -1,22 +1,16 @@
 export interface UserProfile {
-  // Datos Personales / Notificaciones (Editables por el usuario)
   telefono: string;
   correoNotificaciones: string;
 
-  // Datos de Identificación (Lectura sola)
   id: number;
   dni: string;
-  nombres: string;
-  apellidos: string;
+  nombreCompleto: string;
   correoCorporativo: string;
 
-  // Datos Organizacionales SST (Lectura sola por ahora)
   sede: string;
-  area: string;
   cargo: string;
-  fechaIngreso: string;
-  
-  // Módulos SST futuros (Puntaje/Progreso personal)
+  fechaIngreso?: string;
+
   capacitacionesCompletadas?: number;
   capacitacionesPendientes?: number;
 }

@@ -55,10 +55,6 @@ export class TrabajadorService {
     return this.http.get<MaestraItem[]>(`${this.API_URL}/catalogos/sedes`);
   }
 
-  getAreas(): Observable<MaestraItem[]> {
-    return this.http.get<MaestraItem[]>(`${this.API_URL}/catalogos/areas`);
-  }
-
   getCargos(): Observable<MaestraItem[]> {
     return this.http.get<MaestraItem[]>(`${this.API_URL}/catalogos/cargos`);
   }

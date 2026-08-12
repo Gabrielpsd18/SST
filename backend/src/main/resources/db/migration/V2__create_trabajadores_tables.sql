@@ -5,11 +5,6 @@ CREATE TABLE sedes (
     estado BOOLEAN DEFAULT TRUE
 );
 
-CREATE TABLE areas (
-    id BIGSERIAL PRIMARY KEY,
-    nombre VARCHAR(100) NOT NULL UNIQUE,
-    estado BOOLEAN DEFAULT TRUE
-);
 
 CREATE TABLE cargos (
     id BIGSERIAL PRIMARY KEY,
@@ -30,7 +25,6 @@ CREATE TABLE trabajadores (
     
     -- Relaciones con Tablas Maestras
     sede_id BIGINT NOT NULL,
-    area_id BIGINT NOT NULL,
     cargo_id BIGINT NOT NULL,
     
     -- Relación Opcional con la tabla de Usuarios de Auth (Si el trabajador tiene acceso al sistema)
@@ -41,7 +35,6 @@ CREATE TABLE trabajadores (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT fk_trabajador_sede FOREIGN KEY (sede_id) REFERENCES sedes(id),
-    CONSTRAINT fk_trabajador_area FOREIGN KEY (area_id) REFERENCES areas(id),
     CONSTRAINT fk_trabajador_cargo FOREIGN KEY (cargo_id) REFERENCES cargos(id),
     CONSTRAINT fk_trabajador_usuario FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
 );

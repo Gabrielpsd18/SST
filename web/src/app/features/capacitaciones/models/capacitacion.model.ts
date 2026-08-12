@@ -40,6 +40,5 @@ export interface CrearCapacitacionRequest {
   duracionHoras: number;
   capacitadorId: number;
   sedeIdFilter?: number;
-  areaIdFilter?: number;
   trabajadoresIds?: number[];
 }

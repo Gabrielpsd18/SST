@@ -52,15 +52,9 @@ public class TrabajadorController {
         return ResponseEntity.noContent().build();
     }
 
-    // Endpoints Auxiliares para SELECTS del Frontend
     @GetMapping("/catalogos/sedes")
     public ResponseEntity<List<MaestraResponse>> listarSedes() {
         return ResponseEntity.ok(trabajadorService.listarSedes());
-    }
-
-    @GetMapping("/catalogos/areas")
-    public ResponseEntity<List<MaestraResponse>> listarAreas() {
-        return ResponseEntity.ok(trabajadorService.listarAreas());
     }
 
     @GetMapping("/catalogos/cargos")
