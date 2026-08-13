@@ -82,6 +82,7 @@
         <button type="button" class="btn btn--secondary" routerLink="/trabajadores">
           Cancelar
         </button>
+        
         <button type="submit" class="btn btn--primary" [disabled]="createForm.invalid || savingTrabajador()">
           <lucide-icon [img]="Plus"></lucide-icon>
           {{ savingTrabajador() ? 'Guardando...' : 'Registrar Trabajador' }}

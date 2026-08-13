@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal, computed } from '@angular/core';
+import { Component, inject, OnInit, signal, computed} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import {
@@ -35,7 +35,7 @@ import {
   CapacitadorRequest
 } from '../../models/capacitacion.model';
 import { MaestraItem, Trabajador } from '../../../trabajadores/models/trabajador.model';
-
+import { Router } from '@angular/router';
 @Component({
   selector: 'app-capacitaciones',
   standalone: true,
@@ -83,6 +83,7 @@ export class CapacitacionesComponent implements OnInit {
   protected currentPage = signal<number>(0);
   protected pageSize = signal<number>(8);
   protected loadingCapacitaciones = signal<boolean>(true);
+  private readonly router = inject(Router);
 
   // --- Estado de Capacitadores ---
   protected capacitadores = signal<Capacitador[]>([]);
@@ -133,6 +134,17 @@ export class CapacitacionesComponent implements OnInit {
     this.loadCatalogos();
   }
 
+  goToCapacitacionCrear(): void {
+     if (!this.isAdmin()) {
+      return;
+    }
+    this.router.navigate(['/capacitaciones/crear']);
+  }
+
+  goToEditCapacitacion(id: number): void {
+    if (!this.isAdmin()) return;
+    this.router.navigate([`/capacitaciones/${id}/editar`]);
+  }
   private initForms(): void {
     this.capacitacionForm = this.fb.group({
       tema: ['', Validators.required],

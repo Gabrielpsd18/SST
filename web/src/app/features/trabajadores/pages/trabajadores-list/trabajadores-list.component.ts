@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal, computed } from '@angular/core';
+import { Component, inject, OnInit, signal, computed, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -30,6 +30,7 @@ import {
   CapacitacionItem,
   DocumentoItem
 } from '../../models/trabajador.model';
+import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
 
 @Component({
   selector: 'app-trabajadores-list',
@@ -38,7 +39,7 @@ import {
   templateUrl: './trabajadores-list.component.html',
   styleUrl: './trabajadores-list.component.scss'
 })
-export class TrabajadoresListComponent implements OnInit {
+export class TrabajadoresListComponent implements OnInit, OnDestroy {
   private readonly trabajadorService = inject(TrabajadorService);
   private readonly authService = inject(AuthService);
 
@@ -77,25 +78,33 @@ export class TrabajadoresListComponent implements OnInit {
   protected documentos = signal<DocumentoItem[]>([]);
   protected loadingDetail = signal<boolean>(false);
 
-  protected filteredTrabajadores = computed(() => {
-    const term = this.searchTerm().toLowerCase().trim();
-    if (!term) return this.trabajadores();
+  private searchSubject = new Subject<string>();
+  private destroy$ = new Subject<void>();
 
-    return this.trabajadores().filter(t =>
-      t.nombreCompleto.toLowerCase().includes(term) ||
-      t.numeroDocumento.includes(term) ||
-      t.cargoNombre.toLowerCase().includes
-      (term) ||
-      t.sedeNombre.toLowerCase().includes(term)
-    );
+  protected isSearching = computed(() => {
+    return this.searchTerm().toLowerCase().trim().length > 0;
   });
 
-  goToNuevoTrabajador(): void {
-    this.router.navigate(['/trabajadores/nuevo']);
-  }
+  protected filteredTrabajadores = computed(() => {
+    return this.trabajadores();
+  });
 
-  goToImportarTrabajadores(): void {
-    this.router.navigate(['/trabajadores/importar']);
+  constructor() {
+    // Subscribe to search input with debounce
+    this.searchSubject
+      .pipe(
+        debounceTime(300),
+        distinctUntilChanged()
+      )
+      .subscribe((term) => {
+        if (term.trim().length > 0) {
+          // Search mode: query backend
+          this.performSearch(term);
+        } else {
+          // Normal mode: reset and load paginated list
+          this.loadTrabajadores(0);
+        }
+      });
   }
 
   ngOnInit(): void {
@@ -106,16 +115,46 @@ export class TrabajadoresListComponent implements OnInit {
     this.loadTrabajadores();
   }
 
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
 
-  loadTrabajadores( page: number = 0): void {
+  onSearchChange(event: Event): void {
+    const value = (event.target as HTMLInputElement).value;
+    this.searchTerm.set(value);
+    this.searchSubject.next(value);
+  }
+
+  private performSearch(segment: string): void {
     this.loading.set(true);
     this.currentPage.set(0);
+    this.totalPages.set(1); // Search results are not paginated
+
+    this.trabajadorService.searchTrabajadores(segment, 8).subscribe({
+      next: (results) => {
+        this.trabajadores.set(results || []);
+        this.totalElements.set(results?.length ?? 0);
+        this.loading.set(false);
+      },
+      error: () => {
+        this.trabajadores.set([]);
+        this.totalElements.set(0);
+        this.loading.set(false);
+      }
+    });
+  }
+
+  loadTrabajadores(page: number = 0): void {
+    this.loading.set(true);
+    this.currentPage.set(page);
 
     this.trabajadorService.getTrabajadores(page, this.pageSize()).subscribe({
       next: (response) => {
         if (response && response.content) {
           this.trabajadores.set(response.content);
-          this.totalElements.set(response.totalElements);
+          this.totalElements.set(response.totalElements ?? 0);
+          this.totalPages.set(response.totalPages ?? 0);
         }
         this.loading.set(false);
       },
@@ -165,6 +204,14 @@ export class TrabajadoresListComponent implements OnInit {
     if (parts.length === 0) return '?';
     if (parts.length === 1) return parts[0][0]?.toUpperCase() ?? '?';
     return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  }
+
+  goToNuevoTrabajador(): void {
+    this.router.navigate(['/trabajadores/nuevo']);
+  }
+
+  goToImportarTrabajadores(): void {
+    this.router.navigate(['/trabajadores/importar']);
   }
 
 }

@@ -2,6 +2,7 @@ package pe.edu.sst.backend.modules.trabajadores.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -141,6 +142,23 @@ public class TrabajadorServiceImpl implements TrabajadorService {
         @Transactional(readOnly = true)
         public Page<TrabajadorResponse> listarPaginado(Pageable pageable) {
                 return trabajadorRepository.findAll(pageable).map(this::mapToResponse);
+        }
+
+        @Override
+        @Transactional(readOnly = true)
+        public List<TrabajadorResponse> buscarPorSegmento(String segment, int limit) {
+                String value = segment == null ? "" : segment.trim();
+                if (value.isEmpty()) {
+                        return List.of();
+                }
+
+                int safeLimit = Math.max(1, Math.min(limit, 20));
+                Pageable pageable = PageRequest.of(0, safeLimit);
+
+                return trabajadorRepository.findBySegmento(value, pageable)
+                                .stream()
+                                .map(this::mapToResponse)
+                                .toList();
         }
 
         @Override

@@ -1,0 +1,130 @@
+<section class="inspecciones-page">
+  <header class="page-header">
+    <div class="page-header__title">
+      <div class="page-header__icon">
+        <lucide-icon [img]="Shield" aria-hidden="true"></lucide-icon>
+      </div>
+      <div>
+        <p class="eyebrow">SST</p>
+        <h1>Inspecciones</h1>
+      </div>
+    </div>
+
+    <div class="page-header__actions">
+      <button *ngIf="isAdmin()" type="button" class="btn btn--primary" (click)="goToCreate()">
+        <lucide-icon [img]="Plus" aria-hidden="true"></lucide-icon>
+        Nueva inspección
+      </button>
+    </div>
+  </header>
+
+  <div class="stats-grid">
+    <div class="stat-card stat-card--pending">
+      <div class="stat-card__icon"><lucide-icon [img]="Calendar" aria-hidden="true"></lucide-icon></div>
+      <div>
+        <span>Pendientes</span>
+        <strong>{{ summaryCounts().pendiente }}</strong>
+      </div>
+    </div>
+
+    <div class="stat-card stat-card--done">
+      <div class="stat-card__icon"><lucide-icon [img]="CheckCircle" aria-hidden="true"></lucide-icon></div>
+      <div>
+        <span>Realizadas</span>
+        <strong>{{ summaryCounts().realizada }}</strong>
+      </div>
+    </div>
+
+    <div class="stat-card stat-card--late">
+      <div class="stat-card__icon"><lucide-icon [img]="Clock" aria-hidden="true"></lucide-icon></div>
+      <div>
+        <span>Retrasadas</span>
+        <strong>{{ summaryCounts().retrasada }}</strong>
+      </div>
+    </div>
+
+    <div class="stat-card stat-card--failed">
+      <div class="stat-card__icon"><lucide-icon [img]="AlertCircle" aria-hidden="true"></lucide-icon></div>
+      <div>
+        <span>Incumplidas</span>
+        <strong>{{ summaryCounts().incumplida }}</strong>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel__header">
+      <div class="panel__title-wrap">
+        <lucide-icon [img]="Shield" aria-hidden="true"></lucide-icon>
+        <h2>Listado</h2>
+      </div>
+    </div>
+
+    <div *ngIf="loading(); else tableBlock" class="loading-state">
+      <lucide-icon [img]="Loader2" class="spin" aria-hidden="true"></lucide-icon>
+      Cargando inspecciones...
+    </div>
+
+    <ng-template #tableBlock>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Tema</th>
+              <th>Tipo</th>
+              <th>Fecha y hora</th>
+              <th>Responsables</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let inspeccion of inspecciones()">
+              <td>
+                <div class="cell-title">{{ inspeccion.tema }}</div>
+                <small *ngIf="inspeccion.observaciones">{{ inspeccion.observaciones }}</small>
+              </td>
+              <td>{{ inspeccion.tipo }}</td>
+              <td>
+                <div>{{ inspeccion.fechaInspeccion }}</div>
+                <small>{{ inspeccion.horaInspeccion }}</small>
+              </td>
+              <td>{{ inspeccion.responsables.length }}</td>
+              <td>
+                <span [ngClass]="getStatusClass(inspeccion.estado)">{{ inspeccion.estado }}</span>
+              </td>
+              <td>
+                <button *ngIf="isAdmin()" type="button" class="ghost-button" (click)="goToEdit(inspeccion)">
+                  <lucide-icon [img]="Pencil" aria-hidden="true"></lucide-icon>
+                  Editar
+                </button>
+              </td>
+            </tr>
+
+            <tr *ngIf="!inspecciones().length">
+              <td colspan="6" class="empty-state">No hay inspecciones registradas.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <footer class="pagination-footer" *ngIf="totalPages() > 0">
+        <span class="pagination-info">
+          Mostrando página <strong>{{ currentPage() + 1 }}</strong> de <strong>{{ totalPages() }}</strong>
+          (Total: {{ totalElements() }} inspecciones)
+        </span>
+        <div class="pagination-controls">
+          <button type="button" class="btn btn--secondary btn--sm" (click)="prevPage()" [disabled]="currentPage() === 0">
+            <lucide-icon [img]="ChevronLeft" aria-hidden="true"></lucide-icon>
+            Anterior
+          </button>
+          <button type="button" class="btn btn--secondary btn--sm" (click)="nextPage()" [disabled]="currentPage() >= totalPages() - 1">
+            Siguiente
+            <lucide-icon [img]="ChevronRight" aria-hidden="true"></lucide-icon>
+          </button>
+        </div>
+      </footer>
+    </ng-template>
+  </div>
+
+</section>

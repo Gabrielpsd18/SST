@@ -49,19 +49,19 @@ public class SecurityConfig {
                         .permitAll()
 
                         // Reglas RBAC para Trabajadores: Administrador escribe, Supervisor solo lee
-                        .requestMatchers(HttpMethod.GET, "/api/v1/trabajadores/**", "/api/v1/capacitaciones/**", "/api/v1/capacitadores/**")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/trabajadores/**", "/api/v1/capacitaciones/**", "/api/v1/capacitadores/**", "/api/v1/inspecciones/**")
                         .hasAnyRole("ADMINISTRADOR", "SUPERVISOR")
 
-                        .requestMatchers(HttpMethod.POST, "/api/v1/trabajadores/**", "/api/v1/capacitaciones/**", "/api/v1/capacitadores/**")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/trabajadores/**", "/api/v1/capacitaciones/**", "/api/v1/capacitadores/**", "/api/v1/inspecciones/**")
                         .hasRole("ADMINISTRADOR")
 
-                        .requestMatchers(HttpMethod.PUT, "/api/v1/trabajadores/**", "/api/v1/capacitaciones/**", "/api/v1/capacitadores/**")
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/trabajadores/**", "/api/v1/capacitaciones/**", "/api/v1/capacitadores/**", "/api/v1/inspecciones/**")
                         .hasRole("ADMINISTRADOR")
 
-                        .requestMatchers(HttpMethod.PATCH, "/api/v1/trabajadores/**", "/api/v1/capacitaciones/**", "/api/v1/capacitadores/**")
+                        .requestMatchers(HttpMethod.PATCH, "/api/v1/trabajadores/**", "/api/v1/capacitaciones/**", "/api/v1/capacitadores/**", "/api/v1/inspecciones/**")
                         .hasRole("ADMINISTRADOR")
 
-                        .requestMatchers(HttpMethod.DELETE, "/api/v1/trabajadores/**", "/api/v1/capacitaciones/**", "/api/v1/capacitadores/**")
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/trabajadores/**", "/api/v1/capacitaciones/**", "/api/v1/capacitadores/**", "/api/v1/inspecciones/**")
                         .hasRole("ADMINISTRADOR")
 
                         .anyRequest().authenticated())

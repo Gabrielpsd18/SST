@@ -41,4 +41,8 @@ export interface CrearCapacitacionRequest {
   capacitadorId: number;
   sedeIdFilter?: number;
   trabajadoresIds?: number[];
+  responsablesIds?: number[];
+  capacitadorIds?: number[];
+  videoLinks?: string[];
+  formLinks?: string[];
 }

@@ -49,6 +49,13 @@ export class TrabajadorService {
     const params = new HttpParams().set('estado', estado);
     return this.http.patch<void>(`${this.API_URL}/${id}/estado`, null, { params });
   }
+  searchTrabajadores(segment: string, limit: number = 10): Observable<Trabajador[]> {
+    const params = new HttpParams()
+      .set('segment', segment.trim())
+      .set('limit', limit.toString());
+
+    return this.http.get<Trabajador[]>(`${this.API_URL}/search`, { params });
+  }
 
   // Catálogos
   getSedes(): Observable<MaestraItem[]> {

@@ -11,6 +11,9 @@ import { TrabajadoresImportComponent } from './features/trabajadores/pages/traba
 import { InspeccionesListComponent } from './features/inspecciones/pages/inspecciones-list/inspecciones-list.component';
 import { DocumentosMainComponent } from './features/documentos/pages/documentos-main/documentos-main.component';
 import { ReportesMainComponent } from './features/reportes/pages/reportes-main/reportes-main.component';
+import { InspeccionesFormComponent } from './features/inspecciones/pages/inspecciones-form/inspecciones-form.component';
+import { CapacitacionesFormComponent } from './features/capacitaciones/pages/capacitaciones-form/capacitaciones-form.component';
+
 export const routes: Routes = [
   {
     path: 'login',
@@ -48,11 +51,38 @@ export const routes: Routes = [
       },
       {
         path: 'capacitaciones',
-        component: CapacitacionesComponent
+        children:[
+          {
+            path: '',
+            component: CapacitacionesComponent
+          
+          },
+          {
+            path: 'crear',
+            component: CapacitacionesFormComponent
+          },
+          {
+            path: ':id/editar',
+            component: CapacitacionesFormComponent
+          }
+        ]
       },
       {
         path: 'inspecciones',
-        component: InspeccionesListComponent
+        children:[
+            {
+              path: '',
+              component: InspeccionesListComponent
+            },
+            {
+              path: 'nuevo',
+              component: InspeccionesFormComponent
+            },
+            {
+              path: ':id/editar',
+              component: InspeccionesFormComponent
+            }
+        ]
       },
       {
         path: 'documentos',

@@ -21,7 +21,7 @@
 
       @if (isAdmin()) {
         @if (activeMainTab() === 'sesiones') {
-          <button class="btn btn--primary" (click)="openCapacitacionModal()">
+                <button class="btn btn--primary" (click)="goToCapacitacionCrear()">
             <lucide-icon [img]="Plus"></lucide-icon>
             Programar Capacitación
           </button>
@@ -73,6 +73,7 @@
                 <th>Programado por</th>
                 <th>Trabajadores Asignados</th>
                 <th>Estado</th>
+                <th>Acciones</th>
               </tr>
             </thead>
             <tbody>
@@ -114,6 +115,11 @@
                   </td>
                   <td>
                     <span class="badge badge--success">{{ cap.estado }}</span>
+                  </td>
+                  <td class="actions-cell">
+                    @if (isAdmin()) {
+                      <button class="btn btn--secondary btn--sm" (click)="goToEditCapacitacion(cap.id)">Editar</button>
+                    }
                   </td>
                 </tr>
               }

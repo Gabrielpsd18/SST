@@ -34,6 +34,13 @@ public class TrabajadorController {
         return ResponseEntity.ok(trabajadorService.listarPaginado(pageable));
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<List<TrabajadorResponse>> buscarPorSegmento(
+            @RequestParam String segment,
+            @RequestParam(defaultValue = "10") int limit) {
+        return ResponseEntity.ok(trabajadorService.buscarPorSegmento(segment, limit));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<TrabajadorResponse> obtenerPorId(@PathVariable Long id) {
         return ResponseEntity.ok(trabajadorService.obtenerPorId(id));

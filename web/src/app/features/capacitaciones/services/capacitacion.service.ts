@@ -31,6 +31,16 @@ export class CapacitacionService {
     return this.http.post<Capacitacion>(this.CAPACITACIONES_URL, request);
   }
 
+  // Get a single capacitacion by id (used for editing)
+  getCapacitacionById(id: number): Observable<any> {
+    return this.http.get<any>(`${this.CAPACITACIONES_URL}/${id}`);
+  }
+
+  // Update an existing capacitacion
+  updateCapacitacion(id: number, request: CrearCapacitacionRequest): Observable<Capacitacion> {
+    return this.http.put<Capacitacion>(`${this.CAPACITACIONES_URL}/${id}`, request);
+  }
+
   // --- Capacitadores ---
   getCapacitadores(): Observable<Capacitador[]> {
     return this.http.get<Capacitador[]>(this.CAPACITADORES_URL);

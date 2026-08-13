@@ -36,7 +36,7 @@
     <div class="toolbar__search">
       <lucide-icon [img]="Search" class="toolbar__search-icon"></lucide-icon>
       <input type="text" class="form-control" placeholder="Buscar por nombre, DNI, sede o cargo..."
-        [ngModel]="searchTerm()" (ngModelChange)="searchTerm.set($event)" />
+        [value]="searchTerm()" (input)="onSearchChange($event)" />
     </div>
   </div>
 
@@ -125,6 +125,7 @@
       </table>
     </div>
 
+    @if (!isSearching()) {
     <footer class="pagination-footer">
       <span class="pagination-info">
         Mostrando página <strong>{{ currentPage() + 1 }}</strong> de <strong>{{ totalPages() }}</strong> (Total: {{
@@ -139,6 +140,7 @@
         </button>
       </div>
     </footer>
+    }
     }
   </div>
 

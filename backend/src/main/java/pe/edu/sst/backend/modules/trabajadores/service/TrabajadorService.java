@@ -13,6 +13,7 @@ public interface TrabajadorService {
     TrabajadorResponse actualizar(Long id, ActualizarTrabajadorRequest request);
     TrabajadorResponse obtenerPorId(Long id);
     Page<TrabajadorResponse> listarPaginado(Pageable pageable);
+    List<TrabajadorResponse> buscarPorSegmento(String segment, int limit);
     void cambiarEstado(Long id, String nuevoEstado);
 
     List<MaestraResponse> listarSedes();

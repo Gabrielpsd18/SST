@@ -1,0 +1,77 @@
+<section class="inspecciones-form-page">
+  <header class="page-header">
+    <button type="button" class="back-button" (click)="goBack()">
+      <lucide-icon [img]="ArrowLeft" aria-hidden="true"></lucide-icon>
+      Volver
+    </button>
+
+    <div>
+      <p class="eyebrow">SST</p>
+      <h1>{{ isEditMode() ? 'Editar inspección' : 'Nueva inspección' }}</h1>
+    </div>
+  </header>
+
+  <div class="panel">
+    <form [formGroup]="form" (ngSubmit)="submit()" class="inspection-form">
+      <div class="field-grid">
+        <label class="field">
+          <span>Tema</span>
+          <input formControlName="tema" type="text" placeholder="Ej. Inspección de EPP" />
+        </label>
+
+        <label class="field">
+          <span>Tipo</span>
+          <select formControlName="tipo">
+            <option value="PLANEADA">Planeada</option>
+            <option value="RUTINARIA">Rutina</option>
+            <option value="ESPECIAL">Especial</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span>Fecha</span>
+          <input formControlName="fechaInspeccion" type="date" />
+        </label>
+
+        <label class="field">
+          <span>Hora</span>
+          <input formControlName="horaInspeccion" type="time" />
+        </label>
+      </div>
+
+      
+
+      <div class="field">
+        <app-searchable-select
+          formControlName="responsableIds"
+          [multiple]="true"
+          [initialSelectedOptions]="responsablesSeleccionados()"
+          label="Responsables"
+          placeholder="Buscar responsables..."
+          [searchFn]="searchResponsables"
+          [maxResults]="8"
+          (selectionChange)="onResponsablesChange($event)"
+        ></app-searchable-select>
+      </div>
+
+      <label class="field">
+        <span>Observaciones</span>
+        <textarea formControlName="observaciones" rows="3" placeholder="Detalles, hallazgos o comentarios..."></textarea>
+      </label>
+
+      <div *ngIf="errorMessage()" class="form-error">
+        {{ errorMessage() }}
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="secondary-button" (click)="goBack()">Cancelar</button>
+        <button type="submit" class="primary-button" [disabled]="saving()">
+          <span *ngIf="saving()" class="spinner-wrap">
+            <lucide-icon [img]="Loader2" class="spin" aria-hidden="true"></lucide-icon>
+          </span>
+          {{ saving() ? 'Guardando...' : (isEditMode() ? 'Guardar cambios' : 'Crear inspección') }}
+        </button>
+      </div>
+    </form>
+  </div>
+</section>

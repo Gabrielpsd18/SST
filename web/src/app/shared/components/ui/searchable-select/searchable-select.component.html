@@ -3,64 +3,102 @@
     <label class="form-label">{{ label }}</label>
   }
 
-  <button
-    type="button"
-    class="searchable-select__trigger"
-    (click)="toggleDropdown()"
-    [disabled]="isDisabled()"
-    [attr.aria-expanded]="open()"
-  >
-    <span [class.searchable-select__placeholder]="!selectedLabel()">
-      {{ selectedLabel() || placeholder }}
-    </span>
-    <lucide-icon [img]="ChevronDown" class="searchable-select__chevron"></lucide-icon>
-  </button>
+  <div class="searchable-select__field">
+    <button
+      type="button"
+      class="searchable-select__trigger"
+      (click)="toggleDropdown()"
+      [disabled]="isDisabled()"
+      [attr.aria-expanded]="open()"
+    >
+      <span [class.searchable-select__placeholder]="!selectedLabel()">
+        {{ selectedLabel() || placeholder }}
+      </span>
+      @if (loading()) {
+        <lucide-icon [img]="Loader2" class="searchable-select__loader"></lucide-icon>
+      } @else {
+        <lucide-icon [img]="ChevronDown" class="searchable-select__chevron"></lucide-icon>
+      }
+    </button>
 
-  @if (open()) {
-    <div class="searchable-select__panel">
-      <div class="searchable-select__search">
-        <lucide-icon [img]="Search" class="searchable-select__search-icon"></lucide-icon>
-        <input
-          type="text"
-          class="searchable-select__search-input"
-          [placeholder]="searchPlaceholder"
-          [value]="searchTerm()"
-          (input)="onSearchInput($any($event.target).value)"
-          (click)="$event.stopPropagation()"
-        />
-      </div>
+    @if (open()) {
+      <div class="searchable-select__panel">
+        <div class="searchable-select__search">
+          <lucide-icon [img]="Search" class="searchable-select__search-icon"></lucide-icon>
+          <input
+            #searchInput
+            type="text"
+            class="searchable-select__search-input"
+            [placeholder]="searchPlaceholder"
+            [value]="searchTerm()"
+            (input)="onSearchInput($any($event.target).value)"
+            (click)="$event.stopPropagation()"
+          />
+        </div>
 
-      <ul class="searchable-select__list" role="listbox">
-        @if (showAllOption && !searchTerm()) {
-          <li>
-            <button
-              type="button"
-              class="searchable-select__option"
-              [class.searchable-select__option--selected]="selectedId() === null"
-              (click)="selectAllOption()"
-            >
-              {{ allOptionLabel }}
-            </button>
-          </li>
-        }
-
-        @if (filteredOptions().length === 0) {
-          <li class="searchable-select__empty">{{ emptyMessage }}</li>
-        } @else {
-          @for (option of filteredOptions(); track option.id) {
+        <ul class="searchable-select__list" role="listbox">
+          @if (showAllOption && !searchTerm()) {
             <li>
               <button
                 type="button"
                 class="searchable-select__option"
-                [class.searchable-select__option--selected]="option.id === selectedId()"
-                (click)="selectOption(option)"
+                [class.searchable-select__option--selected]="selectedIds().length === 0"
+                (click)="selectAllOption()"
               >
-                {{ option.nombre }}
+                {{ allOptionLabel }}
               </button>
             </li>
           }
-        }
-      </ul>
+
+          @if (filteredOptions().length === 0) {
+            <li class="searchable-select__empty">{{ emptyMessage }}</li>
+          } @else {
+            @for (option of filteredOptions(); track option.id) {
+              <li>
+                <button
+                  type="button"
+                  class="searchable-select__option"
+                  [class.searchable-select__option--selected]="isSelected(option.id)"
+                  (click)="selectOption(option)"
+                >
+                  {{ option.nombre }}
+                </button>
+              </li>
+            }
+          }
+        </ul>
+      </div>
+    }
+  </div>
+
+  @if (multiple && !hideSelectedDisplay) {
+    <div class="searchable-select__selected">
+      @if (selectedRows().length === 0) {
+        <div class="searchable-select__selected-empty">Sin responsables seleccionados.</div>
+      } @else {
+        <div class="searchable-select__table-wrapper">
+          <table class="searchable-select__table">
+            <thead>
+              <tr>
+                <th>Responsable</th>
+                <th class="searchable-select__actions-header">Acción</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (option of selectedRows(); track option.id) {
+                <tr>
+                  <td>{{ option.nombre }}</td>
+                  <td class="searchable-select__actions-cell">
+                    <button type="button" class="searchable-select__remove" (click)="removeOption(option.id)">
+                      Borrar
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
     </div>
   }
 </div>

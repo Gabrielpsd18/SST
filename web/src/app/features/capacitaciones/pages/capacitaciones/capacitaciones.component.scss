@@ -123,6 +123,10 @@
 .table-card {
   padding: 0;
   overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.04);
 }
 
 .table-wrapper {
@@ -134,42 +138,92 @@
   border-collapse: collapse;
   text-align: left;
   font-size: var(--font-size-sm);
+  background: var(--color-surface);
 
-  th {
-    background-color: var(--color-background);
+  thead th {
+    background: linear-gradient(180deg, var(--color-background), rgba(148, 163, 184, 0.04));
     color: var(--color-text-secondary);
     font-weight: var(--font-weight-semibold);
     padding: var(--space-3) var(--space-4);
     border-bottom: 1px solid var(--color-border);
     white-space: nowrap;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    font-size: 0.72rem;
   }
 
-  td {
+  tbody td {
     padding: var(--space-4);
     border-bottom: 1px solid var(--color-border);
     vertical-align: middle;
+    color: var(--color-text-primary);
   }
 
-  tr:hover td {
-    background-color: var(--gray-50);
+  tbody tr {
+    transition: background-color 0.2s ease;
+
+    &:hover td {
+      background-color: rgba(59, 130, 246, 0.03);
+    }
+  }
+
+  tbody tr:last-child td {
+    border-bottom: none;
   }
 }
 
 .tema-title {
-  color: var(--color-text-primary);
   display: block;
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-semibold);
+  line-height: 1.4;
 }
 
 .cap-type-badge {
-  font-size: 11px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.68rem;
   font-weight: 700;
-  padding: 4px 8px;
-  border-radius: 4px;
+  padding: 0.4rem 0.7rem;
+  border-radius: 999px;
   background-color: var(--blue-50);
   color: var(--color-primary);
+  border: 1px solid rgba(59, 130, 246, 0.12);
 
-  &--5min { background-color: #fef3c7; color: #b45309; }
-  &--ind { background-color: #f0fdf4; color: #15803d; }
+  &--5min { background-color: #fef3c7; color: #b45309; border-color: rgba(245, 158, 11, 0.18); }
+  &--ind { background-color: #f0fdf4; color: #15803d; border-color: rgba(34, 197, 94, 0.18); }
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 0.38rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  background: var(--blue-50);
+  color: var(--color-primary);
+  border: 1px solid rgba(59, 130, 246, 0.15);
+
+  &--success {
+    background: #ecfdf5;
+    color: #166534;
+    border-color: rgba(22, 101, 52, 0.14);
+  }
+
+  &--warning {
+    background: #fff7ed;
+    color: #c2410c;
+    border-color: rgba(194, 65, 12, 0.14);
+  }
+}
+
+.actions-cell {
+  width: 120px;
+  text-align: right;
 }
 
 .meta-cell {
