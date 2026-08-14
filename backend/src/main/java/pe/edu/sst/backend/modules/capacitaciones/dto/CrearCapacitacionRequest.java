@@ -26,8 +26,17 @@ public class CrearCapacitacionRequest {
     @NotNull(message = "La duración en horas es obligatoria")
     private BigDecimal duracionHoras;
 
-    @NotNull(message = "El capacitador es obligatorio")
+    // Campo opcional legacy para compatibilidad con clientes antiguos
     private Long capacitadorId;
+
+    @NotNull(message = "Al menos un capacitador es obligatorio")
+    private List<Long> capacitadorIds;
+
+    // Links opcionales de formularios de evaluación (URLs)
+    private List<String> linksEvaluacion;
+
+    // Links opcionales de videos de la capacitación (URLs)
+    private List<String> linksVideo;
 
     // Filtro de asignación masiva por sede
     private Long sedeIdFilter;

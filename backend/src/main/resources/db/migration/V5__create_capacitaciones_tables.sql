@@ -1,4 +1,4 @@
--- 1. Tabla de Capacitadores / Instructores (Internos y Externos)
+-- 1.1 Tabla de Capacitadores / Instructores (Internos y Externos)
 CREATE TABLE capacitadores (
     id BIGSERIAL PRIMARY KEY,
     nombres VARCHAR(100) NOT NULL,
@@ -10,6 +10,24 @@ CREATE TABLE capacitadores (
     estado BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+-- 1.2 Tabla de Links de Formularios de Evaluación de Capacitación (Opcional)
+CREATE TABLE capacitacion_evaluaciones (
+    id BIGSERIAL PRIMARY KEY,
+    capacitacion_id BIGINT NOT NULL,
+    link_formulario VARCHAR(500) NOT NULL,
+    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    estado BOOLEAN DEFAULT TRUE,
+    CONSTRAINT fk_capacitacion_evaluacion FOREIGN KEY (capacitacion_id) REFERENCES capacitaciones(id) ON DELETE CASCADE
+);
+-- 1.3 Tabla de links de Videos de Capacitación (Opcional)
+CREATE TABLE capacitacion_videos (
+    id BIGSERIAL PRIMARY KEY,
+    capacitacion_id BIGINT NOT NULL,
+    link_video VARCHAR(500) NOT NULL,
+    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    estado BOOLEAN DEFAULT TRUE,
+    CONSTRAINT fk_capacitacion_video FOREIGN KEY (capacitacion_id) REFERENCES capacitaciones(id) ON DELETE CASCADE
+);
 
 -- 2. Tabla de Sesiones de Capacitación
 CREATE TABLE capacitaciones (
@@ -18,7 +36,6 @@ CREATE TABLE capacitaciones (
     tipo VARCHAR(50) NOT NULL, -- CHARLA_5_MINUTOS, INDUCCION, CAPACITACION
     fecha_programada TIMESTAMP NOT NULL,
     duracion_horas NUMERIC(4,2) NOT NULL,
-    capacitador_id BIGINT NOT NULL,
     creado_por VARCHAR(100),
     estado VARCHAR(30) DEFAULT 'PROGRAMADO', -- PROGRAMADO, EN_CURSO, COMPLETADO, CANCELADO
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -27,7 +44,7 @@ CREATE TABLE capacitaciones (
     CONSTRAINT fk_capacitacion_capacitador FOREIGN KEY (capacitador_id) REFERENCES capacitadores(id)
 );
 
--- 3. Tabla Relacional de Asignación de Trabajadores a Capacitación
+-- 3.1. Tabla Relacional de Asignación de Trabajadores a Capacitación
 CREATE TABLE capacitacion_trabajadores (
     capacitacion_id BIGINT NOT NULL,
     trabajador_id BIGINT NOT NULL,
@@ -36,7 +53,14 @@ CREATE TABLE capacitacion_trabajadores (
     CONSTRAINT fk_cap_trab_capacitacion FOREIGN KEY (capacitacion_id) REFERENCES capacitaciones(id) ON DELETE CASCADE,
     CONSTRAINT fk_cap_trab_trabajador FOREIGN KEY (trabajador_id) REFERENCES trabajadores(id) ON DELETE CASCADE
 );
-
+--3.2. Tabla Relacional de Asignacion de Capacitores a Capacitaciones (En caso de que se requiera más de un capacitador por sesión)
+CREATE TABLE capacitacion_capacitadores (
+    capacitacion_id BIGINT NOT NULL,
+    capacitador_id BIGINT NOT NULL,
+    PRIMARY KEY (capacitacion_id, capacitador_id),
+    CONSTRAINT fk_cap_capacitacion FOREIGN KEY (capacitacion_id) REFERENCES capacitaciones(id) ON DELETE CASCADE,
+    CONSTRAINT fk_cap_capacitador FOREIGN KEY (capacitador_id) REFERENCES capacitadores(id) ON DELETE CASCADE
+);
 -- 4. Inserción de Datos Iniciales de Capacitadores de Prueba
 INSERT INTO capacitadores (nombres, apellidos, empresa, telefono, correo, especialidad)
 VALUES
@@ -46,14 +70,28 @@ VALUES
 ON CONFLICT DO NOTHING;
 
 -- 5. Inserción de Capacitaciones Iniciales de Prueba
-INSERT INTO capacitaciones (tema, tipo, fecha_programada, duracion_horas, capacitador_id, creado_por, estado)
+INSERT INTO capacitaciones (tema, tipo, fecha_programada, duracion_horas, creado_por, estado)
 VALUES
-('Charla de 5 Minutos: Identificación de Peligros en Planta', 'CHARLA_5_MINUTOS', CURRENT_TIMESTAMP + INTERVAL '1 day', 0.50, 1, 'admin@sst.com', 'PROGRAMADO'),
-('Inducción General de Seguridad para Nuevos Ingresos', 'INDUCCION', CURRENT_TIMESTAMP + INTERVAL '3 days', 4.00, 2, 'admin@sst.com', 'PROGRAMADO'),
-('Capacitación Teórico-Práctica: Ergonomía y Pausas Activas', 'CAPACITACION', CURRENT_TIMESTAMP + INTERVAL '7 days', 2.00, 3, 'admin@sst.com', 'PROGRAMADO')
+('Charla de 5 Minutos: Identificación de Peligros en Planta', 'CHARLA_5_MINUTOS', CURRENT_TIMESTAMP + INTERVAL '1 day', 0.50, 'admin@sst.com', 'PROGRAMADO'),
+('Inducción General de Seguridad para Nuevos Ingresos', 'INDUCCION', CURRENT_TIMESTAMP + INTERVAL '3 days', 4.00, 'admin@sst.com', 'PROGRAMADO'),
+('Capacitación Teórico-Práctica: Ergonomía y Pausas Activas', 'CAPACITACION', CURRENT_TIMESTAMP + INTERVAL '7 days', 2.00, 'admin@sst.com', 'PROGRAMADO')
 ON CONFLICT DO NOTHING;
 
 -- 6. Asignación inicial de trabajadores a la primera capacitación
 INSERT INTO capacitacion_trabajadores (capacitacion_id, trabajador_id, asistencia)
 SELECT 1, id, 'PENDIENTE' FROM trabajadores LIMIT 5
+ON CONFLICT DO NOTHING;
+-- 7. Asignación inicial de capacitadores a la primera capacitación
+INSERT INTO capacitacion_capacitadores (capacitacion_id, capacitador_id)
+SELECT 1, id FROM capacitadores LIMIT 2
+ON CONFLICT DO NOTHING;
+
+--8. Inserción de Links de Evaluación y Videos para la primera capacitación
+INSERT INTO capacitacion_evaluaciones (capacitacion_id, link_formulario)
+VALUES
+(1, 'https://forms.gle/evaluacion-capacitacion-1')
+ON CONFLICT DO NOTHING;
+INSERT INTO capacitacion_videos (capacitacion_id, link_video)
+VALUES
+(1, 'https://www.youtube.com/?app=desktop&hl=es')
 ON CONFLICT DO NOTHING;

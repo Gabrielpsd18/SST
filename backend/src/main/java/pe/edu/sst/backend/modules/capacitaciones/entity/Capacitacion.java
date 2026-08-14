@@ -33,9 +33,13 @@ public class Capacitacion {
     @Column(name = "duracion_horas", nullable = false, precision = 4, scale = 2)
     private BigDecimal duracionHoras;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "capacitador_id", nullable = false)
-    private Capacitador capacitador;
+    // Muchos capacitadores pueden participar en una capacitación (relación N:N)
+    @Builder.Default
+    @ManyToMany
+    @JoinTable(name = "capacitacion_capacitadores",
+            joinColumns = @JoinColumn(name = "capacitacion_id"),
+            inverseJoinColumns = @JoinColumn(name = "capacitador_id"))
+    private Set<Capacitador> capacitadores = new HashSet<>();
 
     @Column(name = "creado_por", length = 100)
     private String creadoPor;
@@ -49,6 +53,20 @@ public class Capacitacion {
 
     @Column(name = "updated_at", insertable = false, updatable = false)
     private LocalDateTime updatedAt;
+
+    // Links de formularios de evaluación (tabla capacitacion_evaluaciones.link_formulario)
+    @Builder.Default
+    @ElementCollection
+    @CollectionTable(name = "capacitacion_evaluaciones", joinColumns = @JoinColumn(name = "capacitacion_id"))
+    @Column(name = "link_formulario", length = 500)
+    private Set<String> linksEvaluacion = new HashSet<>();
+
+    // Links de videos de capacitación (tabla capacitacion_videos.link_video)
+    @Builder.Default
+    @ElementCollection
+    @CollectionTable(name = "capacitacion_videos", joinColumns = @JoinColumn(name = "capacitacion_id"))
+    @Column(name = "link_video", length = 500)
+    private Set<String> linksVideo = new HashSet<>();
 
     @Builder.Default
     @OneToMany(mappedBy = "capacitacion", cascade = CascadeType.ALL, orphanRemoval = true)

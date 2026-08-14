@@ -15,9 +15,9 @@ public class CapacitacionResponse {
     private String tipo;
     private LocalDateTime fechaProgramada;
     private BigDecimal duracionHoras;
-    private Long capacitadorId;
-    private String capacitadorNombre;
-    private String capacitadorEmpresa;
+    private java.util.List<CapacitadorResponse> capacitadores;
+    private java.util.List<String> linksEvaluacion;
+    private java.util.List<String> linksVideo;
     private String creadoPor;
     private String estado;
     private Integer totalTrabajadores;

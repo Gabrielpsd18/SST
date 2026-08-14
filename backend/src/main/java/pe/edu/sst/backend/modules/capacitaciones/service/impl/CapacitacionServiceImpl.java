@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pe.edu.sst.backend.modules.capacitaciones.dto.CrearCapacitacionRequest;
 import pe.edu.sst.backend.modules.capacitaciones.dto.CapacitacionResponse;
+import pe.edu.sst.backend.modules.capacitaciones.dto.CapacitadorResponse;
 import pe.edu.sst.backend.modules.capacitaciones.entity.*;
 import pe.edu.sst.backend.modules.capacitaciones.repository.CapacitacionRepository;
 import pe.edu.sst.backend.modules.capacitaciones.repository.CapacitadorRepository;
@@ -30,15 +31,24 @@ public class CapacitacionServiceImpl implements CapacitacionService {
     @Override
     @Transactional
     public CapacitacionResponse programar(CrearCapacitacionRequest request, String userEmail) {
-        Capacitador capacitador = capacitadorRepository.findById(request.getCapacitadorId())
-                .orElseThrow(() -> new ResourceNotFoundException("Capacitador no encontrado con ID: " + request.getCapacitadorId()));
+        // Cargar los capacitadores solicitados (al menos uno)
+        java.util.List<Long> idsToLoad = request.getCapacitadorIds() != null && !request.getCapacitadorIds().isEmpty()
+                ? request.getCapacitadorIds()
+                : (request.getCapacitadorId() != null ? java.util.List.of(request.getCapacitadorId()) : java.util.List.of());
+
+        java.util.List<Capacitador> capacitadores = capacitadorRepository.findAllById(idsToLoad);
+        if (capacitadores.isEmpty()) {
+            throw new ResourceNotFoundException("No se encontraron capacitadores con los IDs proporcionados");
+        }
 
         Capacitacion capacitacion = Capacitacion.builder()
                 .tema(request.getTema())
                 .tipo(request.getTipo())
                 .fechaProgramada(request.getFechaProgramada())
                 .duracionHoras(request.getDuracionHoras())
-                .capacitador(capacitador)
+                .capacitadores(new HashSet<>(capacitadores))
+                .linksEvaluacion(request.getLinksEvaluacion() != null ? new java.util.HashSet<>(request.getLinksEvaluacion()) : new HashSet<>())
+                .linksVideo(request.getLinksVideo() != null ? new java.util.HashSet<>(request.getLinksVideo()) : new HashSet<>())
                 .creadoPor(userEmail)
                 .estado("PROGRAMADO")
                 .build();
@@ -97,11 +107,21 @@ public class CapacitacionServiceImpl implements CapacitacionService {
     }
 
     private CapacitacionResponse mapToResponse(Capacitacion c) {
-        String capacitadorNombre = c.getCapacitador() != null
-                ? c.getCapacitador().getNombres() + " " + (c.getCapacitador().getApellidos() != null ? c.getCapacitador().getApellidos() : "")
-                : "Sin Asignar";
+        java.util.List<CapacitadorResponse> capaResp = c.getCapacitadores() != null
+                ? c.getCapacitadores().stream().map(cap -> CapacitadorResponse.builder()
+                        .id(cap.getId())
+                        .nombres(cap.getNombres())
+                        .apellidos(cap.getApellidos())
+                        .empresa(cap.getEmpresa())
+                        .telefono(cap.getTelefono())
+                        .correo(cap.getCorreo())
+                        .especialidad(cap.getEspecialidad())
+                        .estado(cap.getEstado())
+                        .build()).toList()
+                : java.util.List.of();
 
-        String capacitadorEmpresa = c.getCapacitador() != null ? c.getCapacitador().getEmpresa() : "";
+        java.util.List<String> linksEval = c.getLinksEvaluacion() != null ? c.getLinksEvaluacion().stream().toList() : java.util.List.of();
+        java.util.List<String> linksVid = c.getLinksVideo() != null ? c.getLinksVideo().stream().toList() : java.util.List.of();
 
         return CapacitacionResponse.builder()
                 .id(c.getId())
@@ -109,9 +129,9 @@ public class CapacitacionServiceImpl implements CapacitacionService {
                 .tipo(c.getTipo())
                 .fechaProgramada(c.getFechaProgramada())
                 .duracionHoras(c.getDuracionHoras())
-                .capacitadorId(c.getCapacitador() != null ? c.getCapacitador().getId() : null)
-                .capacitadorNombre(capacitadorNombre.trim())
-                .capacitadorEmpresa(capacitadorEmpresa)
+                .capacitadores(capaResp)
+                .linksEvaluacion(linksEval)
+                .linksVideo(linksVid)
                 .creadoPor(c.getCreadoPor())
                 .estado(c.getEstado())
                 .totalTrabajadores(c.getTrabajadoresAsignados() != null ? c.getTrabajadoresAsignados().size() : 0)

@@ -20,11 +20,11 @@ ON CONFLICT (email) DO NOTHING;
 
 -- 3. Creamos tu trabajador y lo vinculamos al usuario_id y a los catálogos
 INSERT INTO trabajadores (
-    tipo_documento, numero_documento, nombres, apellidos, 
+    tipo_documento, numero_documento, nombre_completo, 
     telefono, correo_notificaciones, tipo_contrato, 
     sede_id, cargo_id, usuario_id
 ) VALUES (
-    'DNI', '74839201', 'Gabriel', 'Salgado Durán', 
+    'DNI', '74839201', 'Gabriel Salgado Durán', 
     '987654321', 'gabrielsalgadoduran@gmail.com', 'PERMANENTE', 
     1, 2, 1
 );

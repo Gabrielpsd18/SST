@@ -17,8 +17,7 @@ CREATE TABLE trabajadores (
     id BIGSERIAL PRIMARY KEY,
     tipo_documento VARCHAR(20) NOT NULL, -- DNI, CE, PASAPORTE
     numero_documento VARCHAR(20) NOT NULL UNIQUE,
-    nombres VARCHAR(100) NOT NULL,
-    apellidos VARCHAR(100) NOT NULL,
+    nombre_completo VARCHAR(200) NOT NULL,
     telefono VARCHAR(20),
     correo_notificaciones VARCHAR(128),
     tipo_contrato VARCHAR(30) NOT NULL, -- PERMANENTE, TEMPORAL, PRACTICANTE, RESPONSABLE
