@@ -93,6 +93,59 @@ public class CapacitacionServiceImpl implements CapacitacionService {
     }
 
     @Override
+    @Transactional
+    public CapacitacionResponse actualizar(Long id, CrearCapacitacionRequest request) {
+        Capacitacion existing = capacitacionRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Capacitación no encontrada con ID: " + id));
+
+        // Update basic fields
+        existing.setTema(request.getTema());
+        existing.setTipo(request.getTipo());
+        existing.setFechaProgramada(request.getFechaProgramada());
+        existing.setDuracionHoras(request.getDuracionHoras());
+
+        // Update capacitadores if provided
+        java.util.List<Long> idsToLoad = request.getCapacitadorIds() != null && !request.getCapacitadorIds().isEmpty()
+                ? request.getCapacitadorIds()
+                : (request.getCapacitadorId() != null ? java.util.List.of(request.getCapacitadorId()) : java.util.List.of());
+        if (!idsToLoad.isEmpty()) {
+            java.util.List<Capacitador> capacitadores = capacitadorRepository.findAllById(idsToLoad);
+            if (capacitadores.isEmpty()) {
+                throw new ResourceNotFoundException("No se encontraron capacitadores con los IDs proporcionados");
+            }
+            existing.getCapacitadores().clear();
+            existing.getCapacitadores().addAll(new HashSet<>(capacitadores));
+        }
+
+        // Update links (replace if provided)
+        if (request.getLinksEvaluacion() != null) {
+            existing.getLinksEvaluacion().clear();
+            existing.getLinksEvaluacion().addAll(new java.util.HashSet<>(request.getLinksEvaluacion()));
+        }
+        if (request.getLinksVideo() != null) {
+            existing.getLinksVideo().clear();
+            existing.getLinksVideo().addAll(new java.util.HashSet<>(request.getLinksVideo()));
+        }
+
+        // Update trabajadores assignment if explicit list provided
+        if (request.getTrabajadoresIds() != null) {
+            existing.getTrabajadoresAsignados().clear();
+            java.util.List<Trabajador> trabajadores = trabajadorRepository.findAllById(request.getTrabajadoresIds());
+            Set<CapacitacionTrabajador> asignaciones = new HashSet<>();
+            for (Trabajador t : trabajadores) {
+                CapacitacionTrabajador ct = CapacitacionTrabajador.builder()
+                        .id(new CapacitacionTrabajadorId(existing.getId(), t.getId()))
+                        .capacitacion(existing)
+                        .trabajador(t)
+                        .asistencia("PENDIENTE")
+                        .build();
+                asignaciones.add(ct);
+            }
+            existing.getTrabajadoresAsignados().addAll(asignaciones);
+        }
+
+        return mapToResponse(capacitacionRepository.save(existing));
+    }
+    @Override
     @Transactional(readOnly = true)
     public Page<CapacitacionResponse> listarPaginado(Pageable pageable) {
         return capacitacionRepository.findAllByOrderByFechaProgramadaDesc(pageable).map(this::mapToResponse);

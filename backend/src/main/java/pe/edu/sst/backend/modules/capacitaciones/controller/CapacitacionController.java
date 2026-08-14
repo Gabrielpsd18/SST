@@ -37,4 +37,9 @@ public class CapacitacionController {
         String email = auth != null ? auth.getName() : "admin@sst.com";
         return ResponseEntity.status(HttpStatus.CREATED).body(capacitacionService.programar(request, email));
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<CapacitacionResponse> actualizar(@PathVariable Long id, @Valid @RequestBody CrearCapacitacionRequest request) {
+        return ResponseEntity.ok(capacitacionService.actualizar(id, request));
+    }
 }

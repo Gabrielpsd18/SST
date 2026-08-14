@@ -9,4 +9,5 @@ public interface CapacitacionService {
     CapacitacionResponse programar(CrearCapacitacionRequest request, String userEmail);
     Page<CapacitacionResponse> listarPaginado(Pageable pageable);
     CapacitacionResponse obtenerPorId(Long id);
+    CapacitacionResponse actualizar(Long id, CrearCapacitacionRequest request);
 }
