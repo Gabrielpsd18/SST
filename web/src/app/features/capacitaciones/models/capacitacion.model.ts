@@ -31,6 +31,11 @@ export interface Capacitacion {
   estado: string;
   totalTrabajadores: number;
   createdAt: string;
+  // Optional richer fields that backend may include
+  capacitadores?: Capacitador[];
+  linksVideo?: string[];
+  linksEvaluacion?: string[];
+  trabajadores?: any[];
 }
 
 export interface CrearCapacitacionRequest {
