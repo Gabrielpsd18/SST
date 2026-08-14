@@ -288,15 +288,9 @@ export class CapacitacionesFormComponent implements OnInit {
         // store edit capacitador id so when capacitadores list loads we can set initial option
         this.editCapacitadorId.set(cap.capacitadorId ?? null);
 
-        // if capacitadores already loaded, set the initial selected option now
-        const foundNow = this.searchableCapacitadorOptions().find(opt => opt.id === (cap.capacitadorId ?? null));
-        if (foundNow) {
-          this.selectedCapacitadorInitial.set([foundNow]);
-          this.selectedCapacitadores.set([foundNow]);
-          this.capacitacionForm.patchValue({ capacitadorIds: [foundNow.id], capacitadorId: foundNow.id });
-        }
-
-        // If backend provides capacitadores array, prefer it
+        // If backend provides capacitadores array, prefer it. Do NOT try to read searchableCapacitadorOptions() here
+        // because that may trigger writes before the capacitadores catalog finishes loading and lead to change-detection cycles.
+        this.editCapacitadorId.set(cap.capacitadorId ?? null);
         if (Array.isArray(cap.capacitadores) && cap.capacitadores.length > 0) {
           const caps = cap.capacitadores.map((c: any) => ({
             id: c.id,
@@ -371,11 +365,10 @@ export class CapacitacionesFormComponent implements OnInit {
       }
     });
 
-    // Cargar trabajadores asignados (ahora mapeado desde GET /capacitaciones/{id})
-    this.loadTrabajadoresAsignados(id);
-    
-    // Cargar videos y evaluaciones (ahora mapeado desde GET /capacitaciones/{id})
-    this.loadVideosYEvaluaciones(id);
+    // The single GET /capacitaciones/{id} already populates trabajadores, linksVideo and linksEvaluacion
+    // so do not issue additional requests here to avoid duplicate writes and change-detection issues.
+    // this.loadTrabajadoresAsignados(id);
+    // this.loadVideosYEvaluaciones(id);
   }
 
   // Método para cargar trabajadores asignados a una capacitación

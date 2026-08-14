@@ -101,8 +101,8 @@
                   </td>
                   <td>
                     <div class="trainer-cell">
-                      <strong>{{ cap.capacitadorNombre }}</strong>
-                      <span class="trainer-empresa">{{ cap.capacitadorEmpresa }}</span>
+                      <strong>{{ (cap.capacitadores && cap.capacitadores.length) ? (cap.capacitadores[0].nombres + ' ' + (cap.capacitadores[0].apellidos || '')) : (cap.capacitadorNombre || '') }}</strong>
+                      <span class="trainer-empresa">{{ (cap.capacitadores && cap.capacitadores.length) ? (cap.capacitadores[0].empresa) : (cap.capacitadorEmpresa || '') }}</span>
                     </div>
                   </td>
                   <td>
