@@ -128,19 +128,38 @@ public class CapacitacionServiceImpl implements CapacitacionService {
 
         // Update trabajadores assignment if explicit list provided
         if (request.getTrabajadoresIds() != null) {
-            existing.getTrabajadoresAsignados().clear();
-            java.util.List<Trabajador> trabajadores = trabajadorRepository.findAllById(request.getTrabajadoresIds());
-            Set<CapacitacionTrabajador> asignaciones = new HashSet<>();
-            for (Trabajador t : trabajadores) {
-                CapacitacionTrabajador ct = CapacitacionTrabajador.builder()
-                        .id(new CapacitacionTrabajadorId(existing.getId(), t.getId()))
-                        .capacitacion(existing)
-                        .trabajador(t)
-                        .asistencia("PENDIENTE")
-                        .build();
-                asignaciones.add(ct);
+            // Compute current and desired IDs
+            java.util.Set<Long> desiredIds = new java.util.HashSet<>(request.getTrabajadoresIds());
+
+            // Current assignments map: trabajadorId -> CapacitacionTrabajador
+            java.util.Map<Long, CapacitacionTrabajador> currentMap = existing.getTrabajadoresAsignados().stream()
+                    .filter(ct -> ct.getTrabajador() != null && ct.getTrabajador().getId() != null)
+                    .collect(java.util.stream.Collectors.toMap(ct -> ct.getTrabajador().getId(), ct -> ct));
+
+            // Remove assignments that are not desired
+            java.util.Iterator<CapacitacionTrabajador> it = existing.getTrabajadoresAsignados().iterator();
+            while (it.hasNext()) {
+                CapacitacionTrabajador ct = it.next();
+                Long tId = ct.getTrabajador() != null ? ct.getTrabajador().getId() : null;
+                if (tId == null || !desiredIds.contains(tId)) {
+                    it.remove(); // will be orphan-removed
+                }
             }
-            existing.getTrabajadoresAsignados().addAll(asignaciones);
+
+            // Add new assignments for IDs that are not currently present
+            java.util.Set<Long> toAdd = desiredIds.stream().filter(id -> !currentMap.containsKey(id)).collect(java.util.stream.Collectors.toSet());
+            if (!toAdd.isEmpty()) {
+                java.util.List<Trabajador> trabajadores = trabajadorRepository.findAllById(toAdd);
+                for (Trabajador t : trabajadores) {
+                    CapacitacionTrabajador ct = CapacitacionTrabajador.builder()
+                            .id(new CapacitacionTrabajadorId(existing.getId(), t.getId()))
+                            .capacitacion(existing)
+                            .trabajador(t)
+                            .asistencia("PENDIENTE")
+                            .build();
+                    existing.getTrabajadoresAsignados().add(ct);
+                }
+            }
         }
 
         return mapToResponse(capacitacionRepository.save(existing));
