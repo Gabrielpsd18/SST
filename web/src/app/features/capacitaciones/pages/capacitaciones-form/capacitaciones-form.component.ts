@@ -453,8 +453,8 @@ export class CapacitacionesFormComponent implements OnInit {
       sedeIdFilter: formVal.sedeIdFilter ?? undefined,
       trabajadoresIds: this.selectedTrabajadorIds().length > 0 ? this.selectedTrabajadorIds() : undefined,
       responsablesIds: this.responsablesSeleccionados().length > 0 ? this.responsablesSeleccionados().map(r => r.id) : undefined,
-      videoLinks: this.videoLinks().length > 0 ? this.videoLinks() : undefined,
-      formLinks: this.formLinks().length > 0 ? this.formLinks() : undefined
+      linksVideo: this.videoLinks().length > 0 ? this.videoLinks() : undefined,
+      linksEvaluacion: this.formLinks().length > 0 ? this.formLinks() : undefined
     };
 
     // validation: ensure at least one capacitador
