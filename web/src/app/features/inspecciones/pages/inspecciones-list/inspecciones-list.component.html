@@ -58,6 +58,15 @@
         <lucide-icon [img]="Shield" aria-hidden="true"></lucide-icon>
         <h2>Listado</h2>
       </div>
+      <div class="panel__actions">
+        <div class="filter-tabs">
+          <button class="filter-tab" [class.filter-tab--active]="estadoFiltro() === 'TODOS'" (click)="setEstadoFiltro('TODOS')">Todos</button>
+          <button class="filter-tab" [class.filter-tab--active]="estadoFiltro() === 'PENDIENTE'" (click)="setEstadoFiltro('PENDIENTE')">Pendientes</button>
+          <button class="filter-tab" [class.filter-tab--active]="estadoFiltro() === 'REALIZADA'" (click)="setEstadoFiltro('REALIZADA')">Realizadas</button>
+          <button class="filter-tab" [class.filter-tab--active]="estadoFiltro() === 'RETRASADA'" (click)="setEstadoFiltro('RETRASADA')">Retrasadas</button>
+          <button class="filter-tab" [class.filter-tab--active]="estadoFiltro() === 'INCUMPLIDA'" (click)="setEstadoFiltro('INCUMPLIDA')">Incumplidas</button>
+        </div>
+      </div>
     </div>
 
     <div *ngIf="loading(); else tableBlock" class="loading-state">
@@ -79,7 +88,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let inspeccion of inspecciones()">
+            <tr *ngFor="let inspeccion of inspeccionesFiltradas()">
               <td>
                 <div class="cell-title">{{ inspeccion.tema }}</div>
                 <small *ngIf="inspeccion.observaciones">{{ inspeccion.observaciones }}</small>

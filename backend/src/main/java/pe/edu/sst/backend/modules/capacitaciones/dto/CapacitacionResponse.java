@@ -23,4 +23,6 @@ public class CapacitacionResponse {
     private String estado;
     private Integer totalTrabajadores;
     private LocalDateTime createdAt;
+    private List<TrabajadorResumenResponse> trabajadores;
 }
+

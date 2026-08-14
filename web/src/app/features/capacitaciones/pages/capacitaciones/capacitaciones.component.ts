@@ -78,6 +78,12 @@ export class CapacitacionesComponent implements OnInit {
 
   // --- Estado de Capacitaciones ---
   protected capacitaciones = signal<Capacitacion[]>([]);
+  protected estadoFiltroCapacitaciones = signal<'TODOS' | 'PROGRAMADO' | 'REALIZADO' | 'CANCELADO'>('TODOS');
+  protected capacitacionesFiltradas = computed(() => {
+    const filtro = this.estadoFiltroCapacitaciones();
+    if (!filtro || filtro === 'TODOS') return this.capacitaciones();
+    return this.capacitaciones().filter(c => (c.estado ?? '').toUpperCase() === filtro);
+  });
   protected totalElements = signal<number>(0);
   protected totalPages = signal<number>(0);
   protected currentPage = signal<number>(0);
@@ -173,6 +179,10 @@ export class CapacitacionesComponent implements OnInit {
     this.activeMainTab.set(tab);
   }
 
+  setEstadoFiltroCapacitaciones(estado: 'TODOS' | 'PROGRAMADO' | 'REALIZADO' | 'CANCELADO'): void {
+    this.estadoFiltroCapacitaciones.set(estado);
+  }
+
   loadCapacitaciones(page: number = 0): void {
     this.loadingCapacitaciones.set(true);
     this.currentPage.set(page);
@@ -203,7 +213,7 @@ export class CapacitacionesComponent implements OnInit {
 
   private loadCatalogos(): void {
     this.trabajadorService.getSedes().subscribe(res => this.sedes.set(res));
-    this.trabajadorService.getTrabajadores(0, 100).subscribe(res => {
+    this.trabajadorService.getTrabajadores(0, 100, 'ACTIVO').subscribe(res => {
       if (res && res.content) this.trabajadores.set(res.content);
     });
   }

@@ -109,6 +109,12 @@ public class InspeccionServiceImpl implements InspeccionService {
             throw new ResourceNotFoundException("Uno o más trabajadores seleccionados no existen");
         }
 
+        // Ensure all responsables are ACTIVO
+        boolean allActive = responsables.stream().allMatch(t -> t.getEstado() != null && t.getEstado().equalsIgnoreCase("ACTIVO"));
+        if (!allActive) {
+            throw new BadRequestException("Todos los responsables deben estar en estado ACTIVO");
+        }
+
         return responsables.stream().collect(Collectors.toSet());
     }
 

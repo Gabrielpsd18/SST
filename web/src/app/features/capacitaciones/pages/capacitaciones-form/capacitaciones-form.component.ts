@@ -140,7 +140,7 @@ export class CapacitacionesFormComponent implements OnInit {
   protected responsablesSeleccionados = signal<SearchableSelectOption[]>([]);
 
   protected searchResponsables = (segment: string, limit: number): Observable<SearchableSelectOption[]> =>
-    this.trabajadorService.searchTrabajadores(segment, limit).pipe(
+  this.trabajadorService.searchTrabajadores(segment, limit, true).pipe(
       map((trabajadores) =>
         trabajadores.map((trabajador) => ({
           id: trabajador.id,
@@ -201,7 +201,7 @@ export class CapacitacionesFormComponent implements OnInit {
       this.sedes.set(res);
     });
     
-    this.trabajadorService.getTrabajadores(0, 100).subscribe(res => {
+    this.trabajadorService.getTrabajadores(0, 100, 'ACTIVO').subscribe(res => {
 
       if (res && res.content) {
         this.trabajadores.set(res.content);

@@ -68,6 +68,7 @@ export class TrabajadoresListComponent implements OnInit, OnDestroy {
   protected pageSize = signal<number>(8);
   protected loading = signal<boolean>(true);
   protected searchTerm = signal<string>('');
+  protected estadoFiltro = signal<'TODOS' | 'ACTIVO' | 'INACTIVO'>('ACTIVO');
 
   protected isAdmin = signal<boolean>(false);
   protected userRole = signal<string>('');
@@ -131,7 +132,9 @@ export class TrabajadoresListComponent implements OnInit, OnDestroy {
     this.currentPage.set(0);
     this.totalPages.set(1); // Search results are not paginated
 
-    this.trabajadorService.searchTrabajadores(segment, 8).subscribe({
+    // Solo buscar activos si el filtro es ACTIVO
+    const soloActivos = this.estadoFiltro() === 'ACTIVO';
+    this.trabajadorService.searchTrabajadores(segment, 8, soloActivos).subscribe({
       next: (results) => {
         this.trabajadores.set(results || []);
         this.totalElements.set(results?.length ?? 0);
@@ -149,7 +152,8 @@ export class TrabajadoresListComponent implements OnInit, OnDestroy {
     this.loading.set(true);
     this.currentPage.set(page);
 
-    this.trabajadorService.getTrabajadores(page, this.pageSize()).subscribe({
+    const estado = this.estadoFiltro();
+    this.trabajadorService.getTrabajadores(page, this.pageSize(), estado === 'TODOS' ? undefined : estado).subscribe({
       next: (response) => {
         if (response && response.content) {
           this.trabajadores.set(response.content);
@@ -162,6 +166,12 @@ export class TrabajadoresListComponent implements OnInit, OnDestroy {
         this.loading.set(false);
       }
     });
+  }
+
+  setEstadoFiltro(estado: 'TODOS' | 'ACTIVO' | 'INACTIVO'): void {
+    this.estadoFiltro.set(estado);
+    this.searchTerm.set('');
+    this.loadTrabajadores(0);
   }
 
   prevPage(): void {

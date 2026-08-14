@@ -13,7 +13,9 @@ public interface TrabajadorService {
     TrabajadorResponse actualizar(Long id, ActualizarTrabajadorRequest request);
     TrabajadorResponse obtenerPorId(Long id);
     Page<TrabajadorResponse> listarPaginado(Pageable pageable);
+    Page<TrabajadorResponse> listarPaginadoFiltrado(Pageable pageable, String estado);
     List<TrabajadorResponse> buscarPorSegmento(String segment, int limit);
+    List<TrabajadorResponse> buscarPorSegmentoFiltrado(String segment, int limit, String estado);
     void cambiarEstado(Long id, String nuevoEstado);
 
     List<MaestraResponse> listarSedes();

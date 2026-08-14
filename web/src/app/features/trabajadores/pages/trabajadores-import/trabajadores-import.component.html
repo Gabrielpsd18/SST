@@ -7,30 +7,67 @@
   <div class="import-card">
     <div class="file-upload">
       <label class="btn btn--primary" for="excelFile">Seleccionar archivo Excel</label>
-      <input id="excelFile" type="file" accept=".xlsx,.xls" />
+      <input id="excelFile" type="file" accept=".xlsx,.xls" (change)="onFileSelected($event)" />
     </div>
 
-    <div class="table-guide">
-      <p>Ejemplo de formato de Excel:</p>
+    <div class="options">
+      <label>Mes de la importación:</label>
+      <select [(ngModel)]="monthOption">
+        <option value="PREV">Anterior</option>
+        <option value="THIS">Este</option>
+        <option value="NEXT">Siguiente</option>
+      </select>
+      <label><input type="checkbox" [(ngModel)]="autoApply" /> Aplicar cambios automáticamente</label>
+      <label><input type="checkbox" [(ngModel)]="createMissing" /> Crear sedes/cargos faltantes automáticamente</label>
+    </div>
+
+    <div class="actions">
+      <button class="btn btn--primary" (click)="upload()">Previsualizar / Validar</button>
+      <button class="btn btn--secondary" (click)="apply()" [disabled]="!batchId">Aplicar cambios</button>
+    </div>
+
+    <div *ngIf="loading" class="loading">Procesando...</div>
+
+    <div *ngIf="preview">
+      <h3>Resumen</h3>
+      <ul>
+        <li>Total filas: {{ preview.totalRows }}</li>
+        <li>Duplicados: {{ preview.duplicates }}</li>
+        <li>Filas inválidas: {{ preview.invalidRows }}</li>
+        <li>Faltan sedes: {{ preview.missingSede }}</li>
+        <li>Faltan cargos: {{ preview.missingCargo }}</li>
+        <li>Posibles desactivaciones: {{ preview.wouldDeactivateCount }}</li>
+        <li>Nuevos previstos: {{ preview.newCount }}</li>
+        <li>Reactivados previstos: {{ preview.reactivatedCount }}</li>
+      </ul>
+
+      <h4>Muestra</h4>
+      <pre *ngIf="preview.sampleRows" style="max-height:200px; overflow:auto">{{ preview.sampleRows | json }}</pre>
+    </div>
+
+    <div *ngIf="issues && issues.length">
+      <h3>Issues detectados</h3>
       <table>
         <thead>
           <tr>
-            <th>Tipo documento</th>
-            <th>Nº DNI</th>
-            <th>Nombre completo</th>
-            <th>Telefono</th>
-            <th>Sede</th>
-            <th>Cargo</th>
+            <th>ID</th>
+            <th>Tipo</th>
+            <th>Detalles</th>
+            <th>Raw</th>
+            <th>Resuelto</th>
+            <th>Acciones</th>
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>DNI</td>
-            <td>12345678</td>
-            <td>Nombres y Apellidos</td>
-            <td>987654321</td>
-            <td>Sede Centro</td>
-            <td>Responsable</td>
+          <tr *ngFor="let issue of issues">
+            <td>{{ issue.id }}</td>
+            <td>{{ issue.issueType }}</td>
+            <td>{{ issue.issueDetails }}</td>
+            <td><pre style="max-width:200px">{{ issue.rawRowJson }}</pre></td>
+            <td>{{ issue.resolved ? 'Sí' : 'No' }}</td>
+            <td>
+              <button class="btn btn--sm" (click)="resolve(issue, 'CREATE_MISSING')" [disabled]="issue.resolved">Crear/marcar resuelto</button>
+            </td>
           </tr>
         </tbody>
       </table>

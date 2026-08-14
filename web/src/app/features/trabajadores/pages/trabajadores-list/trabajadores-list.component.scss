@@ -84,10 +84,13 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-3);
 
   &__search {
     position: relative;
-    width: 100%;
+    flex: 1;
+    min-width: 200px;
     max-width: 440px;
 
     input {
@@ -104,7 +107,72 @@
       color: var(--color-text-secondary);
     }
   }
+
+  &__filters {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
 }
+
+.filter-label {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-medium);
+  white-space: nowrap;
+}
+
+.filter-tabs {
+  display: flex;
+  gap: var(--space-1);
+  background: var(--color-bg-secondary, #f1f5f9);
+  border-radius: var(--radius-lg, 12px);
+  padding: 3px;
+}
+
+.filter-tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border: none;
+  background: transparent;
+  border-radius: var(--radius-md, 8px);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all 0.18s ease;
+  white-space: nowrap;
+
+  &:hover {
+    background: var(--color-bg-primary, #fff);
+    color: var(--color-text-primary);
+  }
+
+  &--active {
+    background: var(--color-bg-primary, #fff);
+    color: var(--color-text-primary);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.10);
+    font-weight: var(--font-weight-semibold, 600);
+  }
+}
+
+.filter-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+
+  &--active {
+    background: #22c55e;
+  }
+
+  &--cesado {
+    background: #f59e0b;
+  }
+}
+
 
 /* Data Table */
 .table-card {

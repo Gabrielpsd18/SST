@@ -45,6 +45,12 @@ export class InspeccionesListComponent implements OnInit {
 
   protected readonly isAdmin = signal<boolean>(false);
   protected readonly inspecciones = signal<Inspeccion[]>([]);
+  protected readonly estadoFiltro = signal<'TODOS'|'PENDIENTE'|'REALIZADA'|'RETRASADA'|'INCUMPLIDA'>('TODOS');
+  protected readonly inspeccionesFiltradas = computed(() => {
+    const filtro = this.estadoFiltro();
+    if (!filtro || filtro === 'TODOS') return this.inspecciones();
+    return this.inspecciones().filter(i => (i.estado ?? '').toUpperCase() === filtro);
+  });
   protected readonly loading = signal<boolean>(false);
   protected readonly totalElements = signal<number>(0);
   protected readonly totalPages = signal<number>(0);
@@ -82,6 +88,10 @@ export class InspeccionesListComponent implements OnInit {
   ngOnInit(): void {
     this.isAdmin.set(this.authService.getUserRole()?.toUpperCase() === 'ADMINISTRADOR');
     this.loadInspecciones(0);
+  }
+
+  setEstadoFiltro(estado: 'TODOS'|'PENDIENTE'|'REALIZADA'|'RETRASADA'|'INCUMPLIDA'): void {
+    this.estadoFiltro.set(estado);
   }
 
   loadInspecciones(page: number = 0): void {

@@ -21,10 +21,14 @@ export class TrabajadorService {
   private readonly API_URL = 'http://localhost:8080/api/v1/trabajadores';
 
   // Obtener listado de trabajadores con paginación
-  getTrabajadores(page: number = 0, size: number = 10): Observable<PaginatedResponse<Trabajador>> {
-    const params = new HttpParams()
+  getTrabajadores(page: number = 0, size: number = 10, estado?: string): Observable<PaginatedResponse<Trabajador>> {
+    let params = new HttpParams()
       .set('page', page.toString())
       .set('size', size.toString());
+
+    if (estado && estado !== 'TODOS') {
+      params = params.set('estado', estado);
+    }
 
     return this.http.get<PaginatedResponse<Trabajador>>(this.API_URL, { params });
   }
@@ -49,10 +53,15 @@ export class TrabajadorService {
     const params = new HttpParams().set('estado', estado);
     return this.http.patch<void>(`${this.API_URL}/${id}/estado`, null, { params });
   }
-  searchTrabajadores(segment: string, limit: number = 10): Observable<Trabajador[]> {
-    const params = new HttpParams()
+
+  searchTrabajadores(segment: string, limit: number = 10, soloActivos: boolean = false): Observable<Trabajador[]> {
+    let params = new HttpParams()
       .set('segment', segment.trim())
       .set('limit', limit.toString());
+
+    if (soloActivos) {
+      params = params.set('estado', 'ACTIVO');
+    }
 
     return this.http.get<Trabajador[]>(`${this.API_URL}/search`, { params });
   }

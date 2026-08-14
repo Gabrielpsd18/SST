@@ -30,7 +30,7 @@ public class TrabajadorServiceImpl implements TrabajadorService {
         private static final String TIPO_DOCUMENTO_DNI = "DNI";
         private static final String TIPO_CONTRATO_TEMPORAL = "TEMPORAL";
         private static final String ESTADO_ACTIVO = "ACTIVO";
-        private static final String ESTADO_CESADO = "CESADO";
+        private static final String ESTADO_CESADO = "INACTIVO";
 
         private final TrabajadorRepository trabajadorRepository;
         private final SedeRepository sedeRepository;
@@ -146,6 +146,15 @@ public class TrabajadorServiceImpl implements TrabajadorService {
 
         @Override
         @Transactional(readOnly = true)
+        public Page<TrabajadorResponse> listarPaginadoFiltrado(Pageable pageable, String estado) {
+                if (estado == null || estado.isBlank() || "TODOS".equalsIgnoreCase(estado)) {
+                        return trabajadorRepository.findAll(pageable).map(this::mapToResponse);
+                }
+                return trabajadorRepository.findByEstadoIgnoreCase(estado.trim(), pageable).map(this::mapToResponse);
+        }
+
+        @Override
+        @Transactional(readOnly = true)
         public List<TrabajadorResponse> buscarPorSegmento(String segment, int limit) {
                 String value = segment == null ? "" : segment.trim();
                 if (value.isEmpty()) {
@@ -156,6 +165,30 @@ public class TrabajadorServiceImpl implements TrabajadorService {
                 Pageable pageable = PageRequest.of(0, safeLimit);
 
                 return trabajadorRepository.findBySegmento(value, pageable)
+                                .stream()
+                                .map(this::mapToResponse)
+                                .toList();
+        }
+
+        @Override
+        @Transactional(readOnly = true)
+        public List<TrabajadorResponse> buscarPorSegmentoFiltrado(String segment, int limit, String estado) {
+                String value = segment == null ? "" : segment.trim();
+                if (value.isEmpty()) {
+                        return List.of();
+                }
+
+                int safeLimit = Math.max(1, Math.min(limit, 20));
+                Pageable pageable = PageRequest.of(0, safeLimit);
+
+                if (estado == null || estado.isBlank() || "TODOS".equalsIgnoreCase(estado)) {
+                        return trabajadorRepository.findBySegmento(value, pageable)
+                                        .stream()
+                                        .map(this::mapToResponse)
+                                        .toList();
+                }
+
+                return trabajadorRepository.findBySegmentoAndEstado(value, estado.trim(), pageable)
                                 .stream()
                                 .map(this::mapToResponse)
                                 .toList();
@@ -198,7 +231,7 @@ public class TrabajadorServiceImpl implements TrabajadorService {
 
         private void validarEstado(String estado) {
                 if (!ESTADO_ACTIVO.equals(estado) && !ESTADO_CESADO.equals(estado)) {
-                        throw new BadRequestException("El estado debe ser ACTIVO o CESADO");
+                        throw new BadRequestException("El estado debe ser ACTIVO o INACTIVO");
                 }
         }
 

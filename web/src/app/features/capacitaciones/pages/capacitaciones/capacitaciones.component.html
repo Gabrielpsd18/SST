@@ -49,16 +49,36 @@
 
   <!-- Pestaña 1: Sesiones Programadas -->
   @if (activeMainTab() === 'sesiones') {
+    <div class="toolbar card">
+      <div class="toolbar__filters">
+        <span class="filter-label">Estado:</span>
+        <div class="filter-tabs">
+          <button class="filter-tab" [class.filter-tab--active]="estadoFiltroCapacitaciones() === 'TODOS'" (click)="setEstadoFiltroCapacitaciones('TODOS')">
+            Todos
+          </button>
+          <button class="filter-tab" [class.filter-tab--active]="estadoFiltroCapacitaciones() === 'PROGRAMADO'" (click)="setEstadoFiltroCapacitaciones('PROGRAMADO')">
+            <span class="filter-dot" style="background:#3b82f6"></span> Programadas
+          </button>
+          <button class="filter-tab" [class.filter-tab--active]="estadoFiltroCapacitaciones() === 'REALIZADO'" (click)="setEstadoFiltroCapacitaciones('REALIZADO')">
+            <span class="filter-dot" style="background:#22c55e"></span> Realizadas
+          </button>
+          <button class="filter-tab" [class.filter-tab--active]="estadoFiltroCapacitaciones() === 'CANCELADO'" (click)="setEstadoFiltroCapacitaciones('CANCELADO')">
+            <span class="filter-dot" style="background:#ef4444"></span> Canceladas
+          </button>
+        </div>
+      </div>
+    </div>
+
     <div class="card table-card">
       @if (loadingCapacitaciones()) {
         <div class="state-container">
           <lucide-icon [img]="Loader2" class="spin state-icon"></lucide-icon>
           <p>Cargando capacitaciones programadas...</p>
         </div>
-      } @else if (capacitaciones().length === 0) {
+      } @else if (capacitacionesFiltradas().length === 0) {
         <div class="state-container">
           <lucide-icon [img]="GraduationCap" class="state-icon"></lucide-icon>
-          <p>No hay capacitaciones programadas por el momento.</p>
+          <p>No hay capacitaciones con el estado seleccionado.</p>
         </div>
       } @else {
         <div class="table-wrapper">
@@ -77,7 +97,8 @@
               </tr>
             </thead>
             <tbody>
-              @for (cap of capacitaciones(); track cap.id) {
+              @for (cap of capacitacionesFiltradas(); track cap.id) {
+
                 <tr>
                   <td>
                     <strong class="tema-title">{{ cap.tema }}</strong>

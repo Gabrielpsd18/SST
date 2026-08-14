@@ -30,14 +30,23 @@ public class TrabajadorController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<TrabajadorResponse>> listar(Pageable pageable) {
+    public ResponseEntity<Page<TrabajadorResponse>> listar(
+            Pageable pageable,
+            @RequestParam(required = false) String estado) {
+        if (estado != null && !estado.isBlank() && !"TODOS".equalsIgnoreCase(estado)) {
+            return ResponseEntity.ok(trabajadorService.listarPaginadoFiltrado(pageable, estado));
+        }
         return ResponseEntity.ok(trabajadorService.listarPaginado(pageable));
     }
 
     @GetMapping("/search")
     public ResponseEntity<List<TrabajadorResponse>> buscarPorSegmento(
             @RequestParam String segment,
-            @RequestParam(defaultValue = "10") int limit) {
+            @RequestParam(defaultValue = "10") int limit,
+            @RequestParam(required = false) String estado) {
+        if (estado != null && !estado.isBlank() && !"TODOS".equalsIgnoreCase(estado)) {
+            return ResponseEntity.ok(trabajadorService.buscarPorSegmentoFiltrado(segment, limit, estado));
+        }
         return ResponseEntity.ok(trabajadorService.buscarPorSegmento(segment, limit));
     }
 

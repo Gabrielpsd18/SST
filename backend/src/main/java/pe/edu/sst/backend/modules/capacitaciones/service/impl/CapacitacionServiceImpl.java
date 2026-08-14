@@ -147,7 +147,7 @@ public class CapacitacionServiceImpl implements CapacitacionService {
             }
 
             // Add new assignments for IDs that are not currently present
-            java.util.Set<Long> toAdd = desiredIds.stream().filter(id -> !currentMap.containsKey(id)).collect(java.util.stream.Collectors.toSet());
+            java.util.Set<Long> toAdd = desiredIds.stream().filter(tid -> !currentMap.containsKey(tid)).collect(java.util.stream.Collectors.toSet());
             if (!toAdd.isEmpty()) {
                 java.util.List<Trabajador> trabajadores = trabajadorRepository.findAllById(toAdd);
                 for (Trabajador t : trabajadores) {
@@ -195,6 +195,22 @@ public class CapacitacionServiceImpl implements CapacitacionService {
         java.util.List<String> linksEval = c.getLinksEvaluacion() != null ? c.getLinksEvaluacion().stream().toList() : java.util.List.of();
         java.util.List<String> linksVid = c.getLinksVideo() != null ? c.getLinksVideo().stream().toList() : java.util.List.of();
 
+        java.util.List<pe.edu.sst.backend.modules.capacitaciones.dto.TrabajadorResumenResponse> trabajadoresResp =
+                c.getTrabajadoresAsignados() != null
+                ? c.getTrabajadoresAsignados().stream()
+                        .filter(ct -> ct.getTrabajador() != null)
+                        .map(ct -> {
+                            pe.edu.sst.backend.modules.trabajadores.entity.Trabajador t = ct.getTrabajador();
+                            return pe.edu.sst.backend.modules.capacitaciones.dto.TrabajadorResumenResponse.builder()
+                                    .id(t.getId())
+                                    .nombreCompleto(t.getNombreCompleto())
+                                    .numeroDocumento(t.getNumeroDocumento())
+                                    .sedeNombre(t.getSede() != null ? t.getSede().getNombre() : null)
+                                    .cargoNombre(t.getCargo() != null ? t.getCargo().getNombre() : null)
+                                    .build();
+                        }).toList()
+                : java.util.List.of();
+
         return CapacitacionResponse.builder()
                 .id(c.getId())
                 .tema(c.getTema())
@@ -208,6 +224,7 @@ public class CapacitacionServiceImpl implements CapacitacionService {
                 .estado(c.getEstado())
                 .totalTrabajadores(c.getTrabajadoresAsignados() != null ? c.getTrabajadoresAsignados().size() : 0)
                 .createdAt(c.getCreatedAt())
+                .trabajadores(trabajadoresResp)
                 .build();
     }
 }

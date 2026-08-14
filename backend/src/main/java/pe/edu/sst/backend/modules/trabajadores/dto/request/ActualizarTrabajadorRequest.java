@@ -25,6 +25,6 @@ public class ActualizarTrabajadorRequest {
     private Long cargoId;
 
     @NotBlank(message = "El estado es obligatorio")
-    @Pattern(regexp = "^(ACTIVO|CESADO)$", message = "El estado debe ser ACTIVO o CESADO")
+    @Pattern(regexp = "^(ACTIVO|INACTIVO)$", message = "El estado debe ser ACTIVO o INACTIVO")
     private String estado;
 }
