@@ -169,17 +169,15 @@ export class CapacitacionesFormComponent implements OnInit {
     this.isAdmin.set(role.toUpperCase() === 'ADMINISTRADOR');
 
     this.initForms();
-    console.log('[1] Iniciando carga de catálogos...');
+
     this.loadCatalogos();
 
     const idParam = this.route.snapshot.paramMap.get('id');
     if (idParam) {
-      console.log('[2] Modo edición detectado, ID:', idParam);
+
       this.isEditMode.set(true);
       this.loadCapacitacion(Number(idParam));
-    } else {
-      console.log('[2] Modo creación');
-    }
+    } 
   }
 
   private initForms(): void {
@@ -196,17 +194,17 @@ export class CapacitacionesFormComponent implements OnInit {
 
   private loadCatalogos(): void {
     this.trabajadorService.getSedes().subscribe(res => {
-      console.log('[3] Sedes cargadas');
+
       this.sedes.set(res);
     });
     
     this.trabajadorService.getTrabajadores(0, 100).subscribe(res => {
-      console.log('[3] Trabajadores cargados');
+
       if (res && res.content) this.trabajadores.set(res.content);
     });
     
     this.capacitacionService.getCapacitadores().subscribe(res => {
-      console.log('[3] Capacitadores cargados');
+  
       this.capacitadores.set(res);
 
       // If we are editing and the backend already provided the capacitadorId,
@@ -237,9 +235,7 @@ export class CapacitacionesFormComponent implements OnInit {
   private loadCapacitacion(id: number): void {
     this.capacitacionService.getCapacitacionById(id).subscribe({
       next: (cap: any) => {
-        console.log('=== CAPACITACIÓN CARGADA ===');
-        console.log('Objeto completo:', cap);
-        console.log('Propiedades disponibles:', Object.keys(cap));
+
         
         // Patch the form with server values first so form control (and any value accessors)
         // receive the ids before we set selectedTrabajadorIds for rendering
@@ -254,36 +250,24 @@ export class CapacitacionesFormComponent implements OnInit {
 
         // Load trabajadores - try multiple property names
         let trabajadorIds: number[] = [];
-        console.log('--- Buscando trabajadores ---');
-        console.log('cap.trabajadores:', cap.trabajadores);
-        console.log('cap.trabajadoresIds:', cap.trabajadoresIds);
-        console.log('cap.trabajadoresSeleccionados:', cap.trabajadoresSeleccionados);
-        console.log('cap.equipoTrabajo:', cap.equipoTrabajo);
-        console.log('cap.capacitacionTrabajadores:', cap.capacitacionTrabajadores);
+
         
         if (Array.isArray(cap.trabajadores) && cap.trabajadores.length > 0) {
           trabajadorIds = cap.trabajadores.map((t: any) => Number(t.id || t.trabajador_id)).filter((n: number) => !isNaN(n));
-          console.log('✓ Trabajadores encontrados en cap.trabajadores:', trabajadorIds);
+
         } else if (Array.isArray(cap.trabajadoresIds) && cap.trabajadoresIds.length > 0) {
           trabajadorIds = cap.trabajadoresIds.map((v: any) => Number(v)).filter((n: number) => !isNaN(n));
-          console.log('✓ Trabajadores encontrados en cap.trabajadoresIds:', trabajadorIds);
         } else if (Array.isArray(cap.trabajadoresSeleccionados) && cap.trabajadoresSeleccionados.length > 0) {
           trabajadorIds = cap.trabajadoresSeleccionados.map((t: any) => Number(t.id || t.trabajador_id)).filter((n: number) => !isNaN(n));
-          console.log('✓ Trabajadores encontrados en cap.trabajadoresSeleccionados:', trabajadorIds);
         } else if (Array.isArray(cap.equipoTrabajo) && cap.equipoTrabajo.length > 0) {
           trabajadorIds = cap.equipoTrabajo.map((t: any) => Number(t.id || t.trabajador_id)).filter((n: number) => !isNaN(n));
-          console.log('✓ Trabajadores encontrados en cap.equipoTrabajo:', trabajadorIds);
         } else if (Array.isArray(cap.capacitacionTrabajadores) && cap.capacitacionTrabajadores.length > 0) {
           trabajadorIds = cap.capacitacionTrabajadores.map((ct: any) => Number(ct.trabajador_id || ct.trabajadorId || ct.id)).filter((n: number) => !isNaN(n));
-          console.log('✓ Trabajadores encontrados en cap.capacitacionTrabajadores:', trabajadorIds);
         }
         
         if (trabajadorIds.length > 0) {
-          console.log('Estableciendo selectedTrabajadorIds:', trabajadorIds);
           this.selectedTrabajadorIds.set(trabajadorIds);
-        } else {
-          console.log('✗ No se encontraron trabajadores');
-        }
+        } 
 
         // store edit capacitador id so when capacitadores list loads we can set initial option
         this.editCapacitadorId.set(cap.capacitadorId ?? null);
@@ -311,11 +295,7 @@ export class CapacitacionesFormComponent implements OnInit {
         }
 
         // Load video links - try multiple property names
-        console.log('--- Buscando videos ---');
-        console.log('cap.linksVideo:', cap.linksVideo);
-        console.log('cap.videoLinks:', cap.videoLinks);
-        console.log('cap.videos:', cap.videos);
-        console.log('cap.capacitacionVideos:', cap.capacitacionVideos);
+
         
         const videoLinksCandidates = [
           cap.linksVideo,
@@ -328,19 +308,13 @@ export class CapacitacionesFormComponent implements OnInit {
         for (const candidate of videoLinksCandidates) {
           if (Array.isArray(candidate) && candidate.length > 0) {
             this.videoLinks.set(candidate);
-            console.log('✓ Videos encontrados:', candidate);
+
             break;
           }
         }
 
         // Load form links - try multiple property names
-        console.log('--- Buscando formularios ---');
-        console.log('cap.linksEvaluacion:', cap.linksEvaluacion);
-        console.log('cap.formLinks:', cap.formLinks);
-        console.log('cap.evaluaciones:', cap.evaluaciones);
-        console.log('cap.formularios:', cap.formularios);
-        console.log('cap.capacitacionEvaluaciones:', cap.capacitacionEvaluaciones);
-        
+
         const formLinksCandidates = [
           cap.linksEvaluacion,
           cap.formLinks,
@@ -353,14 +327,12 @@ export class CapacitacionesFormComponent implements OnInit {
         for (const candidate of formLinksCandidates) {
           if (Array.isArray(candidate) && candidate.length > 0) {
             this.formLinks.set(candidate);
-            console.log('✓ Formularios encontrados:', candidate);
+
             break;
           }
         }
-        console.log('=== FIN CARGA ===');
       },
       error: (err) => {
-        console.error('Error al cargar capacitación:', err);
         this.errorMessage.set('No se pudo cargar la capacitación.');
       }
     });
@@ -375,15 +347,15 @@ export class CapacitacionesFormComponent implements OnInit {
   private loadTrabajadoresAsignados(capacitacionId: number): void {
     this.capacitacionService.getTrabajadoresAsignados(capacitacionId).subscribe({
       next: (trabajadores: any[]) => {
-        console.log('Trabajadores asignados obtenidos:', trabajadores);
+        
         if (Array.isArray(trabajadores) && trabajadores.length > 0) {
           const ids = trabajadores.map((t: any) => Number(t.id || t.trabajador_id)).filter((n: number) => !isNaN(n));
-          console.log('IDs de trabajadores:', ids);
+          
           this.selectedTrabajadorIds.set(ids);
         }
       },
       error: (err) => {
-        console.warn('No se pudieron cargar los trabajadores asignados:', err);
+        this.errorMessage.set('No se pudieron cargar los trabajadores asignados.');
         // No es error crítico, solo log
       }
     });
@@ -394,16 +366,16 @@ export class CapacitacionesFormComponent implements OnInit {
     // Cargar videos
     this.capacitacionService.getVideosCapacitacion(capacitacionId).subscribe({
       next: (videos: any[]) => {
-        console.log('Videos obtenidos:', videos);
+
         if (Array.isArray(videos) && videos.length > 0) {
           // Extraer URLs si vienen como objetos, o usar directamente si son strings
           const links = videos.map((v: any) => v.link_video || v.linkVideo || v.url || v).filter((v: any) => v);
-          console.log('Links de videos:', links);
+
           this.videoLinks.set(links);
         }
       },
       error: (err) => {
-        console.warn('No se pudieron cargar los videos:', err);
+        this.errorMessage.set('No se pudieron cargar los videos.');
         // No es error crítico, solo log
       }
     });
@@ -411,16 +383,16 @@ export class CapacitacionesFormComponent implements OnInit {
     // Cargar evaluaciones
     this.capacitacionService.getEvaluacionesCapacitacion(capacitacionId).subscribe({
       next: (evaluaciones: any[]) => {
-        console.log('Evaluaciones obtenidas:', evaluaciones);
+
         if (Array.isArray(evaluaciones) && evaluaciones.length > 0) {
           // Extraer URLs si vienen como objetos, o usar directamente si son strings
           const links = evaluaciones.map((e: any) => e.link_formulario || e.linkFormulario || e.url || e).filter((e: any) => e);
-          console.log('Links de evaluaciones:', links);
+
           this.formLinks.set(links);
         }
       },
       error: (err) => {
-        console.warn('No se pudieron cargar las evaluaciones:', err);
+        this.errorMessage.set('No se pudieron cargar las evaluaciones.');
         // No es error crítico, solo log
       }
     });
@@ -506,7 +478,8 @@ export class CapacitacionesFormComponent implements OnInit {
 
     // selection is an array of selected capacitadores
     this.selectedCapacitadores.set(selection);
-    this.selectedCapacitadorInitial.set(selection);
+    // Do not set selectedCapacitadorInitial here — initialSelectedOptions is an input used only for initialisation
+    // Setting it here would cause the child to emit selectionChange again and may create an infinite loop.
     const ids = selection.map(s => s.id);
     this.capacitacionForm.patchValue({ capacitadorIds: ids, capacitadorId: ids[0] ?? '' });
   }
@@ -514,7 +487,7 @@ export class CapacitacionesFormComponent implements OnInit {
   protected onCapacitadorRemove(id: number): void {
     const next = this.selectedCapacitadores().filter(c => c.id !== id);
     this.selectedCapacitadores.set(next);
-    this.selectedCapacitadorInitial.set(next);
+    // Do not update selectedCapacitadorInitial here to avoid creating a write->emit loop with the child component
     this.capacitacionForm.patchValue({ capacitadorIds: next.map(c => c.id), capacitadorId: next[0]?.id ?? '' });
   }
 }
