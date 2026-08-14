@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 import {
   Capacitador,
@@ -53,4 +54,31 @@ export class CapacitacionService {
   updateCapacitador(id: number, request: CapacitadorRequest): Observable<Capacitador> {
     return this.http.put<Capacitador>(`${this.CAPACITADORES_URL}/${id}`, request);
   }
+
+  // --- Trabajadores Asignados ---
+    // The backend currently returns capacitacion details (including links and capacitadores)
+    // via GET /capacitaciones/{id}. If a list of trabajadores is not included, this
+    // method will return an empty array by default. If in the future the backend
+    // includes a 'trabajadores' array, this will map it.
+    getTrabajadoresAsignados(capacitacionId: number): Observable<any[]> {
+      return this.getCapacitacionById(capacitacionId).pipe(
+        map(resp => resp && resp.trabajadores ? resp.trabajadores : [])
+      );
+    }
+
+    // --- Videos ---
+    // Maps to response.linksVideo from the single GET
+    getVideosCapacitacion(capacitacionId: number): Observable<string[]> {
+      return this.getCapacitacionById(capacitacionId).pipe(
+        map(resp => resp && resp.linksVideo ? resp.linksVideo : [])
+      );
+    }
+
+    // --- Evaluaciones ---
+    // Maps to response.linksEvaluacion from the single GET
+    getEvaluacionesCapacitacion(capacitacionId: number): Observable<string[]> {
+      return this.getCapacitacionById(capacitacionId).pipe(
+        map(resp => resp && resp.linksEvaluacion ? resp.linksEvaluacion : [])
+      );
+    }
 }

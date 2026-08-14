@@ -55,7 +55,7 @@
                             <tbody>
                                 <tr *ngFor="let c of selectedCapacitadores()">
                                     <td>{{ c.nombre }}</td>
-                                    <td><button class="btn btn--danger btn--sm"
+                                    <td><button type="button" class="btn btn--danger btn--sm"
                                             (click)="onCapacitadorRemove(c.id)">Quitar</button></td>
                                 </tr>
                             </tbody>
@@ -108,7 +108,7 @@
                                         <td>{{ t.nombreCompleto || (t.nombres + ' ' + (t.apellidos || '')) }}</td>
                                         <td>{{ t.sedeNombre || '-' }}</td>
                                         <td>
-                                            <button class="btn btn--secondary btn--sm" (click)="addTrabajador(t.id)"
+                                            <button type="button" class="btn btn--secondary btn--sm" (click)="addTrabajador(t.id)"
                                                 [disabled]="isTrabajadorSelected(t.id)">
                                                 {{ isTrabajadorSelected(t.id) ? 'Seleccionado' : 'Agregar' }}
                                             </button>
@@ -138,7 +138,7 @@
                                             <td>{{ s.nombreCompleto || (s.nombres + ' ' + (s.apellidos || '')) }}</td>
                                             <td>{{ s.sedeNombre || '-' }}</td>
                                             <td>
-                                                <button class="btn btn--danger btn--sm"
+                                                <button type="button" class="btn btn--danger btn--sm"
                                                     (click)="removeTrabajador(s.id)">Quitar</button>
                                             </td>
                                         </tr>
@@ -150,9 +150,6 @@
                 </div>
             </fieldset>
 
-            <div *ngIf="errorMessage()" class="form-error">{{ errorMessage() }}</div>
-            <div *ngIf="successMessage()" class="form-success">{{ successMessage() }}</div>
-
             <!-- Videos Section -->
             <div class="field grid-span-2">
                 <label class="section-label">
@@ -161,7 +158,7 @@
                 <div class="links-input-group">
                     <input type="text" class="form-control" placeholder="Ingrese el link del video..."
                         [value]="newVideoLink()" (input)="newVideoLink.set($event.target.value)"
-                        (keyup.enter)="addVideoLink()" />
+                        (keyup.enter)="$event.preventDefault(); addVideoLink()" />
                     <button type="button" class="btn btn--primary btn--sm" (click)="addVideoLink()">
                         <lucide-icon [img]="Plus" size="16"></lucide-icon> Agregar video
                     </button>
@@ -170,7 +167,7 @@
                 <div *ngIf="videoLinks().length > 0" class="links-list">
                     <div *ngFor="let link of videoLinks(); let i = index" class="link-item">
                         <a [href]="link" target="_blank" rel="noopener" class="link-text">{{ link }}</a>
-                        <button type="button" class="btn btn--danger btn--sm" (click)="removeVideoLink(i)"
+                        <button type="button" class="btn btn--danger btn--sm" (click)="removeVideoLink(i); $event.stopPropagation()"
                             title="Eliminar video">
                             Eliminar
                         </button>
@@ -187,7 +184,7 @@
                 <div class="links-input-group">
                     <input type="text" class="form-control" placeholder="Ingrese el link del formulario..."
                         [value]="newFormLink()" (input)="newFormLink.set($event.target.value)"
-                        (keyup.enter)="addFormLink()" />
+                        (keyup.enter)="$event.preventDefault(); addFormLink()" />
                     <button type="button" class="btn btn--primary btn--sm" (click)="addFormLink()">
                         <lucide-icon [img]="Plus" size="16"></lucide-icon> Agregar formulario
                     </button>
@@ -196,7 +193,7 @@
                 <div *ngIf="formLinks().length > 0" class="links-list">
                     <div *ngFor="let link of formLinks(); let i = index" class="link-item">
                         <a [href]="link" target="_blank" rel="noopener" class="link-text">{{ link }}</a>
-                        <button type="button" class="btn btn--danger btn--sm" (click)="removeFormLink(i)"
+                        <button type="button" class="btn btn--danger btn--sm" (click)="removeFormLink(i); $event.stopPropagation()"
                             title="Eliminar formulario">
                             Eliminar
                         </button>

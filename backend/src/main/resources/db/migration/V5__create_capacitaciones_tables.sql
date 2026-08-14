@@ -1,4 +1,18 @@
--- 1.1 Tabla de Capacitadores / Instructores (Internos y Externos)
+-- 1. PRIMERO: Crear la tabla principal
+CREATE TABLE capacitaciones (
+    id BIGSERIAL PRIMARY KEY,
+    tema VARCHAR(200) NOT NULL,
+    tipo VARCHAR(50) NOT NULL,
+    fecha_programada TIMESTAMP NOT NULL,
+    duracion_horas NUMERIC(4,2) NOT NULL,
+    creado_por VARCHAR(100),
+    estado VARCHAR(30) DEFAULT 'PROGRAMADO',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP -- Eliminé la coma que tenías aquí
+);
+
+-- 2. LUEGO: Crear las tablas que dependen de 'capacitaciones'
+-- 1.1 Tabla de Capacitadores
 CREATE TABLE capacitadores (
     id BIGSERIAL PRIMARY KEY,
     nombres VARCHAR(100) NOT NULL,
@@ -10,7 +24,8 @@ CREATE TABLE capacitadores (
     estado BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
--- 1.2 Tabla de Links de Formularios de Evaluación de Capacitación (Opcional)
+
+-- 1.2 Tabla de Links de Formularios
 CREATE TABLE capacitacion_evaluaciones (
     id BIGSERIAL PRIMARY KEY,
     capacitacion_id BIGINT NOT NULL,
@@ -19,7 +34,8 @@ CREATE TABLE capacitacion_evaluaciones (
     estado BOOLEAN DEFAULT TRUE,
     CONSTRAINT fk_capacitacion_evaluacion FOREIGN KEY (capacitacion_id) REFERENCES capacitaciones(id) ON DELETE CASCADE
 );
--- 1.3 Tabla de links de Videos de Capacitación (Opcional)
+
+-- 1.3 Tabla de links de Videos
 CREATE TABLE capacitacion_videos (
     id BIGSERIAL PRIMARY KEY,
     capacitacion_id BIGINT NOT NULL,
@@ -29,31 +45,17 @@ CREATE TABLE capacitacion_videos (
     CONSTRAINT fk_capacitacion_video FOREIGN KEY (capacitacion_id) REFERENCES capacitaciones(id) ON DELETE CASCADE
 );
 
--- 2. Tabla de Sesiones de Capacitación
-CREATE TABLE capacitaciones (
-    id BIGSERIAL PRIMARY KEY,
-    tema VARCHAR(200) NOT NULL,
-    tipo VARCHAR(50) NOT NULL, -- CHARLA_5_MINUTOS, INDUCCION, CAPACITACION
-    fecha_programada TIMESTAMP NOT NULL,
-    duracion_horas NUMERIC(4,2) NOT NULL,
-    creado_por VARCHAR(100),
-    estado VARCHAR(30) DEFAULT 'PROGRAMADO', -- PROGRAMADO, EN_CURSO, COMPLETADO, CANCELADO
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT fk_capacitacion_capacitador FOREIGN KEY (capacitador_id) REFERENCES capacitadores(id)
-);
-
--- 3.1. Tabla Relacional de Asignación de Trabajadores a Capacitación
+-- 3.1. Tabla Relacional de Trabajadores
 CREATE TABLE capacitacion_trabajadores (
     capacitacion_id BIGINT NOT NULL,
     trabajador_id BIGINT NOT NULL,
-    asistencia VARCHAR(20) DEFAULT 'PENDIENTE', -- PENDIENTE, ASISTIO, FALTO
+    asistencia VARCHAR(20) DEFAULT 'PENDIENTE',
     PRIMARY KEY (capacitacion_id, trabajador_id),
     CONSTRAINT fk_cap_trab_capacitacion FOREIGN KEY (capacitacion_id) REFERENCES capacitaciones(id) ON DELETE CASCADE,
     CONSTRAINT fk_cap_trab_trabajador FOREIGN KEY (trabajador_id) REFERENCES trabajadores(id) ON DELETE CASCADE
 );
---3.2. Tabla Relacional de Asignacion de Capacitores a Capacitaciones (En caso de que se requiera más de un capacitador por sesión)
+
+-- 3.2. Tabla Relacional de Capacitadores
 CREATE TABLE capacitacion_capacitadores (
     capacitacion_id BIGINT NOT NULL,
     capacitador_id BIGINT NOT NULL,
@@ -61,6 +63,8 @@ CREATE TABLE capacitacion_capacitadores (
     CONSTRAINT fk_cap_capacitacion FOREIGN KEY (capacitacion_id) REFERENCES capacitaciones(id) ON DELETE CASCADE,
     CONSTRAINT fk_cap_capacitador FOREIGN KEY (capacitador_id) REFERENCES capacitadores(id) ON DELETE CASCADE
 );
+
+-- (Luego mantienes tus INSERTs exactamente igual...)
 -- 4. Inserción de Datos Iniciales de Capacitadores de Prueba
 INSERT INTO capacitadores (nombres, apellidos, empresa, telefono, correo, especialidad)
 VALUES
