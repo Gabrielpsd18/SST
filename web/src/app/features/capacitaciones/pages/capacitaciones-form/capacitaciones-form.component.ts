@@ -49,6 +49,9 @@ export class CapacitacionesFormComponent implements OnInit {
   protected trabajadores = signal<any[]>([]);
   protected capacitadores = signal<any[]>([]);
 
+  // Pending trabajador IDs loaded from backend while trabajadores catalog may still be loading
+  protected pendingSelectedTrabajadorIds = signal<number[]>([]);
+
   // For capacitador selector (fixed list) — map to SearchableSelectOption
   protected readonly searchableCapacitadorOptions = computed<SearchableSelectOption[]>(() =>
     this.capacitadores().map((c) => ({
@@ -200,7 +203,19 @@ export class CapacitacionesFormComponent implements OnInit {
     
     this.trabajadorService.getTrabajadores(0, 100).subscribe(res => {
 
-      if (res && res.content) this.trabajadores.set(res.content);
+      if (res && res.content) {
+        this.trabajadores.set(res.content);
+        // If we have pending selected trabajador ids from the server, apply them now
+        const pending = this.pendingSelectedTrabajadorIds();
+        if (pending && pending.length > 0) {
+          // Ensure ids are numbers and exist in the trabajadores catalog
+          const valid = pending.filter(id => res.content.some((t: any) => Number(t.id) === Number(id)));
+          if (valid.length > 0) {
+            this.selectedTrabajadorIds.set(valid);
+          }
+          this.pendingSelectedTrabajadorIds.set([]);
+        }
+      }
     });
     
     this.capacitacionService.getCapacitadores().subscribe(res => {
@@ -266,8 +281,14 @@ export class CapacitacionesFormComponent implements OnInit {
         }
         
         if (trabajadorIds.length > 0) {
-          this.selectedTrabajadorIds.set(trabajadorIds);
-        } 
+          // If trabajadores catalog already loaded, apply selection immediately; otherwise store pending ids
+          if (this.trabajadores().length > 0) {
+            this.selectedTrabajadorIds.set(trabajadorIds);
+          } else {
+            this.pendingSelectedTrabajadorIds.set(trabajadorIds);
+          }
+        }
+        
 
         // store edit capacitador id so when capacitadores list loads we can set initial option
         this.editCapacitadorId.set(cap.capacitadorId ?? null);
