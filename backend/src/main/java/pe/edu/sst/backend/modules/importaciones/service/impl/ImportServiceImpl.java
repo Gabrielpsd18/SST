@@ -1,7 +1,6 @@
 package pe.edu.sst.backend.modules.importaciones.service.impl;
 
 import lombok.AllArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -24,18 +23,21 @@ import pe.edu.sst.backend.modules.identity.entity.Usuario;
 import pe.edu.sst.backend.modules.identity.entity.repository.UsuarioRepository;
 import pe.edu.sst.backend.modules.identity.entity.repository.RolRepository;
 import pe.edu.sst.backend.modules.identity.enums.RoleName;
-import pe.edu.sst.backend.shared.exception.BadRequestException;
 import pe.edu.sst.backend.shared.exception.ResourceNotFoundException;
+import pe.edu.sst.backend.modules.importaciones.service.ImportService;
+import pe.edu.sst.backend.modules.importaciones.entity.ImportAuditLog;
+import pe.edu.sst.backend.modules.trabajadores.entity.Cargo;
+import pe.edu.sst.backend.modules.trabajadores.entity.Sede;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.InputStream;
-import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
-public class ImportServiceImpl implements pe.edu.sst.backend.modules.importaciones.service.ImportService {
+public class ImportServiceImpl implements ImportService {
 
     private final ImportBatchRepository importBatchRepository;
     private final ImportRowIssueRepository importRowIssueRepository;
@@ -50,10 +52,11 @@ public class ImportServiceImpl implements pe.edu.sst.backend.modules.importacion
 
     @Override
     @Transactional
-    public ImportPreviewResult previewImport(MultipartFile file, String monthOption, boolean autoApply, boolean createMissing) throws Exception {
-        // determine target year/month
+    public ImportPreviewResult previewImport(MultipartFile file, String monthOption) throws Exception {
+        // 1. Determinar periodo
         YearMonth target = resolveYearMonth(monthOption);
 
+        // 2. Crear lote inicial
         ImportBatch batch = ImportBatch.builder()
                 .filename(file.getOriginalFilename())
                 .month(target.getMonthValue())
@@ -67,19 +70,23 @@ public class ImportServiceImpl implements pe.edu.sst.backend.modules.importacion
                 .build();
         batch = importBatchRepository.save(batch);
 
-        List<Map<String,String>> rows = parseExcel(file.getInputStream());
+        // 3. Parsear Excel a estructura plana
+        List<Map<String, String>> rows = parseExcel(file.getInputStream());
 
-        Map<String, Map<String,String>> excelByDni = new HashMap<>();
+        Map<String, Map<String, String>> excelByDni = new HashMap<>();
         Set<String> duplicateDnis = new HashSet<>();
         int invalidRows = 0;
-        for (int i=0;i<rows.size();i++){
-            Map<String,String> r = rows.get(i);
-            String dni = (r.getOrDefault("dni", "") ).trim();
-            if (dni.isEmpty() || !dni.matches("^[0-9]{6,20}$")){
-                invalidRows++;
+
+        for (int i = 0; i < rows.size(); i++) {
+            Map<String, String> r = rows.get(i);
+            String dni = r.getOrDefault("dni", "").trim();
+
+            if (dni.isEmpty() || !dni.matches("^[0-9]{6,20}$")) {
+                // Justo antes de validar el DNI, añade esto:
+                
                 ImportRowIssue issue = ImportRowIssue.builder()
                         .importBatchId(batch.getId())
-                        .rowNumber(i+1)
+                        .rowNumber(i + 1)
                         .rawRowJson(r.toString())
                         .issueType("INVALID_DNI")
                         .issueDetails("DNI inválido")
@@ -88,121 +95,86 @@ public class ImportServiceImpl implements pe.edu.sst.backend.modules.importacion
                 importRowIssueRepository.save(issue);
                 continue;
             }
-            if (excelByDni.containsKey(dni)){
+            if (excelByDni.containsKey(dni)) {
                 duplicateDnis.add(dni);
             }
             excelByDni.putIfAbsent(dni, r);
         }
 
-        // fetch activos from DB
+        // 4. Buscar trabajadores activos en BD
         List<Trabajador> activos = trabajadorRepository.findAll().stream()
-                .filter(t->t.getEstado()!=null && t.getEstado().equalsIgnoreCase("ACTIVO"))
+                .filter(t -> t.getEstado() != null && t.getEstado().equalsIgnoreCase("ACTIVO"))
                 .collect(Collectors.toList());
-        Set<String> activosDnis = activos.stream().map(Trabajador::getNumeroDocumento).collect(Collectors.toSet());
 
-        // determine wouldDeactivate
-        List<Trabajador> toDeactivate = activos.stream().filter(t->!excelByDni.containsKey(t.getNumeroDocumento())).collect(Collectors.toList());
+        List<Trabajador> toDeactivate = activos.stream()
+                .filter(t -> !excelByDni.containsKey(t.getNumeroDocumento()))
+                .collect(Collectors.toList());
 
-        int missingSede=0, missingCargo=0;
-        List<Map<String,String>> sample = rows.stream().limit(20).collect(Collectors.toList());
+        int missingSede = 0, missingCargo = 0;
+        List<Map<String, String>> sample = rows.stream().limit(20).collect(Collectors.toList());
 
-        // detect missing sede/cargo
-        for (Map.Entry<String, Map<String,String>> e: excelByDni.entrySet()){
-            Map<String,String> r = e.getValue();
+        // 5. Validar existencia de Sede y Cargo (Modo Estricto sin auto-creación)
+        for (Map.Entry<String, Map<String, String>> e : excelByDni.entrySet()) {
+            Map<String, String> r = e.getValue();
             String sedeNombre = r.getOrDefault("sede", "").trim();
             String cargoNombre = r.getOrDefault("cargo", "").trim();
-            if (!sedeNombre.isEmpty()){
-                boolean exists = sedeRepository.findByEstadoTrue().stream().anyMatch(s->s.getNombre().equalsIgnoreCase(sedeNombre));
-            if (!exists){
-                if (createMissing){
-                    // create missing sede automatically
-                    pe.edu.sst.backend.modules.trabajadores.entity.Sede newSede = pe.edu.sst.backend.modules.trabajadores.entity.Sede.builder()
-                            .nombre(sedeNombre)
-                            .estado(true)
-                            .build();
-                    sedeRepository.save(newSede);
-                } else {
+
+            if (!sedeNombre.isEmpty()) {
+                boolean exists = sedeRepository.findByEstadoTrue().stream()
+                        .anyMatch(s -> s.getNombre().equalsIgnoreCase(sedeNombre));
+                if (!exists) {
                     missingSede++;
+                    importRowIssueRepository.save(ImportRowIssue.builder()
+                            .importBatchId(batch.getId())
+                            .rawRowJson(r.toString())
+                            .issueType("MISSING_SEDE")
+                            .issueDetails("Sede no encontrada: " + sedeNombre)
+                            .resolved(false)
+                            .build());
                 }
             }
-            }
-            if (!cargoNombre.isEmpty()){
-            boolean exists = cargoRepository.findAll().stream().anyMatch(c->c.getNombre().equalsIgnoreCase(cargoNombre));
-            if (!exists){
-                if (createMissing){
-                    pe.edu.sst.backend.modules.trabajadores.entity.Cargo newCargo = pe.edu.sst.backend.modules.trabajadores.entity.Cargo.builder()
-                            .nombre(cargoNombre)
-                            .estado(true)
-                            .build();
-                    cargoRepository.save(newCargo);
-                } else {
+
+            if (!cargoNombre.isEmpty()) {
+                boolean exists = cargoRepository.findAll().stream()
+                        .anyMatch(c -> c.getNombre().equalsIgnoreCase(cargoNombre));
+                if (!exists) {
                     missingCargo++;
+                    importRowIssueRepository.save(ImportRowIssue.builder()
+                            .importBatchId(batch.getId())
+                            .rawRowJson(r.toString())
+                            .issueType("MISSING_CARGO")
+                            .issueDetails("Cargo no encontrado: " + cargoNombre)
+                            .resolved(false)
+                            .build());
                 }
-            }
             }
         }
 
-        // create issues for duplicates
-        for (String d: duplicateDnis){
-            ImportRowIssue issue = ImportRowIssue.builder()
+        // 6. Registrar duplicados como incidencias
+        for (String d : duplicateDnis) {
+            importRowIssueRepository.save(ImportRowIssue.builder()
                     .importBatchId(batch.getId())
-                    .rowNumber(null)
-                    .rawRowJson("DNI duplicate: "+d)
+                    .rawRowJson("DNI duplicate: " + d)
                     .issueType("DUPLICATE")
                     .issueDetails("DNI repetido en archivo")
                     .resolved(false)
-                    .build();
-            importRowIssueRepository.save(issue);
+                    .build());
         }
 
-        // persist every parsed row as ROW_DATA so applyImport can process it later
-        com.fasterxml.jackson.databind.ObjectMapper om = new com.fasterxml.jackson.databind.ObjectMapper();
-        for (Map.Entry<String, Map<String,String>> e: excelByDni.entrySet()){
-            Map<String,String> r = e.getValue();
-            String rawJson = om.writeValueAsString(r);
-            ImportRowIssue rowData = ImportRowIssue.builder()
+        // 7. Persistir filas válidas como ROW_DATA para que applyImport las procese
+        // luego
+        ObjectMapper om = new ObjectMapper();
+        for (Map.Entry<String, Map<String, String>> e : excelByDni.entrySet()) {
+            Map<String, String> r = e.getValue();
+            importRowIssueRepository.save(ImportRowIssue.builder()
                     .importBatchId(batch.getId())
-                    .rowNumber(null)
-                    .rawRowJson(rawJson)
+                    .rawRowJson(om.writeValueAsString(r))
                     .issueType("ROW_DATA")
-                    .issueDetails(null)
                     .resolved(false)
-                    .build();
-            importRowIssueRepository.save(rowData);
-
-            String dni = e.getKey();
-            String sedeNombre = r.getOrDefault("sede", "").trim();
-            String cargoNombre = r.getOrDefault("cargo", "").trim();
-            if (!sedeNombre.isEmpty()){
-                boolean exists = sedeRepository.findByEstadoTrue().stream().anyMatch(s->s.getNombre().equalsIgnoreCase(sedeNombre));
-                if (!exists){
-                    ImportRowIssue issue = ImportRowIssue.builder()
-                            .importBatchId(batch.getId())
-                            .rowNumber(null)
-                            .rawRowJson(r.toString())
-                            .issueType("MISSING_SEDE")
-                            .issueDetails("Sede no encontrada: "+sedeNombre)
-                            .resolved(false)
-                            .build();
-                    importRowIssueRepository.save(issue);
-                }
-            }
-            if (!cargoNombre.isEmpty()){
-                boolean exists = cargoRepository.findAll().stream().anyMatch(c->c.getNombre().equalsIgnoreCase(cargoNombre));
-                if (!exists){
-                    ImportRowIssue issue = ImportRowIssue.builder()
-                            .importBatchId(batch.getId())
-                            .rowNumber(null)
-                            .rawRowJson(r.toString())
-                            .issueType("MISSING_CARGO")
-                            .issueDetails("Cargo no encontrado: "+cargoNombre)
-                            .resolved(false)
-                            .build();
-                    importRowIssueRepository.save(issue);
-                }
-            }
+                    .build());
         }
 
+        // 8. Construir respuesta de previsualización
         ImportPreviewResult result = ImportPreviewResult.builder()
                 .batchId(batch.getId())
                 .totalRows(rows.size())
@@ -213,17 +185,13 @@ public class ImportServiceImpl implements pe.edu.sst.backend.modules.importacion
                 .newCount(0)
                 .reactivatedCount(0)
                 .wouldDeactivateCount(toDeactivate.size())
-                .errors(0)
+                .errors(invalidRows + duplicateDnis.size() + missingSede + missingCargo)
                 .sampleRows(sample)
                 .build();
 
-        // if autoApply then perform apply now
-        if (autoApply){
-            applyImport(batch.getId());
-        } else {
-            batch.setStatus("PENDING");
-            importBatchRepository.save(batch);
-        }
+        // 9. Dejar el lote en estado PENDIENTE esperando el "Aplicar cambios"
+        batch.setStatus("PENDING");
+        importBatchRepository.save(batch);
 
         return result;
     }
@@ -231,39 +199,45 @@ public class ImportServiceImpl implements pe.edu.sst.backend.modules.importacion
     @Override
     @Transactional
     public ImportPreviewResult applyImport(Long batchId) throws Exception {
-        ImportBatch batch = importBatchRepository.findById(batchId).orElseThrow(() -> new ResourceNotFoundException("Batch not found"));
+        ImportBatch batch = importBatchRepository.findById(batchId)
+                .orElseThrow(() -> new ResourceNotFoundException("Batch not found"));
         batch.setStatus("PROCESSING");
         importBatchRepository.save(batch);
 
         // Load all ROW_DATA entries for this batch
         List<ImportRowIssue> rowDataIssues = importRowIssueRepository.findByImportBatchId(batchId).stream()
-                .filter(i->"ROW_DATA".equals(i.getIssueType()))
+                .filter(i -> "ROW_DATA".equals(i.getIssueType()))
                 .toList();
 
-        com.fasterxml.jackson.databind.ObjectMapper om = new com.fasterxml.jackson.databind.ObjectMapper();
+        ObjectMapper om = new ObjectMapper();
 
-        Map<String, Map<String,String>> excelByDni = new HashMap<>();
-        for (ImportRowIssue r : rowDataIssues){
-            try{
-                Map<String,String> map = om.readValue(r.getRawRowJson(), Map.class);
+        Map<String, Map<String, String>> excelByDni = new HashMap<>();
+        for (ImportRowIssue r : rowDataIssues) {
+            try {
+                Map<String, String> map = om.readValue(r.getRawRowJson(), Map.class);
                 String dni = (map.getOrDefault("dni", "")).trim();
-                if (dni.isEmpty()) continue;
+                if (dni.isEmpty())
+                    continue;
                 excelByDni.put(dni, map);
-            }catch(Exception ex){
+            } catch (Exception ex) {
                 // skip malformed
             }
+
         }
 
         // Fetch all trabajadores from DB mapped by DNI
         List<Trabajador> allTrabajadores = trabajadorRepository.findAll();
-        Map<String, Trabajador> dbByDni = allTrabajadores.stream().filter(t->t.getNumeroDocumento()!=null).collect(Collectors.toMap(Trabajador::getNumeroDocumento, t->t, (a,b)->a));
+        Map<String, Trabajador> dbByDni = allTrabajadores.stream().filter(t -> t.getNumeroDocumento() != null)
+                .collect(Collectors.toMap(Trabajador::getNumeroDocumento, t -> t, (a, b) -> a));
 
         // Deactivate actuales activos not in excel
-        List<Trabajador> activos = allTrabajadores.stream().filter(t->t.getEstado()!=null && t.getEstado().equalsIgnoreCase("ACTIVO")).collect(Collectors.toList());
-        int deactivated=0, created=0, reactivated=0, updated=0, errors=0;
-        for (Trabajador t: activos){
-            if (!excelByDni.containsKey(t.getNumeroDocumento())){
-                try{
+        List<Trabajador> activos = allTrabajadores.stream()
+                .filter(t -> t.getEstado() != null && t.getEstado().equalsIgnoreCase("ACTIVO"))
+                .collect(Collectors.toList());
+        int deactivated = 0, created = 0, reactivated = 0, updated = 0, errors = 0;
+        for (Trabajador t : activos) {
+            if (!excelByDni.containsKey(t.getNumeroDocumento())) {
+                try {
                     String before = om.writeValueAsString(t);
                     t.setEstado("INACTIVO");
                     trabajadorRepository.save(t);
@@ -275,7 +249,8 @@ public class ImportServiceImpl implements pe.edu.sst.backend.modules.importacion
                             .estado("INACTIVO")
                             .build());
                     // audit
-                    pe.edu.sst.backend.modules.importaciones.entity.ImportAuditLog log = pe.edu.sst.backend.modules.importaciones.entity.ImportAuditLog.builder()
+                    ImportAuditLog log = ImportAuditLog
+                            .builder()
                             .importBatchId(batch.getId())
                             .trabajadorId(t.getId())
                             .action("DEACTIVATE")
@@ -284,17 +259,17 @@ public class ImportServiceImpl implements pe.edu.sst.backend.modules.importacion
                             .build();
                     importAuditLogRepository.save(log);
                     deactivated++;
-                }catch(Exception ex){
+                } catch (Exception ex) {
                     deactivated++;
                 }
             }
         }
 
         // Process excel rows
-        for (Map.Entry<String, Map<String,String>> e: excelByDni.entrySet()){
+        for (Map.Entry<String, Map<String, String>> e : excelByDni.entrySet()) {
             String dni = e.getKey();
-            Map<String,String> row = e.getValue();
-            try{
+            Map<String, String> row = e.getValue();
+            try {
                 Trabajador existing = dbByDni.get(dni);
                 String nombre = row.getOrDefault("nombrecompleto", row.getOrDefault("nombre", "")).trim();
                 String telefono = row.getOrDefault("telefono", "").trim();
@@ -303,21 +278,25 @@ public class ImportServiceImpl implements pe.edu.sst.backend.modules.importacion
                 String cargoNombre = row.getOrDefault("cargo", "").trim();
 
                 // find sede and cargo if exists
-                pe.edu.sst.backend.modules.trabajadores.entity.Sede sedeEnt = null;
-                if (!sedeNombre.isEmpty()){
-                    var sede = sedeRepository.findByEstadoTrue().stream().filter(s->s.getNombre().equalsIgnoreCase(sedeNombre)).findFirst();
-                    if (sede.isPresent()) sedeEnt = sede.get();
+                Sede sedeEnt = null;
+                if (!sedeNombre.isEmpty()) {
+                    var sede = sedeRepository.findByEstadoTrue().stream()
+                            .filter(s -> s.getNombre().equalsIgnoreCase(sedeNombre)).findFirst();
+                    if (sede.isPresent())
+                        sedeEnt = sede.get();
                 }
-                pe.edu.sst.backend.modules.trabajadores.entity.Cargo cargoEnt = null;
-                if (!cargoNombre.isEmpty()){
-                    var cargo = cargoRepository.findByEstadoTrue().stream().filter(c->c.getNombre().equalsIgnoreCase(cargoNombre)).findFirst();
-                    if (cargo.isPresent()) cargoEnt = cargo.get();
+                Cargo cargoEnt = null;
+                if (!cargoNombre.isEmpty()) {
+                    var cargo = cargoRepository.findByEstadoTrue().stream()
+                            .filter(c -> c.getNombre().equalsIgnoreCase(cargoNombre)).findFirst();
+                    if (cargo.isPresent())
+                        cargoEnt = cargo.get();
                 }
 
-                if (existing == null){
+                if (existing == null) {
                     // create user and trabajador
                     Usuario user = Usuario.builder()
-                            .email(dni+"@sst.com")
+                            .email(dni + "@sst.com")
                             .password(passwordEncoder.encode(dni))
                             .activo(true)
                             .rol(rolRepository.findByNombre(RoleName.TRABAJADOR).orElseThrow())
@@ -328,11 +307,13 @@ public class ImportServiceImpl implements pe.edu.sst.backend.modules.importacion
                             .tipoDocumento("DNI")
                             .numeroDocumento(dni)
                             .nombreCompleto(nombre)
-                            .telefono(telefono.isEmpty()?null:telefono)
-                            .correoNotificaciones(correo.isEmpty()?null:correo)
+                            .telefono(telefono.isEmpty() ? null : telefono)
+                            .correoNotificaciones(correo.isEmpty() ? null : correo)
                             .tipoContrato("TEMPORAL")
-                            .sede(sedeEnt != null ? sedeEnt : sedeRepository.findByEstadoTrue().stream().findFirst().orElse(null))
-                            .cargo(cargoEnt != null ? cargoEnt : cargoRepository.findByEstadoTrue().stream().findFirst().orElse(null))
+                            .sede(sedeEnt != null ? sedeEnt
+                                    : sedeRepository.findByEstadoTrue().stream().findFirst().orElse(null))
+                            .cargo(cargoEnt != null ? cargoEnt
+                                    : cargoRepository.findByEstadoTrue().stream().findFirst().orElse(null))
                             .usuarioId(user.getId())
                             .estado("ACTIVO")
                             .build();
@@ -346,9 +327,10 @@ public class ImportServiceImpl implements pe.edu.sst.backend.modules.importacion
                             .estado("ACTIVO")
                             .build());
                     // audit create
-                    try{
+                    try {
                         String after = om.writeValueAsString(nuevo);
-                        pe.edu.sst.backend.modules.importaciones.entity.ImportAuditLog log = pe.edu.sst.backend.modules.importaciones.entity.ImportAuditLog.builder()
+                        ImportAuditLog log = ImportAuditLog
+                                .builder()
                                 .importBatchId(batch.getId())
                                 .trabajadorId(nuevo.getId())
                                 .action("CREATE")
@@ -356,20 +338,21 @@ public class ImportServiceImpl implements pe.edu.sst.backend.modules.importacion
                                 .afterJson(after)
                                 .build();
                         importAuditLogRepository.save(log);
-                    }catch(Exception ex){ }
+                    } catch (Exception ex) {
+                    }
                     created++;
                 } else {
                     // exists
-                    if (existing.getEstado()!=null && existing.getEstado().equalsIgnoreCase("INACTIVO")){
+                    if (existing.getEstado() != null && existing.getEstado().equalsIgnoreCase("INACTIVO")) {
                         existing.setEstado("ACTIVO");
                         // reset or create user
                         Usuario usr = null;
-                        if (existing.getUsuarioId()!=null){
+                        if (existing.getUsuarioId() != null) {
                             usr = usuarioRepository.findById(existing.getUsuarioId()).orElse(null);
                         }
-                        if (usr==null){
+                        if (usr == null) {
                             Usuario user = Usuario.builder()
-                                    .email(dni+"@sst.com")
+                                    .email(dni + "@sst.com")
                                     .password(passwordEncoder.encode(dni))
                                     .activo(true)
                                     .rol(rolRepository.findByNombre(RoleName.TRABAJADOR).orElseThrow())
@@ -377,20 +360,23 @@ public class ImportServiceImpl implements pe.edu.sst.backend.modules.importacion
                             user = usuarioRepository.save(user);
                             existing.setUsuarioId(user.getId());
                         } else {
-                            usr.setEmail(dni+"@sst.com");
+                            usr.setEmail(dni + "@sst.com");
                             usr.setPassword(passwordEncoder.encode(dni));
                             usr.setActivo(true);
                             usuarioRepository.save(usr);
                         }
 
                         // update fields
-                        try{
+                        try {
                             String before = om.writeValueAsString(existing);
-                            existing.setNombreCompleto(nombre.isEmpty()?existing.getNombreCompleto():nombre);
-                            existing.setTelefono(telefono.isEmpty()?existing.getTelefono():telefono);
-                            existing.setCorreoNotificaciones(correo.isEmpty()?existing.getCorreoNotificaciones():correo);
-                            if (sedeEnt != null) existing.setSede(sedeEnt);
-                            if (cargoEnt != null) existing.setCargo(cargoEnt);
+                            existing.setNombreCompleto(nombre.isEmpty() ? existing.getNombreCompleto() : nombre);
+                            existing.setTelefono(telefono.isEmpty() ? existing.getTelefono() : telefono);
+                            existing.setCorreoNotificaciones(
+                                    correo.isEmpty() ? existing.getCorreoNotificaciones() : correo);
+                            if (sedeEnt != null)
+                                existing.setSede(sedeEnt);
+                            if (cargoEnt != null)
+                                existing.setCargo(cargoEnt);
                             trabajadorRepository.save(existing);
                             trabajadorMesEstadoRepository.save(TrabajadorMesEstado.builder()
                                     .trabajadorId(existing.getId())
@@ -400,7 +386,8 @@ public class ImportServiceImpl implements pe.edu.sst.backend.modules.importacion
                                     .estado("ACTIVO")
                                     .build());
                             // audit
-                            pe.edu.sst.backend.modules.importaciones.entity.ImportAuditLog log = pe.edu.sst.backend.modules.importaciones.entity.ImportAuditLog.builder()
+                            ImportAuditLog log = ImportAuditLog
+                                    .builder()
                                     .importBatchId(batch.getId())
                                     .trabajadorId(existing.getId())
                                     .action("REACTIVATE_OR_UPDATE")
@@ -408,17 +395,21 @@ public class ImportServiceImpl implements pe.edu.sst.backend.modules.importacion
                                     .afterJson(om.writeValueAsString(existing))
                                     .build();
                             importAuditLogRepository.save(log);
-                        }catch(Exception ex){ }
+                        } catch (Exception ex) {
+                        }
                         reactivated++;
                     } else {
                         // active: update selected fields
-                        try{
+                        try {
                             String before = om.writeValueAsString(existing);
-                            existing.setNombreCompleto(nombre.isEmpty()?existing.getNombreCompleto():nombre);
-                            existing.setTelefono(telefono.isEmpty()?existing.getTelefono():telefono);
-                            existing.setCorreoNotificaciones(correo.isEmpty()?existing.getCorreoNotificaciones():correo);
-                            if (sedeEnt != null) existing.setSede(sedeEnt);
-                            if (cargoEnt != null) existing.setCargo(cargoEnt);
+                            existing.setNombreCompleto(nombre.isEmpty() ? existing.getNombreCompleto() : nombre);
+                            existing.setTelefono(telefono.isEmpty() ? existing.getTelefono() : telefono);
+                            existing.setCorreoNotificaciones(
+                                    correo.isEmpty() ? existing.getCorreoNotificaciones() : correo);
+                            if (sedeEnt != null)
+                                existing.setSede(sedeEnt);
+                            if (cargoEnt != null)
+                                existing.setCargo(cargoEnt);
                             trabajadorRepository.save(existing);
                             trabajadorMesEstadoRepository.save(TrabajadorMesEstado.builder()
                                     .trabajadorId(existing.getId())
@@ -427,7 +418,8 @@ public class ImportServiceImpl implements pe.edu.sst.backend.modules.importacion
                                     .year(batch.getYear())
                                     .estado("ACTIVO")
                                     .build());
-                            pe.edu.sst.backend.modules.importaciones.entity.ImportAuditLog log = pe.edu.sst.backend.modules.importaciones.entity.ImportAuditLog.builder()
+                            ImportAuditLog log = ImportAuditLog
+                                    .builder()
                                     .importBatchId(batch.getId())
                                     .trabajadorId(existing.getId())
                                     .action("UPDATE")
@@ -435,11 +427,12 @@ public class ImportServiceImpl implements pe.edu.sst.backend.modules.importacion
                                     .afterJson(om.writeValueAsString(existing))
                                     .build();
                             importAuditLogRepository.save(log);
-                        }catch(Exception ex){ }
+                        } catch (Exception ex) {
+                        }
                         updated++;
                     }
                 }
-            }catch(Exception ex){
+            } catch (Exception ex) {
                 errors++;
             }
         }
@@ -463,43 +456,48 @@ public class ImportServiceImpl implements pe.edu.sst.backend.modules.importacion
     }
 
     @Override
-    public java.util.List<pe.edu.sst.backend.modules.importaciones.entity.ImportRowIssue> listIssues(Long batchId){
+    public List<ImportRowIssue> listIssues(Long batchId) {
         return importRowIssueRepository.findByImportBatchId(batchId);
     }
 
     @Override
     @Transactional
-    public void resolveIssue(Long batchId, Long issueId, String action){
-        pe.edu.sst.backend.modules.importaciones.entity.ImportRowIssue issue = importRowIssueRepository.findById(issueId).orElseThrow();
+    public void resolveIssue(Long batchId, Long issueId, String action) {
+        ImportRowIssue issue = importRowIssueRepository
+                .findById(issueId).orElseThrow();
         // support some automatic actions
-        if ("CREATE_MISSING".equalsIgnoreCase(action) || action!=null && action.startsWith("CREATE_MISSING")){
+        if ("CREATE_MISSING".equalsIgnoreCase(action) || action != null && action.startsWith("CREATE_MISSING")) {
             // attempt to parse rawRowJson to extract sede/cargo names
-            try{
-                com.fasterxml.jackson.databind.ObjectMapper om = new com.fasterxml.jackson.databind.ObjectMapper();
-                Map<String,String> row = om.readValue(issue.getRawRowJson(), Map.class);
+            try {
+                ObjectMapper om = new ObjectMapper();
+                Map<String, String> row = om.readValue(issue.getRawRowJson(), Map.class);
                 String sedeNombre = row.getOrDefault("sede", "").trim();
                 String cargoNombre = row.getOrDefault("cargo", "").trim();
-                if (!sedeNombre.isEmpty()){
-                    boolean exists = sedeRepository.findByEstadoTrue().stream().anyMatch(s->s.getNombre().equalsIgnoreCase(sedeNombre));
-                    if (!exists){
-                        pe.edu.sst.backend.modules.trabajadores.entity.Sede newSede = pe.edu.sst.backend.modules.trabajadores.entity.Sede.builder()
+                if (!sedeNombre.isEmpty()) {
+                    boolean exists = sedeRepository.findByEstadoTrue().stream()
+                            .anyMatch(s -> s.getNombre().equalsIgnoreCase(sedeNombre));
+                    if (!exists) {
+                        Sede newSede = Sede
+                                .builder()
                                 .nombre(sedeNombre)
                                 .estado(true)
                                 .build();
                         sedeRepository.save(newSede);
                     }
                 }
-                if (!cargoNombre.isEmpty()){
-                    boolean exists = cargoRepository.findAll().stream().anyMatch(c->c.getNombre().equalsIgnoreCase(cargoNombre));
-                    if (!exists){
-                        pe.edu.sst.backend.modules.trabajadores.entity.Cargo newCargo = pe.edu.sst.backend.modules.trabajadores.entity.Cargo.builder()
+                if (!cargoNombre.isEmpty()) {
+                    boolean exists = cargoRepository.findAll().stream()
+                            .anyMatch(c -> c.getNombre().equalsIgnoreCase(cargoNombre));
+                    if (!exists) {
+                        Cargo newCargo = Cargo
+                                .builder()
                                 .nombre(cargoNombre)
                                 .estado(true)
                                 .build();
                         cargoRepository.save(newCargo);
                     }
                 }
-            }catch(Exception ex){
+            } catch (Exception ex) {
                 // ignore parse errors
             }
         }
@@ -509,49 +507,60 @@ public class ImportServiceImpl implements pe.edu.sst.backend.modules.importacion
         importRowIssueRepository.save(issue);
     }
 
-   
-
-    private YearMonth resolveYearMonth(String monthOption){
+    private YearMonth resolveYearMonth(String monthOption) {
         YearMonth now = YearMonth.now();
-        if (monthOption == null) return now;
-        switch (monthOption.toUpperCase()){
-            case "THIS": return now;
-            case "NEXT": return now.plusMonths(1);
-            case "PREV": return now.minusMonths(1);
+        if (monthOption == null)
+            return now;
+        switch (monthOption.toUpperCase()) {
+            case "THIS":
+                return now;
+            case "NEXT":
+                return now.plusMonths(1);
+            case "PREV":
+                return now.minusMonths(1);
             default:
                 // try parse YYYY-MM or MM-YYYY
-                try{
+                try {
                     String[] parts = monthOption.split("-");
-                    if (parts.length==2){
+                    if (parts.length == 2) {
                         int m = Integer.parseInt(parts[0]);
                         int y = Integer.parseInt(parts[1]);
-                        return YearMonth.of(y,m);
+                        return YearMonth.of(y, m);
                     }
-                }catch (Exception ex){ }
+                } catch (Exception ex) {
+                }
                 return now;
         }
     }
 
-    private List<Map<String,String>> parseExcel(InputStream is) throws Exception{
-        List<Map<String,String>> rows = new ArrayList<>();
-        Workbook wb = new XSSFWorkbook(is);
+    private List<Map<String, String>> parseExcel(InputStream is) throws Exception {
+        List<Map<String, String>> rows = new ArrayList<>();
+        Workbook wb = WorkbookFactory.create(is);
         Sheet sheet = wb.getSheetAt(0);
+
+        // DataFormatter lee el valor de la celda tal como lo muestra Excel (evita .0 en
+        // números y respeta formatos)
+        DataFormatter dataFormatter = new DataFormatter();
+
         Iterator<Row> it = sheet.rowIterator();
-        if (!it.hasNext()) return rows;
+        if (!it.hasNext())
+            return rows;
+
         Row header = it.next();
         List<String> headers = new ArrayList<>();
-        for (Cell c: header){
-            headers.add(c.getStringCellValue().trim().toLowerCase());
+        for (Cell c : header) {
+            headers.add(dataFormatter.formatCellValue(c).trim().toLowerCase());
         }
-        while (it.hasNext()){
+
+        while (it.hasNext()) {
             Row r = it.next();
-            Map<String,String> map = new HashMap<>();
-            for (int i=0;i<headers.size();i++){
+            Map<String, String> map = new HashMap<>();
+            for (int i = 0; i < headers.size(); i++) {
                 Cell c = r.getCell(i);
                 String val = "";
-                if (c != null){
-                    c.setCellType(CellType.STRING);
-                    val = c.getStringCellValue().trim();
+                if (c != null) {
+                    // Formatea la celda a texto plano de manera segura y moderna
+                    val = dataFormatter.formatCellValue(c).trim();
                 }
                 map.put(headers.get(i), val);
             }

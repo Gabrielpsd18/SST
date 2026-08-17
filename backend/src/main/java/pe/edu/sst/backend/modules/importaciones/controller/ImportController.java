@@ -16,10 +16,8 @@ public class ImportController {
 
     @PostMapping(path = "/trabajadores")
     public ResponseEntity<ImportPreviewResult> upload(@RequestParam("file") MultipartFile file,
-                                                      @RequestParam(value = "month", required = false, defaultValue = "THIS") String month,
-                                                      @RequestParam(value = "autoApply", required = false, defaultValue = "false") boolean autoApply,
-                                                      @RequestParam(value = "createMissing", required = false, defaultValue = "false") boolean createMissing) throws Exception {
-        ImportPreviewResult res = importService.previewImport(file, month, autoApply, createMissing);
+                                                      @RequestParam(value = "month", required = false, defaultValue = "THIS") String month) throws Exception {
+        ImportPreviewResult res = importService.previewImport(file, month);
         return ResponseEntity.ok(res);
     }
 

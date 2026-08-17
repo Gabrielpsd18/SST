@@ -7,13 +7,11 @@ export class ImportacionService {
   private readonly http = inject(HttpClient);
   private readonly API = 'http://localhost:8080/api/v1/importaciones';
 
-  upload(file: File, month: string = 'THIS', autoApply: boolean = false, createMissing: boolean = false): Observable<any>{
+  upload(file: File, month: string = 'THIS'): Observable<any>{
     const fd = new FormData();
     fd.append('file', file);
     const params = new HttpParams()
-      .set('month', month)
-      .set('autoApply', String(autoApply))
-      .set('createMissing', String(createMissing));
+      .set('month', month);
     return this.http.post<any>(`${this.API}/trabajadores`, fd, { params });
   }
 
@@ -28,4 +26,10 @@ export class ImportacionService {
   resolveIssue(batchId: number, issueId: number, action: string){
     return this.http.post(`${this.API}/${batchId}/issues/${issueId}/resolve`, { action });
   }
+}
+export interface TrabajadorImportDTO {
+  documento: string;
+  nombres: string;
+  apellidos: string;
+  // ... los campos que tenga tu Excel
 }

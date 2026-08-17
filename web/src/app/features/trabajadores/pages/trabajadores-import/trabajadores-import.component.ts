@@ -15,8 +15,7 @@ export class TrabajadoresImportComponent implements OnInit {
 
   protected selectedFile: File | null = null;
   protected monthOption: 'THIS'|'NEXT'|'PREV' = 'THIS';
-  protected autoApply = false;
-  protected createMissing = false;
+  
 
   protected preview: any = null;
   protected batchId: number | null = null;
@@ -35,7 +34,7 @@ export class TrabajadoresImportComponent implements OnInit {
   upload(){
     if (!this.selectedFile) return;
     this.loading = true;
-    this.importService.upload(this.selectedFile, this.monthOption, this.autoApply, this.createMissing).subscribe({
+    this.importService.upload(this.selectedFile, this.monthOption).subscribe({
       next: (res)=>{
         this.preview = res;
         this.batchId = res.batchId;
