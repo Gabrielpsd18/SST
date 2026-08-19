@@ -1,0 +1,68 @@
+services:
+
+  postgres:
+    image: postgres:17
+    container_name: sst-postgres
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_DB: sst_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 12345
+
+    ports:
+      - "5432:5432"
+
+    volumes:
+      - sst_postgres_data:/var/lib/postgresql/data
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d sst_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+
+  backend:
+    build:
+      context: ../..
+      dockerfile: infrastructure/docker/Dockerfile.backend
+
+    container_name: sst-backend
+    restart: unless-stopped
+
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/sst_db?currentSchema=public
+      DB_USERNAME: postgres
+      DB_PASSWORD: 12345
+
+      SERVER_PORT: 8080
+
+      JWT_SECRET: rPqfXJ0ktpW2uY4nD5sV8zBcM7LhQaEe1Rg6UiNo9PmKxYsTzAvCxDfGhJkLmNpQr
+      JWT_EXPIRATION: 3600000
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+    ports:
+      - "8080:8080"
+
+
+  frontend:
+    build:
+      context: ../..
+      dockerfile: infrastructure/docker/Dockerfile.frontend
+
+    container_name: sst-frontend
+    restart: unless-stopped
+
+    depends_on:
+      - backend
+
+    ports:
+      - "80:80"
+
+
+volumes:
+  sst_postgres_data:

@@ -1,22 +1,23 @@
 spring:
   application:
     name: backend
+
   datasource:
-    # Agregamos ?currentSchema=public al final
-    url: jdbc:postgresql://localhost:5432/sst_db?currentSchema=public
-    username: postgres
-    password: 12345
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/sst_db?currentSchema=public}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:12345}
 
   jpa:
     hibernate:
       ddl-auto: validate
+
     open-in-view: false
+
     properties:
       hibernate:
         format_sql: true
         default_schema: public
         dialect: org.hibernate.dialect.PostgreSQLDialect
-
 
   flyway:
     enabled: true
@@ -26,8 +27,8 @@ spring:
     create-schemas: true
 
 server:
-  port: 8080
+  port: ${SERVER_PORT:8080}
 
 jwt:
-  secret: rPqfXJ0ktpW2uY4nD5sV8zBcM7LhQaEe1Rg6UiNo9PmKxYsTzAvCxDfGhJkLmNpQr
-  expiration: 3600000
+  secret: ${JWT_SECRET:rPqfXJ0ktpW2uY4nD5sV8zBcM7LhQaEe1Rg6UiNo9PmKxYsTzAvCxDfGhJkLmNpQr}
+  expiration: ${JWT_EXPIRATION:3600000}
