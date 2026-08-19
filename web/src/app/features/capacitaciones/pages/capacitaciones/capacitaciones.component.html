@@ -4,7 +4,7 @@
   <header class="page-header">
     <div class="page-header__title">
       <div class="page-header__icon">
-        <lucide-icon [img]="GraduationCap"></lucide-icon>
+        <svg lucideGraduationCap></svg>
       </div>
       <div>
         <h2>Módulo de Capacitaciones SST</h2>
@@ -15,19 +15,19 @@
     <div class="page-header__actions">
       <!-- Badge de Rol Activo -->
       <span class="role-badge" [class.role-badge--admin]="isAdmin()" [class.role-badge--supervisor]="!isAdmin()">
-        <div><lucide-icon [img]="Shield"></lucide-icon></div>
+        <div><svg lucideShield></svg>></div>
         <div>{{ isAdmin() ? 'Modo Administrador (Escritura)' : 'Modo Supervisor (Solo Lectura)' }}</div>
       </span>
 
       @if (isAdmin()) {
         @if (activeMainTab() === 'sesiones') {
                 <button class="btn btn--primary" (click)="goToCapacitacionCrear()">
-            <lucide-icon [img]="Plus"></lucide-icon>
+            <svg lucidePlus></svg>
             Programar Capacitación
           </button>
         } @else {
           <button class="btn btn--primary" (click)="openCapacitadorModal()">
-            <lucide-icon [img]="Plus"></lucide-icon>
+            <svg lucideUserCheck></svg>
             Nuevo Capacitador
           </button>
         }
@@ -38,11 +38,11 @@
   <!-- Pestañas Principales del Módulo -->
   <nav class="module-tabs">
     <button [class.active]="activeMainTab() === 'sesiones'" (click)="setMainTab('sesiones')">
-      <lucide-icon [img]="Calendar"></lucide-icon>
+      <svg lucideCalendar></svg>
       Programación de Capacitaciones
     </button>
     <button [class.active]="activeMainTab() === 'capacitadores'" (click)="setMainTab('capacitadores')">
-      <lucide-icon [img]="UserCheck"></lucide-icon>
+      <svg lucideUserCheck></svg>
       Gestión de Capacitadores (Instructores)
     </button>
   </nav>
@@ -72,12 +72,12 @@
     <div class="card table-card">
       @if (loadingCapacitaciones()) {
         <div class="state-container">
-          <lucide-icon [img]="Loader2" class="spin state-icon"></lucide-icon>
+          <svg lucideLoader2 class="spin state-icon"></svg>
           <p>Cargando capacitaciones programadas...</p>
         </div>
       } @else if (capacitacionesFiltradas().length === 0) {
         <div class="state-container">
-          <lucide-icon [img]="GraduationCap" class="state-icon"></lucide-icon>
+          <svg lucideGraduationCap class="state-icon"></svg>
           <p>No hay capacitaciones con el estado seleccionado.</p>
         </div>
       } @else {
@@ -110,13 +110,13 @@
                   </td>
                   <td>
                     <div class="meta-cell">
-                      <lucide-icon [img]="Calendar"></lucide-icon>
+                      <svg lucideCalendar></svg>
                       <span>{{ cap.fechaProgramada | date:'dd/MM/yyyy HH:mm' }}</span>
                     </div>
                   </td>
                   <td>
                     <div class="meta-cell">
-                      <lucide-icon [img]="Clock"></lucide-icon>
+                      <svg lucideClock></svg>
                       <span>{{ cap.duracionHoras }} hora(s)</span>
                     </div>
                   </td>
@@ -127,11 +127,14 @@
                     </div>
                   </td>
                   <td>
-                    <span class="user-audit"><lucide-icon [img]="Shield"></lucide-icon> {{ cap.creadoPor || 'Sistema' }}</span>
+                    <span class="user-audit">
+                      <svg lucideShield></svg>
+                      {{ cap.creadoPor || 'Sistema' }}</span>
                   </td>
                   <td>
                     <span class="badge badge--success">
-                      <lucide-icon [img]="Users"></lucide-icon> {{ cap.totalTrabajadores }} trabajador(es)
+                      <svg lucideUsers></svg>
+                      {{ cap.totalTrabajadores }} trabajador(es)
                     </span>
                   </td>
                   <td>
@@ -155,10 +158,10 @@
           </span>
           <div class="pagination-controls">
             <button class="btn btn--secondary btn--sm" (click)="prevPage()" [disabled]="currentPage() === 0">
-              <lucide-icon [img]="ChevronLeft"></lucide-icon> Anterior
+              <svg lucideChevronLeft></svg> Anterior
             </button>
             <button class="btn btn--secondary btn--sm" (click)="nextPage()" [disabled]="currentPage() >= totalPages() - 1">
-              Siguiente <lucide-icon [img]="ChevronRight"></lucide-icon>
+              Siguiente <svg lucideChevronRight></svg> 
             </button>
           </div>
         </footer>
@@ -171,12 +174,12 @@
     <div class="card table-card">
       @if (loadingCapacitadores()) {
         <div class="state-container">
-          <lucide-icon [img]="Loader2" class="spin state-icon"></lucide-icon>
+          <svg lucideLoader2 class="spin state-icon"></svg> 
           <p>Cargando lista de capacitadores...</p>
         </div>
       } @else if (capacitadores().length === 0) {
         <div class="state-container">
-          <lucide-icon [img]="UserCheck" class="state-icon"></lucide-icon>
+          <svg lucideUserCheck class="state-icon"></svg> 
           <p>No se encontraron capacitadores registrados.</p>
         </div>
       } @else {
@@ -202,16 +205,18 @@
                     </div>
                   </td>
                   <td>
-                    <span class="empresa-badge"><lucide-icon [img]="Building2"></lucide-icon> {{ c.empresa }}</span>
+                    <span class="empresa-badge">
+                      <svg lucideBuilding2></svg> 
+                      {{ c.empresa }}</span>
                   </td>
                   <td>
-                    <span class="meta-cell"><lucide-icon [img]="Phone"></lucide-icon> {{ c.telefono }}</span>
+                    <span class="meta-cell"><svg lucidePhone></svg> {{ c.telefono }}</span>
                   </td>
                   <td>
-                    <span class="meta-cell"><lucide-icon [img]="Mail"></lucide-icon> {{ c.correo || 'No registrado' }}</span>
+                    <span class="meta-cell"><svg lucideMail></svg> {{ c.correo || 'No registrado' }}</span>
                   </td>
                   <td>
-                    <span class="especialidad-tag"><lucide-icon [img]="Award"></lucide-icon> {{ c.especialidad || 'General' }}</span>
+                    <span class="especialidad-tag"> <svg lucideAward></svg> {{ c.especialidad || 'General' }}</span>
                   </td>
                   <td>
                     <span class="badge" [class.badge--success]="c.estado" [class.badge--warning]="!c.estado">
@@ -233,7 +238,7 @@
     <div class="modal card">
       <header class="modal__header">
         <h3>Programar Nueva Capacitación SST</h3>
-        <button (click)="closeCapacitacionModal()"><lucide-icon [img]="X"></lucide-icon></button>
+        <button (click)="closeCapacitacionModal()"> <svg lucideX></svg> </button>
       </header>
 
       @if (capSuccessMsg()) {
@@ -283,7 +288,7 @@
 
         <!-- Sección de Asignación Masiva por Grupos -->
         <fieldset class="group-assignment-box">
-          <legend><lucide-icon [img]="Users"></lucide-icon> Grupo de Trabajadores a Capacitar</legend>
+          <legend><svg lucideUsers></svg>  Grupo de Trabajadores a Capacitar</legend>
           <p class="box-desc">Permite asignar masivamente a todos los trabajadores activos de una sede específica.</p>
 
           <div class="form-grid">
@@ -299,7 +304,7 @@
           </div>
 
           <div class="assignment-summary">
-            <lucide-icon [img]="CheckCircle"></lucide-icon>
+            <svg lucideCheckCircle></svg> 
             <span>Total de Trabajadores Asignados en este Grupo: <strong>{{ totalAsignadosCount() }} personas</strong></span>
           </div>
         </fieldset>
@@ -307,7 +312,7 @@
         <footer class="modal__footer">
           <button type="button" class="btn btn--secondary" (click)="closeCapacitacionModal()">Cancelar</button>
           <button type="submit" class="btn btn--primary" [disabled]="capacitacionForm.invalid || savingCapacitacion()">
-            <lucide-icon [img]="Plus"></lucide-icon>
+            <svg lucidePlus></svg> 
             {{ savingCapacitacion() ? 'Guardando...' : 'Programar Capacitación' }}
           </button>
         </footer>
@@ -321,7 +326,7 @@
     <div class="modal card">
       <header class="modal__header">
         <h3>Registrar Nuevo Capacitador / Instructor</h3>
-        <button (click)="closeCapacitadorModal()"><lucide-icon [img]="X"></lucide-icon></button>
+        <button (click)="closeCapacitadorModal()"><svg lucideX></svg> </button>
       </header>
 
       @if (trainerSuccessMsg()) {
@@ -369,7 +374,7 @@
         <footer class="modal__footer">
           <button type="button" class="btn btn--secondary" (click)="closeCapacitadorModal()">Cancelar</button>
           <button type="submit" class="btn btn--primary" [disabled]="capacitadorForm.invalid || savingCapacitador()">
-            <lucide-icon [img]="UserCheck"></lucide-icon>
+            <svg lucideUserCheck></svg> 
             {{ savingCapacitador() ? 'Guardando...' : 'Registrar Capacitador' }}
           </button>
         </footer>

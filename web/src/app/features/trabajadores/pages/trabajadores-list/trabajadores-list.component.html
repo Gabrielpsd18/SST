@@ -3,7 +3,7 @@
   <header class="page-header">
     <div class="page-header__title">
       <div class="page-header__icon">
-        <lucide-icon [img]="Users"></lucide-icon>
+        <svg lucideUsers aria-hidden="true"></svg>
       </div>
       <div>
         <h2>Gestión de Trabajadores</h2>
@@ -13,19 +13,19 @@
 
     <div class="page-header__actions">
       <span class="role-badge" [class.role-badge--admin]="isAdmin()" [class.role-badge--supervisor]="!isAdmin()">
-        <lucide-icon [img]="Shield"></lucide-icon>
+        <svg lucideShield aria-hidden="true"></svg>
         {{ isAdmin() ? 'Modo Administrador (Escritura)' : 'Modo Supervisor (Solo Lectura)' }}
       </span>
 
       <!-- Agrega el botón de crear aquí -->
       @if (isAdmin()) {
       <button class="btn btn--primary" (click)="goToNuevoTrabajador()">
-        <lucide-icon [img]="Plus" size="20"></lucide-icon>
+        <svg lucidePlus size="20" aria-hidden="true"></svg>
         Nuevo Trabajador
       </button>
 
       <button class="btn btn--primary" (click)="goToImportarTrabajadores()">
-        <lucide-icon [img]="Plus" size="20"></lucide-icon>
+        <svg lucidePlus size="20" aria-hidden="true"></svg>
         Importar Trabajadores
       </button>
       }
@@ -34,7 +34,7 @@
 
   <div class="toolbar card">
     <div class="toolbar__search">
-      <lucide-icon [img]="Search" class="toolbar__search-icon"></lucide-icon>
+      <svg lucideSearch class="toolbar__search-icon" aria-hidden="true"></svg>
       <input type="text" class="form-control" placeholder="Buscar por nombre, DNI, sede o cargo..."
         [value]="searchTerm()" (input)="onSearchChange($event)" />
     </div>
@@ -57,12 +57,12 @@
   <div class="card table-card">
     @if (loading()) {
     <div class="state-container">
-      <lucide-icon [img]="Loader2" class="spin state-icon"></lucide-icon>
+      <svg lucideLoader2 class="spin state-icon" aria-hidden="true"></svg>
       <p>Cargando listado de trabajadores...</p>
     </div>
     } @else if (filteredTrabajadores().length === 0) {
     <div class="state-container">
-      <lucide-icon [img]="Users" class="state-icon"></lucide-icon>
+      <svg lucideUsers class="state-icon" aria-hidden="true"></svg>
       <p>No se encontraron trabajadores que coincidan con la búsqueda.</p>
     </div>
     } @else {
@@ -98,16 +98,16 @@
             </td>
             <td>
               <div class="meta-column">
-                <span class="meta-primary"><lucide-icon [img]="Building2"></lucide-icon> {{ trabajador.sedeNombre
+                <span class="meta-primary"><svg lucideBuilding2 aria-hidden="true"></svg> {{ trabajador.sedeNombre
                   }}</span>
               </div>
             </td>
             <td>
-              <span class="cargo-tag"><lucide-icon [img]="Briefcase"></lucide-icon> {{ trabajador.cargoNombre }}</span>
+              <span class="cargo-tag"><svg lucideBriefcase aria-hidden="true"></svg> {{ trabajador.cargoNombre }}</span>
             </td>
             <td>
               <div class="contact-info">
-                <span><lucide-icon [img]="Phone"></lucide-icon> {{ trabajador.telefono || 'Sin celular' }}</span>
+                <span><svg lucidePhone aria-hidden="true"></svg> {{ trabajador.telefono || 'Sin celular' }}</span>
                 <span class="email-sub">{{ trabajador.correoNotificaciones || 'Sin email' }}</span>
               </div>
             </td>
@@ -121,15 +121,15 @@
               <div class="action-buttons">
                 <button class="btn btn--secondary btn--sm" (click)="inspectTrabajador(trabajador, 'perfil')"
                   title="Ver Ficha y Perfil">
-                  <lucide-icon [img]="Eye"></lucide-icon> Perfil
+                  <svg lucideEye aria-hidden="true"></svg> Perfil
                 </button>
                 <button class="btn btn--secondary btn--sm" (click)="inspectTrabajador(trabajador, 'capacitaciones')"
                   title="Inspeccionar Capacitaciones">
-                  <lucide-icon [img]="BookOpen"></lucide-icon>
+                  <svg lucideBookOpen aria-hidden="true"></svg>
                 </button>
                 <button class="btn btn--secondary btn--sm" (click)="inspectTrabajador(trabajador, 'documentos')"
                   title="Inspeccionar Documentos">
-                  <lucide-icon [img]="FileText"></lucide-icon>
+                  <svg lucideFileText aria-hidden="true"></svg>
                 </button>
               </div>
             </td>
@@ -147,10 +147,10 @@
       </span>
       <div class="pagination-controls">
         <button class="btn btn--secondary btn--sm" (click)="prevPage()" [disabled]="currentPage() === 0">
-          <lucide-icon [img]="ChevronLeft"></lucide-icon> Anterior
+          <svg lucideChevronLeft aria-hidden="true"></svg> Anterior
         </button>
         <button class="btn btn--secondary btn--sm" (click)="nextPage()" [disabled]="currentPage() >= totalPages() - 1">
-          Siguiente <lucide-icon [img]="ChevronRight"></lucide-icon>
+          Siguiente <svg lucideChevronRight aria-hidden="true"></svg>
         </button>
       </div>
     </footer>
@@ -172,26 +172,26 @@
         </div>
       </div>
       <button class="drawer__close" (click)="closeDrawer()">
-        <lucide-icon [img]="X"></lucide-icon>
+        <svg lucideX aria-hidden="true"></svg>
       </button>
     </header>
 
     <nav class="drawer__tabs">
       <button [class.active]="activeDrawerTab() === 'perfil'" (click)="setDrawerTab('perfil')">
-        <lucide-icon [img]="Eye"></lucide-icon> Perfil
+        <svg lucideEye aria-hidden="true"></svg> Perfil
       </button>
       <button [class.active]="activeDrawerTab() === 'capacitaciones'" (click)="setDrawerTab('capacitaciones')">
-        <lucide-icon [img]="BookOpen"></lucide-icon> Capacitaciones
+        <svg lucideBookOpen aria-hidden="true"></svg> Capacitaciones
       </button>
       <button [class.active]="activeDrawerTab() === 'documentos'" (click)="setDrawerTab('documentos')">
-        <lucide-icon [img]="FileText"></lucide-icon> Documentos
+        <svg lucideFileText aria-hidden="true"></svg> Documentos
       </button>
     </nav>
 
     <div class="drawer__body">
       @if (activeDrawerTab() === 'perfil') {
       <div class="detail-section card">
-        <h4><lucide-icon [img]="Shield"></lucide-icon> Información Institucional</h4>
+        <h4><svg lucideShield aria-hidden="true"></svg> Información Institucional</h4>
         <ul class="detail-list">
           <li><span>Tipo y N° Documento:</span> <strong>{{ selectedTrabajador()!.tipoDocumento }} - {{
               selectedTrabajador()!.numeroDocumento }}</strong></li>
@@ -201,7 +201,7 @@
       </div>
 
       <div class="detail-section card">
-        <h4><lucide-icon [img]="Building2"></lucide-icon> Asignación SST</h4>
+        <h4><svg lucideBuilding2 aria-hidden="true"></svg> Asignación SST</h4>
         <ul class="detail-list">
           <li><span>Sede Asignada:</span> <strong>{{ selectedTrabajador()!.sedeNombre }}</strong></li>
           <li><span>Cargo / Función:</span> <strong>{{ selectedTrabajador()!.cargoNombre }}</strong></li>
@@ -209,7 +209,7 @@
       </div>
 
       <div class="detail-section card">
-        <h4><lucide-icon [img]="Mail"></lucide-icon> Contacto y Notificaciones</h4>
+        <h4><svg lucideMail aria-hidden="true"></svg> Contacto y Notificaciones</h4>
         <ul class="detail-list">
           <li><span>Celular / Teléfono:</span> <strong>{{ selectedTrabajador()!.telefono || 'No registrado' }}</strong>
           </li>
@@ -233,7 +233,7 @@
           </div>
           <h5 class="cap-title">{{ cap.titulo }}</h5>
           <div class="cap-card__footer">
-            <span class="cap-hours"><lucide-icon [img]="Award"></lucide-icon> {{ cap.horas }} hora(s)</span>
+            <span class="cap-hours"><svg lucideAward aria-hidden="true"></svg> {{ cap.horas }} hora(s)</span>
             <span class="badge" [class.badge--success]="cap.estado === 'APROBADO'">{{ cap.estado }}</span>
           </div>
         </div>
@@ -247,7 +247,7 @@
         @for (doc of documentos(); track doc.id) {
         <div class="doc-card">
           <div class="doc-card__icon">
-            <lucide-icon [img]="FileText"></lucide-icon>
+            <svg lucideFileText aria-hidden="true"></svg>
           </div>
           <div class="doc-card__info">
             <h5>{{ doc.nombre }}</h5>
@@ -261,6 +261,5 @@
     </div>
   </aside>
   }
-
 
 </div>

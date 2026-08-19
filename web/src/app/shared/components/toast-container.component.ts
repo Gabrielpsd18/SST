@@ -1,37 +1,37 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { LucideAngularModule, AlertCircle, CheckCircle, Info, AlertTriangle, X } from 'lucide-angular';
+import { LucideAlertCircle, LucideCheckCircle, LucideInfo, LucideAlertTriangle, LucideX } from '@lucide/angular';
 import { NotificationService, Toast } from '../../core/services/notification.service';
 
 @Component({
   selector: 'app-toast-container',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule],
+  imports: [CommonModule],
   template: `
     <div class="toast-container">
       @for (toast of notificationService.toasts$(); track toast.id) {
         <div [ngClass]="['toast', 'toast--' + toast.type]" 
-             (mouseover)="pause(toast.id)"
-             (mouseleave)="resume(toast.id)">
+            (mouseover)="pause(toast.id)"
+            (mouseleave)="resume(toast.id)">
           <div class="toast__icon">
             @switch (toast.type) {
               @case ('success') {
-                <lucide-icon [img]="CheckCircle" size="20"></lucide-icon>
+                <svg lucideCheckCircle size="20" aria-hidden="true"></svg>
               }
               @case ('error') {
-                <lucide-icon [img]="AlertCircle" size="20"></lucide-icon>
+                <svg lucideAlertCircle size="20" aria-hidden="true"></svg>
               }
               @case ('warning') {
-                <lucide-icon [img]="AlertTriangle" size="20"></lucide-icon>
+                <svg lucideAlertTriangle size="20" aria-hidden="true"></svg>
               }
               @case ('info') {
-                <lucide-icon [img]="Info" size="20"></lucide-icon>
+                <svg lucideInfo size="20" aria-hidden="true"></svg>
               }
             }
           </div>
           <div class="toast__message">{{ toast.message }}</div>
           <button class="toast__close" type="button" (click)="notificationService.removeToast(toast.id)" title="Cerrar">
-            <lucide-icon [img]="X" size="16"></lucide-icon>
+            <svg lucideX size="16" aria-hidden="true"></svg>
           </button>
         </div>
       }
@@ -144,11 +144,11 @@ import { NotificationService, Toast } from '../../core/services/notification.ser
 })
 export class ToastContainerComponent {
   protected readonly notificationService = inject(NotificationService);
-  protected readonly CheckCircle = CheckCircle;
-  protected readonly AlertCircle = AlertCircle;
-  protected readonly AlertTriangle = AlertTriangle;
-  protected readonly Info = Info;
-  protected readonly X = X;
+  protected readonly CheckCircle = LucideCheckCircle;
+  protected readonly AlertCircle = LucideAlertCircle;
+  protected readonly AlertTriangle = LucideAlertTriangle;
+  protected readonly Info = LucideInfo;
+  protected readonly X = LucideX;
 
   pause(toastId: string): void {
     // Implementation for pausing auto-dismiss on hover can be added if needed

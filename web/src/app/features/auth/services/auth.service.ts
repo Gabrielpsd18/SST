@@ -6,6 +6,7 @@ import { LoginRequest } from '../models/login-request';
 import { JwtResponse } from '../models/jwt-response';
 import { ApiResponse } from '../models/api-response';
 import { STORAGE } from '../../../core/constants/storage.constants';
+import { environment } from '../../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -13,7 +14,7 @@ import { STORAGE } from '../../../core/constants/storage.constants';
 export class AuthService {
 
   private http = inject(HttpClient);
-  private readonly API_URL = 'http://localhost:8080/api/v1/auth';
+  private readonly API_URL = `${environment.apiUrl}/auth`;
 
   login(request: LoginRequest): Observable<ApiResponse<JwtResponse>> {
     return this.http.post<ApiResponse<JwtResponse>>(`${this.API_URL}/login`, request)

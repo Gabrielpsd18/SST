@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 
 import { ApiResponse } from '../../auth/models/api-response';
 import { UserProfile, UpdateProfileRequest } from '../models/user-profile.model';
+import { environment } from '../../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -11,7 +12,7 @@ import { UserProfile, UpdateProfileRequest } from '../models/user-profile.model'
 export class UserService {
 
   private readonly http = inject(HttpClient);
-  private readonly API_URL = 'http://localhost:8080/api/v1/users';
+  private readonly API_URL =  `${environment.apiUrl}/inspecciones`;
 
   // Obtener la información del perfil del usuario logueado
   getProfile(): Observable<ApiResponse<UserProfile>> {

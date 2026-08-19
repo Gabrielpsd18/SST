@@ -4,14 +4,16 @@ import { Observable } from 'rxjs';
 
 import { PaginatedResponse } from '../../trabajadores/models/trabajador.model';
 import { CrearInspeccionRequest, Inspeccion } from '../models/inspeccion.model';
+import { environment } from '../../../../environments/environment';
+
 
 @Injectable({
   providedIn: 'root'
 })
 export class InspeccionesService {
   private readonly http = inject(HttpClient);
-  private readonly API_URL = 'http://localhost:8080/api/v1/inspecciones';
-
+  private readonly API_URL = `${environment.apiUrl}/inspecciones`;
+  
   getInspecciones(page: number = 0, size: number = 10): Observable<PaginatedResponse<Inspeccion>> {
     const params = new HttpParams()
       .set('page', page.toString())

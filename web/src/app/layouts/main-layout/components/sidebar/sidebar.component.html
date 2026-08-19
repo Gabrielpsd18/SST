@@ -1,7 +1,7 @@
 <aside class="sidebar" [class.sidebar--collapsed]="collapsed()">
   <div class="sidebar__logo">
     <div class="sidebar__logo-icon">
-      <lucide-icon [img]="Shield"></lucide-icon>
+      <svg lucideShield aria-hidden="true"></svg>
     </div>
 
     @if (!collapsed()) {
@@ -18,7 +18,31 @@
         [routerLink]="item.route" 
         routerLinkActive="active"
         [routerLinkActiveOptions]="{ exact: item.route === '/home' }">
-        <lucide-icon [img]="icons[item.icon]"></lucide-icon>
+        
+        @switch (item.icon) {
+          @case ('layout-dashboard') {
+            <svg lucideLayoutDashboard aria-hidden="true"></svg>
+          }
+          @case ('users') {
+            <svg lucideUsers aria-hidden="true"></svg>
+          }
+          @case ('graduation-cap') {
+            <svg lucideGraduationCap aria-hidden="true"></svg>
+          }
+          @case ('file-text') {
+            <svg lucideFileText aria-hidden="true"></svg>
+          }
+          @case ('chart-column') {
+            <svg lucideChartColumn aria-hidden="true"></svg>
+          }
+          @case ('shield') {
+            <svg lucideShield aria-hidden="true"></svg>
+          }
+          @case ('clipboard-list') {
+            <svg lucideClipboardList aria-hidden="true"></svg>
+          }
+        }
+
         @if (!collapsed()) {
           <span>{{ item.label }}</span>
         }

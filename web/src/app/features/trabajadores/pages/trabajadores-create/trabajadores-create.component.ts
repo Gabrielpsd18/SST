@@ -2,7 +2,7 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
-import { LucideAngularModule, Plus } from 'lucide-angular';
+import {LucidePlus } from '@lucide/angular';
 
 import { TrabajadorService } from '../../services/trabajador.service';
 import { AuthService } from '../../../auth/services/auth.service';
@@ -12,7 +12,7 @@ import { MaestraItem, CrearTrabajadorRequest } from '../../models/trabajador.mod
 @Component({
   selector: 'app-trabajadores-create',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule, LucideAngularModule, SearchableSelectComponent],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, SearchableSelectComponent],
   templateUrl: './trabajadores-create.component.html',
   styleUrl: './trabajadores-create.component.scss'
 })
@@ -22,7 +22,7 @@ export class TrabajadoresCreateComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
 
-  protected readonly Plus = Plus;
+  protected readonly Plus = LucidePlus;
 
   protected isAdmin = signal<boolean>(false);
   

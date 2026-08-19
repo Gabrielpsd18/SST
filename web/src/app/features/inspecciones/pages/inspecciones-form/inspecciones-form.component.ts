@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { ArrowLeft, CheckCircle, Loader2, LucideAngularModule, Save, Search, Users } from 'lucide-angular';
+import { LucideArrowLeft, LucideCheckCircle, LucideLoader2, LucideSave, LucideSearch, LucideUsers } from '@lucide/angular';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
@@ -15,7 +15,7 @@ import { InspeccionesService } from '../../services/inspecciones.service';
 @Component({
   selector: 'app-inspecciones-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule, LucideAngularModule, SearchableSelectComponent],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, SearchableSelectComponent],
   templateUrl: './inspecciones-form.component.html',
   styleUrl: './inspecciones-form.component.scss'
 })
@@ -27,12 +27,12 @@ export class InspeccionesFormComponent implements OnInit {
   private readonly inspeccionesService = inject(InspeccionesService);
   private readonly trabajadorService = inject(TrabajadorService);
 
-  protected readonly ArrowLeft = ArrowLeft;
-  protected readonly Users = Users;
-  protected readonly Search = Search;
-  protected readonly Save = Save;
-  protected readonly CheckCircle = CheckCircle;
-  protected readonly Loader2 = Loader2;
+  protected readonly ArrowLeft = LucideArrowLeft;
+  protected readonly Users = LucideUsers;
+  protected readonly Search = LucideSearch;
+  protected readonly Save = LucideSave;
+  protected readonly CheckCircle = LucideCheckCircle;
+  protected readonly Loader2 = LucideLoader2;
 
   protected readonly isAdmin = signal<boolean>(false);
   protected readonly saving = signal<boolean>(false);

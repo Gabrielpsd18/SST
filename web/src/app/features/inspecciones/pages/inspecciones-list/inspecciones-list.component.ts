@@ -2,18 +2,17 @@ import { CommonModule } from '@angular/common';
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import {
-  AlertCircle,
-  Calendar,
-  CheckCircle,
-  ChevronLeft,
-  ChevronRight,
-  Clock,
-  Loader2,
-  Pencil,
-  Plus,
-  Shield,
-  LucideAngularModule
-} from 'lucide-angular';
+  LucideAlertCircle,
+  LucideCalendar,
+  LucideCheckCircle,
+  LucideChevronLeft,
+  LucideChevronRight,
+  LucideClock,
+  LucideLoader2,
+  LucidePencil,
+  LucidePlus,
+  LucideShield
+} from '@lucide/angular';
 
 import { AuthService } from '../../../auth/services/auth.service';
 import { PaginatedResponse } from '../../../trabajadores/models/trabajador.model';
@@ -23,7 +22,7 @@ import { InspeccionesService } from '../../services/inspecciones.service';
 @Component({
   selector: 'app-inspecciones-list',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule],
+  imports: [CommonModule],
   templateUrl: './inspecciones-list.component.html',
   styleUrl: './inspecciones-list.component.scss'
 })
@@ -32,16 +31,16 @@ export class InspeccionesListComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
 
-  protected readonly Calendar = Calendar;
-  protected readonly Clock = Clock;
-  protected readonly Plus = Plus;
-  protected readonly Pencil = Pencil;
-  protected readonly Shield = Shield;
-  protected readonly Loader2 = Loader2;
-  protected readonly CheckCircle = CheckCircle;
-  protected readonly AlertCircle = AlertCircle;
-  protected readonly ChevronLeft = ChevronLeft;
-  protected readonly ChevronRight = ChevronRight;
+  protected readonly Calendar = LucideCalendar;
+  protected readonly Clock = LucideClock;
+  protected readonly Plus = LucidePlus;
+  protected readonly Pencil = LucidePencil;
+  protected readonly Shield = LucideShield;
+  protected readonly Loader2 = LucideLoader2;
+  protected readonly CheckCircle = LucideCheckCircle;
+  protected readonly AlertCircle = LucideAlertCircle;
+  protected readonly ChevronLeft = LucideChevronLeft;
+  protected readonly ChevronRight = LucideChevronRight;
 
   protected readonly isAdmin = signal<boolean>(false);
   protected readonly inspecciones = signal<Inspeccion[]>([]);

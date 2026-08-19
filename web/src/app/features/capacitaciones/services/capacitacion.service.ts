@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { environment } from '../../../../environments/environment';
 
 import {
   Capacitador,
@@ -17,8 +18,8 @@ import { PaginatedResponse } from '../../trabajadores/models/trabajador.model';
 export class CapacitacionService {
 
   private readonly http = inject(HttpClient);
-  private readonly CAPACITACIONES_URL = 'http://localhost:8080/api/v1/capacitaciones';
-  private readonly CAPACITADORES_URL = 'http://localhost:8080/api/v1/capacitadores';
+  private readonly CAPACITACIONES_URL = `${environment.apiUrl}/capacitaciones`;
+  private readonly CAPACITADORES_URL = `${environment.apiUrl}/capacitadores`;
 
   // --- Capacitaciones ---
   getCapacitaciones(page: number = 0, size: number = 10): Observable<PaginatedResponse<Capacitacion>> {

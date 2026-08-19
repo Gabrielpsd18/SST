@@ -4,7 +4,7 @@
   <header class="page-header">
     <div class="page-header__title">
       <div class="page-header__icon">
-        <lucide-icon [img]="Plus"></lucide-icon>
+        <svg lucidePlus></svg>
       </div>
       <div>
         <h2>Registrar Nuevo Trabajador</h2>
@@ -84,7 +84,7 @@
         </button>
         
         <button type="submit" class="btn btn--primary" [disabled]="createForm.invalid || savingTrabajador()">
-          <lucide-icon [img]="Plus"></lucide-icon>
+          <svg lucidePlus> </svg>
           {{ savingTrabajador() ? 'Guardando...' : 'Registrar Trabajador' }}
         </button>
       </footer>

@@ -1,7 +1,7 @@
 import { Component, Input, Output, EventEmitter, forwardRef, signal, computed, ElementRef, inject, HostListener, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from '@angular/forms';
-import { LucideAngularModule, ChevronDown, Search, Loader2 } from 'lucide-angular';
+import {  LucideChevronDown, LucideSearch, LucideLoader2 } from '@lucide/angular';
 import { Observable, Subject, catchError, debounceTime, distinctUntilChanged, finalize, of, switchMap } from 'rxjs';
 
 export interface SearchableSelectOption {
@@ -12,7 +12,7 @@ export interface SearchableSelectOption {
 @Component({
   selector: 'app-searchable-select',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './searchable-select.component.html',
   styleUrl: './searchable-select.component.scss',
   providers: [
@@ -41,9 +41,9 @@ export class SearchableSelectComponent implements ControlValueAccessor {
 
   @ViewChild('searchInput') private searchInput?: ElementRef<HTMLInputElement>;
 
-  protected readonly ChevronDown = ChevronDown;
-  protected readonly Search = Search;
-  protected readonly Loader2 = Loader2;
+  protected readonly ChevronDown = LucideChevronDown;
+  protected readonly Search = LucideSearch;
+  protected readonly Loader2 = LucideLoader2;
 
   protected open = signal(false);
   protected searchTerm = signal('');

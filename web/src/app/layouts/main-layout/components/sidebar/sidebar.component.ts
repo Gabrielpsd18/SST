@@ -1,23 +1,31 @@
 import { Component, inject, input, OnInit, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import {
-  LayoutDashboard,
-  Users,
-  GraduationCap,
-  FileText,
-  ChartColumn,
-  Shield,
-  LucideAngularModule,
-  LucideIconData,
-  ClipboardList,
-} from 'lucide-angular';
+  LucideLayoutDashboard,
+  LucideUsers,
+  LucideGraduationCap,
+  LucideFileText,
+  LucideChartColumn,
+  LucideShield,
+  LucideClipboardList,
+} from '@lucide/angular';
 import { MENU_ITEMS } from '../../constants/menu-items';
 import { AuthService } from '../../../../features/auth/services/auth.service';
 
 @Component({
   selector: 'app-sidebar',
   standalone: true,
-  imports: [RouterLink, RouterLinkActive, LucideAngularModule],
+  imports: [
+    RouterLink, 
+    RouterLinkActive,
+    LucideLayoutDashboard,
+    LucideUsers,
+    LucideGraduationCap,
+    LucideFileText,
+    LucideChartColumn,
+    LucideShield,
+    LucideClipboardList
+  ],
   templateUrl: './sidebar.component.html',
   styleUrl: './sidebar.component.scss'
 })
@@ -27,20 +35,10 @@ export class SidebarComponent implements OnInit {
   private readonly authService = inject(AuthService);
 
   protected readonly menuItems = MENU_ITEMS;
-  protected readonly Shield = Shield;
 
   protected userName = signal<string>('Usuario');
   protected userRole = signal<string>('Rol');
 
-  protected readonly icons: Record<string, LucideIconData> = {
-    'layout-dashboard': LayoutDashboard,
-    'users': Users,
-    'graduation-cap': GraduationCap,
-    'file-text': FileText,
-    'chart-column': ChartColumn,
-    'shield': Shield,
-    'clipboard-list': ClipboardList,
-  };
   ngOnInit(): void {
     this.userName.set(this.authService.getUserName());
     const role = localStorage.getItem('user_role');

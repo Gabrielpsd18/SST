@@ -1,7 +1,7 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { LucideAngularModule, Shield, Building2, Mail, Award, Save, Loader2 } from 'lucide-angular';
+import { LucideShield, LucideBuilding2, LucideMail, LucideAward, LucideSave, LucideLoader2 } from '@lucide/angular';
 
 import { UserService } from '../../services/user.service';
 import { UserProfile, UpdateProfileRequest } from '../../models/user-profile.model';
@@ -9,7 +9,7 @@ import { UserProfile, UpdateProfileRequest } from '../../models/user-profile.mod
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, LucideAngularModule],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.scss'
 })
@@ -17,12 +17,12 @@ export class ProfileComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly userService = inject(UserService);
 
-  protected readonly Shield = Shield;
-  protected readonly Building2 = Building2;
-  protected readonly Mail = Mail;
-  protected readonly Award = Award;
-  protected readonly Save = Save;
-  protected readonly Loader2 = Loader2;
+  protected readonly Shield = LucideShield;
+  protected readonly Building2 = LucideBuilding2;
+  protected readonly Mail = LucideMail;
+  protected readonly Award = LucideAward;
+  protected readonly Save = LucideSave;
+  protected readonly Loader2 = LucideLoader2;
 
   protected profileForm!: FormGroup;
   protected loadingData = signal<boolean>(true);

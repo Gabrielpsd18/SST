@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { LucideAngularModule, Calendar, Clock, Users, CheckCircle, Plus, Loader2, BookOpen, FileText } from 'lucide-angular';
+import { LucideCalendar, LucideClock, LucideUsers, LucideCheckCircle, LucidePlus, LucideLoader2, LucideBookOpen, LucideFileText } from '@lucide/angular';
 import { of, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { CapacitacionService } from '../../services/capacitacion.service';
@@ -15,7 +15,7 @@ import { NotificationService } from '../../../../core/services/notification.serv
 @Component({
   selector: 'app-capacitaciones-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule, LucideAngularModule, SearchableSelectComponent],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, SearchableSelectComponent],
   templateUrl: './capacitaciones-form.component.html',
   styleUrl: './capacitaciones-form.component.scss'
 })
@@ -28,14 +28,14 @@ export class CapacitacionesFormComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly notificationService = inject(NotificationService);
 
-  protected readonly Calendar = Calendar;
-  protected readonly Clock = Clock;
-  protected readonly Users = Users;
-  protected readonly CheckCircle = CheckCircle;
-  protected readonly Plus = Plus;
-  protected readonly Loader2 = Loader2;
-  protected readonly BookOpen = BookOpen;
-  protected readonly FileText = FileText;
+  protected readonly Calendar = LucideCalendar;
+  protected readonly Clock = LucideClock;
+  protected readonly Users = LucideUsers;
+  protected readonly CheckCircle = LucideCheckCircle;
+  protected readonly Plus = LucidePlus;
+  protected readonly Loader2 = LucideLoader2;
+  protected readonly BookOpen = LucideBookOpen;
+  protected readonly FileText = LucideFileText;
 
   protected isAdmin = signal<boolean>(false);
   protected isEditMode = signal<boolean>(false);

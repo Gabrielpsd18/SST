@@ -11,6 +11,7 @@ import {
   CapacitacionItem,
   DocumentoItem
 } from '../models/trabajador.model';
+import { environment } from '../../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -18,7 +19,7 @@ import {
 export class TrabajadorService {
 
   private readonly http = inject(HttpClient);
-  private readonly API_URL = 'http://localhost:8080/api/v1/trabajadores';
+  private readonly API_URL = `${environment.apiUrl}/trabajadores`;;
 
   // Obtener listado de trabajadores con paginación
   getTrabajadores(page: number = 0, size: number = 10, estado?: string): Observable<PaginatedResponse<Trabajador>> {

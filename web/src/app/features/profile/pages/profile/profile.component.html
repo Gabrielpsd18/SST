@@ -2,7 +2,7 @@
 
   @if (loadingData()) {
     <div class="profile-container__loading">
-      <lucide-icon [img]="Loader2" class="spin"></lucide-icon>
+      <svg lucideLoader2 class="spin" aria-hidden="true"></svg>
       <p>Cargando información del perfil...</p>
     </div>
   } @else if (profileData()) {
@@ -39,7 +39,7 @@
       <section class="card">
 
         <div class="card__header">
-          <lucide-icon [img]="Mail"></lucide-icon>
+          <svg lucideMail aria-hidden="true"></svg>
           <h3>Canales de Notificación SST</h3>
         </div>
 
@@ -78,7 +78,7 @@
       <section class="card">
 
         <div class="card__header">
-          <lucide-icon [img]="Shield"></lucide-icon>
+          <svg lucideShield aria-hidden="true"></svg>
           <h3>Credenciales de Acceso</h3>
         </div>
 
@@ -133,7 +133,7 @@
       <section class="card">
 
         <div class="card__header">
-          <lucide-icon [img]="Building2"></lucide-icon>
+          <svg lucideBuilding2 aria-hidden="true"></svg>
           <h3>Ubicación y Puesto de Trabajo</h3>
         </div>
 
@@ -167,7 +167,7 @@
       <section class="card">
 
         <div class="card__header">
-          <lucide-icon [img]="Shield"></lucide-icon>
+          <svg lucideShield aria-hidden="true"></svg>
           <h3>Identificación Institucional</h3>
         </div>
 
@@ -201,7 +201,7 @@
       <section class="card">
 
         <div class="card__header">
-          <lucide-icon [img]="Award"></lucide-icon>
+          <svg lucideAward aria-hidden="true"></svg>
           <h3>Estado de Capacitación SST</h3>
         </div>
 
@@ -241,10 +241,10 @@
         >
 
           @if (saving()) {
-            <lucide-icon [img]="Loader2" class="spin"></lucide-icon>
+            <svg lucideLoader2 class="spin" aria-hidden="true"></svg>
             Guardando...
           } @else {
-            <lucide-icon [img]="Save"></lucide-icon>
+            <svg lucideSave aria-hidden="true"></svg>
             Guardar Cambios
           }
 

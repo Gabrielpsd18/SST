@@ -2,7 +2,7 @@ import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { LucideAngularModule, Shield } from 'lucide-angular';
+import { LucideShield } from '@lucide/angular';
 
 import { AuthService } from '../../services/auth.service';
 import { LoginRequest } from '../../models/login-request';
@@ -10,12 +10,11 @@ import { LoginRequest } from '../../models/login-request';
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule],
+  imports: [CommonModule, FormsModule, LucideShield],
   templateUrl: './login.html',
   styleUrl: './login.scss'
 })
 export class LoginComponent implements OnInit {
-  protected readonly Shield = Shield;
 
   username = '';
   password = '';
@@ -28,6 +27,7 @@ export class LoginComponent implements OnInit {
 
   ngOnInit(): void {
     const token = localStorage.getItem('access_token');
+
     if (token) {
       this.router.navigate(['/home']);
     }

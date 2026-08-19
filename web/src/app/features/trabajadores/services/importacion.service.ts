@@ -1,11 +1,12 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class ImportacionService {
   private readonly http = inject(HttpClient);
-  private readonly API = 'http://localhost:8080/api/v1/importaciones';
+  private readonly API = `${environment.apiUrl}/importaciones`;;
 
   // Sube el archivo y ejecuta la importación e implementación directa de golpe
   uploadAndImplement(file: File, month: string = 'THIS'): Observable<any> {

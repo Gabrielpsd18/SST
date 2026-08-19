@@ -69,7 +69,7 @@
             </div>
 
             <fieldset class="group-assignment-box">
-                <legend><lucide-icon [img]="Users"></lucide-icon> Grupo de Trabajadores a Capacitar</legend>
+                <legend><svg lucideUsers></svg> Grupo de Trabajadores a Capacitar</legend>
 
                 <div class="form-grid">
                     <app-searchable-select formControlName="sedeIdFilter" label="Filtrar por Sede"
@@ -78,7 +78,7 @@
                 </div>
 
                 <div class="assignment-summary">
-                    <lucide-icon [img]="CheckCircle"></lucide-icon>
+                    <svg lucideCheckCircle></svg>
                     <span>Total de Trabajadores Asignados en este Grupo: <strong>{{ totalAsignadosCount() }}
                             personas</strong></span>
                 </div>
@@ -153,14 +153,14 @@
             <!-- Videos Section -->
             <div class="field grid-span-2">
                 <label class="section-label">
-                    <lucide-icon [img]="BookOpen"></lucide-icon> Videos
+                    <svg lucideBookOpen></svg> Videos
                 </label>
                 <div class="links-input-group">
                     <input type="text" class="form-control" placeholder="Ingrese el link del video..."
                         [value]="newVideoLink()" (input)="newVideoLink.set($event.target.value)"
                         (keyup.enter)="$event.preventDefault(); addVideoLink()" />
                     <button type="button" class="btn btn--primary btn--sm" (click)="addVideoLink()">
-                        <lucide-icon [img]="Plus" size="16"></lucide-icon> Agregar video
+                        <svg lucidePlus></svg> Agregar video
                     </button>
                 </div>
 
@@ -179,14 +179,14 @@
             <!-- Forms Section -->
             <div class="field grid-span-2">
                 <label class="section-label">
-                    <lucide-icon [img]="FileText"></lucide-icon> Formularios
+                    <svg lucideFileText></svg> Formularios
                 </label>
                 <div class="links-input-group">
                     <input type="text" class="form-control" placeholder="Ingrese el link del formulario..."
                         [value]="newFormLink()" (input)="newFormLink.set($event.target.value)"
                         (keyup.enter)="$event.preventDefault(); addFormLink()" />
                     <button type="button" class="btn btn--primary btn--sm" (click)="addFormLink()">
-                        <lucide-icon [img]="Plus" size="16"></lucide-icon> Agregar formulario
+                        <svg lucidePlus></svg> Agregar formulario
                     </button>
                 </div>
 
@@ -205,7 +205,7 @@
                 <button type="button" class="secondary-button" (click)="goBack()">Cancelar</button>
                 <button type="submit" class="primary-button" [disabled]="saving()">
                     <span *ngIf="saving()" class="spinner-wrap">
-                        <lucide-icon [img]="Loader2" class="spin"></lucide-icon>
+                        <svg lucideLoader2 class="spin"></svg>
                     </span>
                     {{ saving() ? (isEditMode() ? 'Guardando...' : 'Programando...') : (isEditMode() ? 'Guardar cambios'
                     : 'Programar capacitación') }}

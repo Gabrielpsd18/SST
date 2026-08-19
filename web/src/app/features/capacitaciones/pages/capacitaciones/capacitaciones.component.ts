@@ -2,27 +2,26 @@ import { Component, inject, OnInit, signal, computed} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import {
-  LucideAngularModule,
-  GraduationCap,
-  Plus,
-  Search,
-  UserCheck,
-  Building2,
-  Calendar,
-  Clock,
-  Briefcase,
-  Users,
-  Shield,
-  Loader2,
-  ChevronLeft,
-  ChevronRight,
-  X,
-  Phone,
-  Mail,
-  Award,
-  CheckCircle,
-  AlertCircle
-} from 'lucide-angular';
+  LucideGraduationCap,
+  LucidePlus,
+  LucideSearch,
+  LucideUserCheck,
+  LucideBuilding2,
+  LucideCalendar,
+  LucideClock,
+  LucideBriefcase,
+  LucideUsers,
+  LucideShield,
+  LucideLoader2,
+  LucideChevronLeft,
+  LucideChevronRight,
+  LucideX,
+  LucidePhone,
+  LucideMail,
+  LucideAward,
+  LucideCheckCircle,
+  LucideAlertCircle
+} from '@lucide/angular';
 
 import { CapacitacionService } from '../../services/capacitacion.service';
 import { TrabajadorService } from '../../../trabajadores/services/trabajador.service';
@@ -39,7 +38,7 @@ import { Router } from '@angular/router';
 @Component({
   selector: 'app-capacitaciones',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, LucideAngularModule, SearchableSelectComponent],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, SearchableSelectComponent],
   templateUrl: './capacitaciones.component.html',
   styleUrl: './capacitaciones.component.scss'
 })
@@ -50,25 +49,25 @@ export class CapacitacionesComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
 
   // Iconos
-  protected readonly GraduationCap = GraduationCap;
-  protected readonly Plus = Plus;
-  protected readonly Search = Search;
-  protected readonly UserCheck = UserCheck;
-  protected readonly Building2 = Building2;
-  protected readonly Calendar = Calendar;
-  protected readonly Clock = Clock;
-  protected readonly Briefcase = Briefcase;
-  protected readonly Users = Users;
-  protected readonly Shield = Shield;
-  protected readonly Loader2 = Loader2;
-  protected readonly ChevronLeft = ChevronLeft;
-  protected readonly ChevronRight = ChevronRight;
-  protected readonly X = X;
-  protected readonly Phone = Phone;
-  protected readonly Mail = Mail;
-  protected readonly Award = Award;
-  protected readonly CheckCircle = CheckCircle;
-  protected readonly AlertCircle = AlertCircle;
+  protected readonly GraduationCap = LucideGraduationCap;
+  protected readonly Plus = LucidePlus;
+  protected readonly Search = LucideSearch;
+  protected readonly UserCheck = LucideUserCheck;
+  protected readonly Building2 = LucideBuilding2;
+  protected readonly Calendar = LucideCalendar;
+  protected readonly Clock = LucideClock;
+  protected readonly Briefcase = LucideBriefcase;
+  protected readonly Users = LucideUsers;
+  protected readonly Shield = LucideShield;
+  protected readonly Loader2 = LucideLoader2;
+  protected readonly ChevronLeft = LucideChevronLeft;
+  protected readonly ChevronRight = LucideChevronRight;
+  protected readonly X = LucideX;
+  protected readonly Phone = LucidePhone;
+  protected readonly Mail = LucideMail;
+  protected readonly Award = LucideAward;
+  protected readonly CheckCircle = LucideCheckCircle;
+  protected readonly AlertCircle = LucideAlertCircle;
 
   // Control de Pestaña Principal (Sesiones vs Capacitadores)
   protected activeMainTab = signal<'sesiones' | 'capacitadores'>('sesiones');

@@ -2,7 +2,7 @@
   <header class="page-header">
     <div class="page-header__title">
       <div class="page-header__icon">
-        <lucide-icon [img]="Shield" aria-hidden="true"></lucide-icon>
+        <svg lucideShield aria-hidden="true"></svg>
       </div>
       <div>
         <p class="eyebrow">SST</p>
@@ -12,7 +12,7 @@
 
     <div class="page-header__actions">
       <button *ngIf="isAdmin()" type="button" class="btn btn--primary" (click)="goToCreate()">
-        <lucide-icon [img]="Plus" aria-hidden="true"></lucide-icon>
+        <svg lucidePlus aria-hidden="true"></svg>
         Nueva inspección
       </button>
     </div>
@@ -20,7 +20,7 @@
 
   <div class="stats-grid">
     <div class="stat-card stat-card--pending">
-      <div class="stat-card__icon"><lucide-icon [img]="Calendar" aria-hidden="true"></lucide-icon></div>
+      <div class="stat-card__icon"><svg lucideCalendar aria-hidden="true"></svg></div>
       <div>
         <span>Pendientes</span>
         <strong>{{ summaryCounts().pendiente }}</strong>
@@ -28,7 +28,7 @@
     </div>
 
     <div class="stat-card stat-card--done">
-      <div class="stat-card__icon"><lucide-icon [img]="CheckCircle" aria-hidden="true"></lucide-icon></div>
+      <div class="stat-card__icon"><svg lucideCheckCircle aria-hidden="true"></svg></div>
       <div>
         <span>Realizadas</span>
         <strong>{{ summaryCounts().realizada }}</strong>
@@ -36,7 +36,7 @@
     </div>
 
     <div class="stat-card stat-card--late">
-      <div class="stat-card__icon"><lucide-icon [img]="Clock" aria-hidden="true"></lucide-icon></div>
+      <div class="stat-card__icon"><svg lucideClock aria-hidden="true"></svg></div>
       <div>
         <span>Retrasadas</span>
         <strong>{{ summaryCounts().retrasada }}</strong>
@@ -44,7 +44,7 @@
     </div>
 
     <div class="stat-card stat-card--failed">
-      <div class="stat-card__icon"><lucide-icon [img]="AlertCircle" aria-hidden="true"></lucide-icon></div>
+      <div class="stat-card__icon"><svg lucideAlertCircle aria-hidden="true"></svg></div>
       <div>
         <span>Incumplidas</span>
         <strong>{{ summaryCounts().incumplida }}</strong>
@@ -55,7 +55,7 @@
   <div class="panel">
     <div class="panel__header">
       <div class="panel__title-wrap">
-        <lucide-icon [img]="Shield" aria-hidden="true"></lucide-icon>
+        <svg lucideShield aria-hidden="true"></svg>
         <h2>Listado</h2>
       </div>
       <div class="panel__actions">
@@ -70,7 +70,7 @@
     </div>
 
     <div *ngIf="loading(); else tableBlock" class="loading-state">
-      <lucide-icon [img]="Loader2" class="spin" aria-hidden="true"></lucide-icon>
+      <svg lucideLoader2 class="spin" aria-hidden="true"></svg>
       Cargando inspecciones...
     </div>
 
@@ -104,7 +104,7 @@
               </td>
               <td>
                 <button *ngIf="isAdmin()" type="button" class="ghost-button" (click)="goToEdit(inspeccion)">
-                  <lucide-icon [img]="Pencil" aria-hidden="true"></lucide-icon>
+                  <svg lucidePencil aria-hidden="true"></svg>
                   Editar
                 </button>
               </td>
@@ -124,16 +124,15 @@
         </span>
         <div class="pagination-controls">
           <button type="button" class="btn btn--secondary btn--sm" (click)="prevPage()" [disabled]="currentPage() === 0">
-            <lucide-icon [img]="ChevronLeft" aria-hidden="true"></lucide-icon>
+            <svg lucideChevronLeft aria-hidden="true"></svg>
             Anterior
           </button>
           <button type="button" class="btn btn--secondary btn--sm" (click)="nextPage()" [disabled]="currentPage() >= totalPages() - 1">
             Siguiente
-            <lucide-icon [img]="ChevronRight" aria-hidden="true"></lucide-icon>
+            <svg lucideChevronRight aria-hidden="true"></svg>
           </button>
         </div>
       </footer>
     </ng-template>
   </div>
-
 </section>

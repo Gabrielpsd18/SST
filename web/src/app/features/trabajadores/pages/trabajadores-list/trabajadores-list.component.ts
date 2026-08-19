@@ -4,24 +4,23 @@ import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 
 import {
-  LucideAngularModule,
-  Users,
-  Plus,
-  Search,
-  Eye,
-  BookOpen,
-  FileText,
-  ChevronLeft,
-  ChevronRight,
-  X,
-  Shield,
-  Building2,
-  Briefcase,
-  Phone,
-  Mail,
-  Award,
-  Loader2
-} from 'lucide-angular';
+  LucideUsers,
+  LucidePlus,
+  LucideSearch,
+  LucideEye,
+  LucideBookOpen,
+  LucideFileText,
+  LucideChevronLeft,
+  LucideChevronRight,
+  LucideX,
+  LucideShield,
+  LucideBuilding2,
+  LucideBriefcase,
+  LucidePhone,
+  LucideMail,
+  LucideAward,
+  LucideLoader2
+} from '@lucide/angular';
 
 import { TrabajadorService } from '../../services/trabajador.service';
 import { AuthService } from '../../../auth/services/auth.service';
@@ -35,7 +34,7 @@ import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
 @Component({
   selector: 'app-trabajadores-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, LucideAngularModule],
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './trabajadores-list.component.html',
   styleUrl: './trabajadores-list.component.scss'
 })
@@ -43,22 +42,22 @@ export class TrabajadoresListComponent implements OnInit, OnDestroy {
   private readonly trabajadorService = inject(TrabajadorService);
   private readonly authService = inject(AuthService);
 
-  protected readonly Users = Users;
-  protected readonly Plus = Plus;
-  protected readonly Search = Search;
-  protected readonly Eye = Eye;
-  protected readonly BookOpen = BookOpen;
-  protected readonly FileText = FileText;
-  protected readonly ChevronLeft = ChevronLeft;
-  protected readonly ChevronRight = ChevronRight;
-  protected readonly X = X;
-  protected readonly Shield = Shield;
-  protected readonly Building2 = Building2;
-  protected readonly Briefcase = Briefcase;
-  protected readonly Phone = Phone;
-  protected readonly Mail = Mail;
-  protected readonly Award = Award;
-  protected readonly Loader2 = Loader2;
+  protected readonly Users = LucideUsers;
+  protected readonly Plus = LucidePlus;
+  protected readonly Search = LucideSearch;
+  protected readonly Eye = LucideEye;
+  protected readonly BookOpen = LucideBookOpen;
+  protected readonly FileText = LucideFileText;
+  protected readonly ChevronLeft = LucideChevronLeft;
+  protected readonly ChevronRight = LucideChevronRight;
+  protected readonly X = LucideX;
+  protected readonly Shield = LucideShield;
+  protected readonly Building2 = LucideBuilding2;
+  protected readonly Briefcase = LucideBriefcase;
+  protected readonly Phone = LucidePhone;
+  protected readonly Mail = LucideMail;
+  protected readonly Award = LucideAward;
+  protected readonly Loader2 = LucideLoader2;
   private readonly router = inject(Router);
 
   protected trabajadores = signal<Trabajador[]>([]);

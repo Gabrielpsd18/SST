@@ -15,16 +15,16 @@
         {{ selectedLabel() || placeholder }}
       </span>
       @if (loading()) {
-        <lucide-icon [img]="Loader2" class="searchable-select__loader"></lucide-icon>
+        <svg lucideLoader2 class="searchable-select__loader" aria-hidden="true"></svg>
       } @else {
-        <lucide-icon [img]="ChevronDown" class="searchable-select__chevron"></lucide-icon>
+        <svg lucideChevronDown class="searchable-select__chevron" aria-hidden="true"></svg>
       }
     </button>
 
     @if (open()) {
       <div class="searchable-select__panel">
         <div class="searchable-select__search">
-          <lucide-icon [img]="Search" class="searchable-select__search-icon"></lucide-icon>
+          <svg lucideSearch class="searchable-select__search-icon" aria-hidden="true"></svg>
           <input
             #searchInput
             type="text"
