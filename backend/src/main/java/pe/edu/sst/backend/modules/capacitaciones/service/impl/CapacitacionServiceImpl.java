@@ -14,6 +14,11 @@ import pe.edu.sst.backend.modules.capacitaciones.repository.CapacitadorRepositor
 import pe.edu.sst.backend.modules.capacitaciones.service.CapacitacionService;
 import pe.edu.sst.backend.modules.trabajadores.entity.Trabajador;
 import pe.edu.sst.backend.modules.trabajadores.repository.TrabajadorRepository;
+import pe.edu.sst.backend.modules.identity.entity.Usuario;
+import pe.edu.sst.backend.modules.identity.entity.repository.UsuarioRepository;
+import pe.edu.sst.backend.modules.identity.enums.RoleName;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.Authentication;
 import pe.edu.sst.backend.shared.exception.ResourceNotFoundException;
 
 import java.util.HashSet;
@@ -27,6 +32,7 @@ public class CapacitacionServiceImpl implements CapacitacionService {
     private final CapacitacionRepository capacitacionRepository;
     private final CapacitadorRepository capacitadorRepository;
     private final TrabajadorRepository trabajadorRepository;
+    private final UsuarioRepository usuarioRepository;
 
     @Override
     @Transactional
@@ -167,6 +173,10 @@ public class CapacitacionServiceImpl implements CapacitacionService {
     @Override
     @Transactional(readOnly = true)
     public Page<CapacitacionResponse> listarPaginado(Pageable pageable) {
+        Long sedeId = obtenerSedeIdFiltro();
+        if (sedeId != null) {
+            return capacitacionRepository.findBySedeIdOrderByFechaProgramadaDesc(sedeId, pageable).map(this::mapToResponse);
+        }
         return capacitacionRepository.findAllByOrderByFechaProgramadaDesc(pageable).map(this::mapToResponse);
     }
 
@@ -226,5 +236,26 @@ public class CapacitacionServiceImpl implements CapacitacionService {
                 .createdAt(c.getCreatedAt())
                 .trabajadores(trabajadoresResp)
                 .build();
+    }
+
+    private Long obtenerSedeIdFiltro() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated()) {
+            return null;
+        }
+        String email = auth.getName();
+        if ("admin@sst.com".equals(email)) {
+            return null;
+        }
+        java.util.Optional<Usuario> optUser = usuarioRepository.findByEmail(email);
+        if (optUser.isEmpty()) {
+            return null;
+        }
+        Usuario user = optUser.get();
+        if (user.getRol().getNombre() == RoleName.ADMINISTRADOR) {
+            return null;
+        }
+        java.util.Optional<Trabajador> optTrabajador = trabajadorRepository.findByUsuarioId(user.getId());
+        return optTrabajador.map(t -> t.getSede() != null ? t.getSede().getId() : null).orElse(null);
     }
 }

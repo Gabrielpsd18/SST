@@ -5,6 +5,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import pe.edu.sst.backend.config.constants.ApiPaths;
 import pe.edu.sst.backend.modules.capacitaciones.dto.CapacitadorRequest;
 import pe.edu.sst.backend.modules.capacitaciones.dto.CapacitadorResponse;
 import pe.edu.sst.backend.modules.capacitaciones.service.CapacitadorService;
@@ -12,7 +14,7 @@ import pe.edu.sst.backend.modules.capacitaciones.service.CapacitadorService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/capacitadores")
+@RequestMapping(ApiPaths.CAPACITORES)
 @RequiredArgsConstructor
 public class CapacitadorController {
 

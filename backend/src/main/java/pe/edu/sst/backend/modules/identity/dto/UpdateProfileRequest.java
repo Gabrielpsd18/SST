@@ -16,4 +16,10 @@ public class UpdateProfileRequest {
 
     @Pattern(regexp = "^[0-9]{9}$", message = "El teléfono debe tener 9 dígitos")
     private String telefono;
+
+    @Email(message = "El correo corporativo debe ser válido")
+    private String email;
+
+    @jakarta.validation.constraints.Size(min = 6, message = "La contraseña debe tener al menos 6 caracteres")
+    private String password;
 }

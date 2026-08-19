@@ -44,7 +44,7 @@ export class CapacitacionesFormComponent implements OnInit {
   protected successMessage = signal<string>('');
 
   protected capacitacionForm!: FormGroup;
-
+  
   protected sedes = signal<any[]>([]);
   protected trabajadores = signal<any[]>([]);
   protected capacitadores = signal<any[]>([]);

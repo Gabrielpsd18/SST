@@ -101,7 +101,12 @@
 			<version>0.12.7</version>
 		</dependency>
 
-		<!-- Apache POI for Excel parsing -->
+		<!-- Apache POI for Excel parsing (add classic POI for .xls support) -->
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi</artifactId>
+			<version>5.2.3</version>
+		</dependency>
 		<dependency>
 			<groupId>org.apache.poi</groupId>
 			<artifactId>poi-ooxml</artifactId>

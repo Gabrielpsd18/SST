@@ -10,4 +10,7 @@ public final class ApiPaths {
     public static final String TRABAJADORES = API + "/trabajadores";
     public static final String CAPACITACIONES = API + "/capacitaciones";
     public static final String INSPECCIONES = API + "/inspecciones";
+    public static final String DASHBOARD = API + "/dashboard";
+    public static final String IMPORTACIONES = API + "/importaciones";
+    public static final String CAPACITORES = API + "/capacitadores";
 }

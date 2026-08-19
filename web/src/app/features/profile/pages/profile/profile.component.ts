@@ -45,7 +45,9 @@ export class ProfileComponent implements OnInit {
       sede: [{ value: '', disabled: true }],
       cargo: [{ value: '', disabled: true }],
       correoNotificaciones: ['', [Validators.required, Validators.email]],
-      telefono: ['', [Validators.required, Validators.pattern('^[0-9]{9}$')]]
+      telefono: ['', [Validators.required, Validators.pattern('^[0-9]{9}$')]],
+      email: ['', [Validators.required, Validators.email]],
+      password: ['']
     });
   }
 
@@ -66,7 +68,8 @@ export class ProfileComponent implements OnInit {
             sede: data.sede,
             cargo: data.cargo,
             correoNotificaciones: data.correoNotificaciones,
-            telefono: data.telefono
+            telefono: data.telefono,
+            email: data.email
           });
         }
         this.loadingData.set(false);
@@ -94,7 +97,9 @@ export class ProfileComponent implements OnInit {
 
     const request: UpdateProfileRequest = {
       correoNotificaciones: this.profileForm.value.correoNotificaciones,
-      telefono: this.profileForm.value.telefono
+      telefono: this.profileForm.value.telefono,
+      email: this.profileForm.value.email,
+      password: this.profileForm.value.password || undefined
     };
 
     this.userService.updateProfile(request).subscribe({

@@ -1,13 +1,14 @@
 <div class="trabajadores-import-container">
   <header class="page-header">
     <h2>Importar Trabajadores</h2>
-    <p>Seleccione un archivo Excel con los datos de los trabajadores.</p>
+    <p>Seleccione un archivo Excel con los datos de los trabajadores para implementarlos directamente.</p>
   </header>
 
   <div class="import-card">
     <div class="file-upload">
       <label class="btn btn--primary" for="excelFile">Seleccionar archivo Excel</label>
       <input id="excelFile" type="file" accept=".xlsx,.xls" (change)="onFileSelected($event)" />
+      <span *ngIf="selectedFile" class="file-name">{{ selectedFile.name }}</span>
     </div>
 
     <div class="options">
@@ -17,59 +18,86 @@
         <option value="THIS">Este</option>
         <option value="NEXT">Siguiente</option>
       </select>
-
     </div>
 
     <div class="actions">
-      <button class="btn btn--primary" (click)="upload()">Previsualizar / Validar</button>
-      <button class="btn btn--secondary" (click)="apply()" [disabled]="!batchId">Aplicar cambios</button>
+      <!-- Un solo botón para subir e implementar directamente -->
+      <button class="btn btn--primary" (click)="uploadAndProcess()" [disabled]="!selectedFile || loading">
+        {{ loading ? 'Procesando e Implementando...' : 'Implementar Importación' }}
+      </button>
     </div>
 
-    <div *ngIf="loading" class="loading">Procesando...</div>
-
-    <div *ngIf="preview">
-      <h3>Resumen</h3>
-      <ul>
-        <li>Total filas: {{ preview.totalRows }}</li>
-        <li>Duplicados: {{ preview.duplicates }}</li>
-        <li>Filas inválidas: {{ preview.invalidRows }}</li>
-        <li>Faltan sedes: {{ preview.missingSede }}</li>
-        <li>Faltan cargos: {{ preview.missingCargo }}</li>
-        <li>Posibles desactivaciones: {{ preview.wouldDeactivateCount }}</li>
-        <li>Nuevos previstos: {{ preview.newCount }}</li>
-        <li>Reactivados previstos: {{ preview.reactivatedCount }}</li>
-      </ul>
-
-      <h4>Muestra</h4>
-      <pre *ngIf="preview.sampleRows" style="max-height:200px; overflow:auto">{{ preview.sampleRows | json }}</pre>
+    <!-- Resumen de estadísticas del proceso -->
+    <div *ngIf="importResult" class="summary-section">
+      <h3>Resumen de Importación Reciente</h3>
+      <div class="summary-grid">
+        <div class="summary-card">
+          <span class="summary-card__value">{{ importResult.totalRows }}</span>
+          <span class="summary-card__label">Filas Procesadas</span>
+        </div>
+        <div class="summary-card summary-card--success">
+          <span class="summary-card__value">{{ importResult.correctRows }}</span>
+          <span class="summary-card__label">Guardados / Actualizados</span>
+        </div>
+        <div class="summary-card summary-card--warning">
+          <span class="summary-card__value">{{ importResult.errorsCount }}</span>
+          <span class="summary-card__label">Incidencias Detectadas</span>
+        </div>
+        <div class="summary-card summary-card--info">
+          <span class="summary-card__value">{{ importResult.duplicates }}</span>
+          <span class="summary-card__label">Duplicados en Excel</span>
+        </div>
+        <div class="summary-card summary-card--danger">
+          <span class="summary-card__value">{{ importResult.wouldDeactivateCount }}</span>
+          <span class="summary-card__label">Inactivados (Fuera del Excel)</span>
+        </div>
+      </div>
     </div>
 
-    <div *ngIf="issues && issues.length">
-      <h3>Issues detectados</h3>
-      <table>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Tipo</th>
-            <th>Detalles</th>
-            <th>Raw</th>
-            <th>Resuelto</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let issue of issues">
-            <td>{{ issue.id }}</td>
-            <td>{{ issue.issueType }}</td>
-            <td>{{ issue.issueDetails }}</td>
-            <td><pre style="max-width:200px">{{ issue.rawRowJson }}</pre></td>
-            <td>{{ issue.resolved ? 'Sí' : 'No' }}</td>
-            <td>
-              <button class="btn btn--sm" (click)="resolve(issue, 'CREATE_MISSING')" [disabled]="issue.resolved">Crear/marcar resuelto</button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+    <!-- Nueva Tabla Interactiva de Errores listos para corregir -->
+    <div *ngIf="pendingErrors && pendingErrors.length > 0" class="errors-section">
+      <div class="errors-header">
+        <h3>Incidencias Pendientes de Corrección ({{ pendingErrors.length }})</h3>
+        <p>Estos registros no pudieron importarse debido a inconsistencias de datos. Edite los valores directamente en la tabla y guárdelos, o descártelos.</p>
+      </div>
+
+      <div class="table-responsive">
+        <table class="error-table">
+          <thead>
+            <tr>
+              <th style="min-width: 100px;">DNI</th>
+              <th style="min-width: 180px;">Nombre del Trabajador</th>
+              <th style="min-width: 110px;">Teléfono</th>
+              <th style="min-width: 130px;">Sede</th>
+              <th style="min-width: 130px;">Cargo</th>
+              <th style="min-width: 180px;">Detalle de Incidencia</th>
+              <th style="min-width: 180px; text-align: center;">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let row of pendingErrors">
+              <td><input type="text" [(ngModel)]="row.dni" class="form-control-sm" [class.is-invalid]="isFieldInvalid(row, 'dni')" /></td>
+              <td><input type="text" [(ngModel)]="row.trabajador" class="form-control-sm" [class.is-invalid]="isFieldInvalid(row, 'trabajador')" /></td>
+              <td><input type="text" [(ngModel)]="row.telefono" class="form-control-sm" /></td>
+              <td><input type="text" [(ngModel)]="row.sede" class="form-control-sm" [class.is-invalid]="isFieldInvalid(row, 'sede')" /></td>
+              <td><input type="text" [(ngModel)]="row.cargo" class="form-control-sm" [class.is-invalid]="isFieldInvalid(row, 'cargo')" /></td>
+              <td>
+                <span class="badge-error" [title]="row.errorMessage">{{ row.errorMessage }}</span>
+              </td>
+              <td>
+                <div class="actions-cell">
+                  <button class="btn btn--sm btn--success" (click)="fixAndResendRow(row)" title="Guardar cambios de esta fila">
+                    Guardar
+                  </button>
+                  <button class="btn btn--sm btn--danger" (click)="discardError(row.id)" title="Descartar esta fila con error">
+                    Descartar
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 </div>

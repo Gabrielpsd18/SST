@@ -2,34 +2,35 @@ package pe.edu.sst.backend.modules.importaciones.service.impl;
 
 import lombok.AllArgsConstructor;
 import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import pe.edu.sst.backend.modules.importaciones.dto.ImportPreviewResult;
+import pe.edu.sst.backend.modules.importaciones.dto.ImportResultDTO;
+import pe.edu.sst.backend.modules.importaciones.dto.InvalidRowDetail;
 import pe.edu.sst.backend.modules.importaciones.entity.ImportBatch;
-import pe.edu.sst.backend.modules.importaciones.entity.ImportRowIssue;
 import pe.edu.sst.backend.modules.importaciones.entity.TrabajadorMesEstado;
 import pe.edu.sst.backend.modules.importaciones.repository.ImportAuditLogRepository;
 import pe.edu.sst.backend.modules.importaciones.repository.ImportBatchRepository;
-import pe.edu.sst.backend.modules.importaciones.repository.ImportRowIssueRepository;
+import pe.edu.sst.backend.modules.importaciones.repository.ImportErrorRepository;
 import pe.edu.sst.backend.modules.importaciones.repository.TrabajadorMesEstadoRepository;
 import pe.edu.sst.backend.modules.trabajadores.entity.Trabajador;
 import pe.edu.sst.backend.modules.trabajadores.repository.CargoRepository;
 import pe.edu.sst.backend.modules.trabajadores.repository.SedeRepository;
 import pe.edu.sst.backend.modules.trabajadores.repository.TrabajadorRepository;
 import pe.edu.sst.backend.modules.identity.entity.Usuario;
+import pe.edu.sst.backend.modules.identity.entity.Rol;
 import pe.edu.sst.backend.modules.identity.entity.repository.UsuarioRepository;
 import pe.edu.sst.backend.modules.identity.entity.repository.RolRepository;
 import pe.edu.sst.backend.modules.identity.enums.RoleName;
-import pe.edu.sst.backend.shared.exception.ResourceNotFoundException;
 import pe.edu.sst.backend.modules.importaciones.service.ImportService;
 import pe.edu.sst.backend.modules.importaciones.entity.ImportAuditLog;
 import pe.edu.sst.backend.modules.trabajadores.entity.Cargo;
 import pe.edu.sst.backend.modules.trabajadores.entity.Sede;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.io.InputStream;
 import java.time.YearMonth;
 import java.util.*;
@@ -40,7 +41,6 @@ import java.util.stream.Collectors;
 public class ImportServiceImpl implements ImportService {
 
     private final ImportBatchRepository importBatchRepository;
-    private final ImportRowIssueRepository importRowIssueRepository;
     private final TrabajadorMesEstadoRepository trabajadorMesEstadoRepository;
     private final ImportAuditLogRepository importAuditLogRepository;
     private final TrabajadorRepository trabajadorRepository;
@@ -48,15 +48,15 @@ public class ImportServiceImpl implements ImportService {
     private final CargoRepository cargoRepository;
     private final UsuarioRepository usuarioRepository;
     private final RolRepository rolRepository;
+    private final ImportErrorRepository importErrorRepository;
     private final PasswordEncoder passwordEncoder;
+    
 
     @Override
     @Transactional
-    public ImportPreviewResult previewImport(MultipartFile file, String monthOption) throws Exception {
-        // 1. Determinar periodo
+    public ImportResultDTO processAndImplementImport(MultipartFile file, String monthOption) throws Exception {
         YearMonth target = resolveYearMonth(monthOption);
 
-        // 2. Crear lote inicial
         ImportBatch batch = ImportBatch.builder()
                 .filename(file.getOriginalFilename())
                 .month(target.getMonthValue())
@@ -70,442 +70,393 @@ public class ImportServiceImpl implements ImportService {
                 .build();
         batch = importBatchRepository.save(batch);
 
-        // 3. Parsear Excel a estructura plana
         List<Map<String, String>> rows = parseExcel(file.getInputStream());
-
-        Map<String, Map<String, String>> excelByDni = new HashMap<>();
+        // ObjectMapper compartido con soporte para java.time.* para evitar InvalidDefinitionException al serializar entidades con LocalDateTime
+        ObjectMapper om = new ObjectMapper();
+        om.registerModule(new JavaTimeModule());
+        om.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        Map<String, Map<String, String>> validRowsByDni = new LinkedHashMap<>();
         Set<String> duplicateDnis = new HashSet<>();
-        int invalidRows = 0;
+        List<InvalidRowDetail> errors = new ArrayList<>();
+        // guardar errores en tabla temporal para que la UI los muestre siempre hasta que se corrijan o se descarten
+        List<pe.edu.sst.backend.modules.importaciones.entity.ImportError> persistedErrors = new ArrayList<>();
 
         for (int i = 0; i < rows.size(); i++) {
-            Map<String, String> r = rows.get(i);
-            String dni = r.getOrDefault("dni", "").trim();
+            Map<String, String> row = rows.get(i);
+            String dni = row.getOrDefault("dni", "").trim();
 
             if (dni.isEmpty() || !dni.matches("^[0-9]{6,20}$")) {
-                // Justo antes de validar el DNI, añade esto:
-                
-                ImportRowIssue issue = ImportRowIssue.builder()
-                        .importBatchId(batch.getId())
-                        .rowNumber(i + 1)
-                        .rawRowJson(r.toString())
-                        .issueType("INVALID_DNI")
-                        .issueDetails("DNI inválido")
-                        .resolved(false)
-                        .build();
-                importRowIssueRepository.save(issue);
+                errors.add(buildInvalidRow(row, "DNI inválido"));
                 continue;
             }
-            if (excelByDni.containsKey(dni)) {
+
+            if (validRowsByDni.containsKey(dni)) {
                 duplicateDnis.add(dni);
+                errors.add(buildInvalidRow(row, "DNI repetido en archivo"));
+                continue;
             }
-            excelByDni.putIfAbsent(dni, r);
+
+            String sedeNombre = row.getOrDefault("sede", "").trim();
+            String cargoNombre = row.getOrDefault("cargo", "").trim();
+
+            if (!sedeNombre.isEmpty() && sedeRepository.findByEstadoTrue().stream()
+                    .noneMatch(s -> s.getNombre().equalsIgnoreCase(sedeNombre))) {
+                errors.add(buildInvalidRow(row, "Sede no encontrada: " + sedeNombre));
+                continue;
+            }
+
+            if (!cargoNombre.isEmpty() && cargoRepository.findByEstadoTrue().stream()
+                    .noneMatch(c -> c.getNombre().equalsIgnoreCase(cargoNombre))) {
+                errors.add(buildInvalidRow(row, "Cargo no encontrado: " + cargoNombre));
+                continue;
+            }
+
+            validRowsByDni.put(dni, row);
         }
 
-        // 4. Buscar trabajadores activos en BD
-        List<Trabajador> activos = trabajadorRepository.findAll().stream()
-                .filter(t -> t.getEstado() != null && t.getEstado().equalsIgnoreCase("ACTIVO"))
-                .collect(Collectors.toList());
-
-        List<Trabajador> toDeactivate = activos.stream()
-                .filter(t -> !excelByDni.containsKey(t.getNumeroDocumento()))
-                .collect(Collectors.toList());
-
-        int missingSede = 0, missingCargo = 0;
-        List<Map<String, String>> sample = rows.stream().limit(20).collect(Collectors.toList());
-
-        // 5. Validar existencia de Sede y Cargo (Modo Estricto sin auto-creación)
-        for (Map.Entry<String, Map<String, String>> e : excelByDni.entrySet()) {
-            Map<String, String> r = e.getValue();
-            String sedeNombre = r.getOrDefault("sede", "").trim();
-            String cargoNombre = r.getOrDefault("cargo", "").trim();
-
-            if (!sedeNombre.isEmpty()) {
-                boolean exists = sedeRepository.findByEstadoTrue().stream()
-                        .anyMatch(s -> s.getNombre().equalsIgnoreCase(sedeNombre));
-                if (!exists) {
-                    missingSede++;
-                    importRowIssueRepository.save(ImportRowIssue.builder()
-                            .importBatchId(batch.getId())
-                            .rawRowJson(r.toString())
-                            .issueType("MISSING_SEDE")
-                            .issueDetails("Sede no encontrada: " + sedeNombre)
-                            .resolved(false)
-                            .build());
-                }
-            }
-
-            if (!cargoNombre.isEmpty()) {
-                boolean exists = cargoRepository.findAll().stream()
-                        .anyMatch(c -> c.getNombre().equalsIgnoreCase(cargoNombre));
-                if (!exists) {
-                    missingCargo++;
-                    importRowIssueRepository.save(ImportRowIssue.builder()
-                            .importBatchId(batch.getId())
-                            .rawRowJson(r.toString())
-                            .issueType("MISSING_CARGO")
-                            .issueDetails("Cargo no encontrado: " + cargoNombre)
-                            .resolved(false)
-                            .build());
-                }
+        // Persistir errores encontrados en tabla temporal para que la UI los consulte en la página de importaciones
+        for (InvalidRowDetail ir : errors) {
+            String errMsg = ir.getErrorMessage();
+            String dni = ir.getDni();
+            // evitar duplicados exactos
+            boolean exists = importErrorRepository.existsByImportBatchIdAndDniAndErrorMessage(batch.getId(), dni, errMsg);
+            if (!exists) {
+                pe.edu.sst.backend.modules.importaciones.entity.ImportError ie = pe.edu.sst.backend.modules.importaciones.entity.ImportError.builder()
+                        .importBatchId(batch.getId())
+                        .dni(ir.getDni())
+                        .trabajador(ir.getTrabajador())
+                        .telefono(ir.getTelefono())
+                        .sede(ir.getSede())
+                        .cargo(ir.getCargo())
+                        .errorMessage(ir.getErrorMessage())
+                        .createdAt(java.time.LocalDateTime.now())
+                        .build();
+                persistedErrors.add(importErrorRepository.save(ie));
             }
         }
 
-        // 6. Registrar duplicados como incidencias
-        for (String d : duplicateDnis) {
-            importRowIssueRepository.save(ImportRowIssue.builder()
-                    .importBatchId(batch.getId())
-                    .rawRowJson("DNI duplicate: " + d)
-                    .issueType("DUPLICATE")
-                    .issueDetails("DNI repetido en archivo")
-                    .resolved(false)
-                    .build());
-        }
-
-        // 7. Persistir filas válidas como ROW_DATA para que applyImport las procese
-        // luego
-        ObjectMapper om = new ObjectMapper();
-        for (Map.Entry<String, Map<String, String>> e : excelByDni.entrySet()) {
-            Map<String, String> r = e.getValue();
-            importRowIssueRepository.save(ImportRowIssue.builder()
-                    .importBatchId(batch.getId())
-                    .rawRowJson(om.writeValueAsString(r))
-                    .issueType("ROW_DATA")
-                    .resolved(false)
-                    .build());
-        }
-
-        // 8. Construir respuesta de previsualización
-        ImportPreviewResult result = ImportPreviewResult.builder()
-                .batchId(batch.getId())
-                .totalRows(rows.size())
-                .duplicates(duplicateDnis.size())
-                .invalidRows(invalidRows)
-                .missingSede(missingSede)
-                .missingCargo(missingCargo)
-                .newCount(0)
-                .reactivatedCount(0)
-                .wouldDeactivateCount(toDeactivate.size())
-                .errors(invalidRows + duplicateDnis.size() + missingSede + missingCargo)
-                .sampleRows(sample)
-                .build();
-
-        // 9. Dejar el lote en estado PENDIENTE esperando el "Aplicar cambios"
-        batch.setStatus("PENDING");
-        importBatchRepository.save(batch);
-
-        return result;
-    }
-
-    @Override
-    @Transactional
-    public ImportPreviewResult applyImport(Long batchId) throws Exception {
-        ImportBatch batch = importBatchRepository.findById(batchId)
-                .orElseThrow(() -> new ResourceNotFoundException("Batch not found"));
-        batch.setStatus("PROCESSING");
-        importBatchRepository.save(batch);
-
-        // Load all ROW_DATA entries for this batch
-        List<ImportRowIssue> rowDataIssues = importRowIssueRepository.findByImportBatchId(batchId).stream()
-                .filter(i -> "ROW_DATA".equals(i.getIssueType()))
-                .toList();
-
-        ObjectMapper om = new ObjectMapper();
-
-        Map<String, Map<String, String>> excelByDni = new HashMap<>();
-        for (ImportRowIssue r : rowDataIssues) {
-            try {
-                Map<String, String> map = om.readValue(r.getRawRowJson(), Map.class);
-                String dni = (map.getOrDefault("dni", "")).trim();
-                if (dni.isEmpty())
-                    continue;
-                excelByDni.put(dni, map);
-            } catch (Exception ex) {
-                // skip malformed
-            }
-
-        }
-
-        // Fetch all trabajadores from DB mapped by DNI
         List<Trabajador> allTrabajadores = trabajadorRepository.findAll();
-        Map<String, Trabajador> dbByDni = allTrabajadores.stream().filter(t -> t.getNumeroDocumento() != null)
+        Map<String, Trabajador> dbByDni = allTrabajadores.stream()
+                .filter(t -> t.getNumeroDocumento() != null)
                 .collect(Collectors.toMap(Trabajador::getNumeroDocumento, t -> t, (a, b) -> a));
 
-        // Deactivate actuales activos not in excel
-        List<Trabajador> activos = allTrabajadores.stream()
+        int deactivated = 0;
+        for (Trabajador trabajador : allTrabajadores.stream()
                 .filter(t -> t.getEstado() != null && t.getEstado().equalsIgnoreCase("ACTIVO"))
-                .collect(Collectors.toList());
-        int deactivated = 0, created = 0, reactivated = 0, updated = 0, errors = 0;
-        for (Trabajador t : activos) {
-            if (!excelByDni.containsKey(t.getNumeroDocumento())) {
-                try {
-                    String before = om.writeValueAsString(t);
-                    t.setEstado("INACTIVO");
-                    trabajadorRepository.save(t);
-                    trabajadorMesEstadoRepository.save(TrabajadorMesEstado.builder()
-                            .trabajadorId(t.getId())
-                            .importBatchId(batch.getId())
-                            .month(batch.getMonth())
-                            .year(batch.getYear())
-                            .estado("INACTIVO")
-                            .build());
-                    // audit
-                    ImportAuditLog log = ImportAuditLog
-                            .builder()
-                            .importBatchId(batch.getId())
-                            .trabajadorId(t.getId())
-                            .action("DEACTIVATE")
-                            .beforeJson(before)
-                            .afterJson(om.writeValueAsString(t))
-                            .build();
-                    importAuditLogRepository.save(log);
-                    deactivated++;
-                } catch (Exception ex) {
-                    deactivated++;
-                }
+                .collect(Collectors.toList())) {
+            if (!validRowsByDni.containsKey(trabajador.getNumeroDocumento())) {
+                String before = om.writeValueAsString(trabajador);
+                trabajador.setEstado("INACTIVO");
+                trabajadorRepository.save(trabajador);
+                trabajadorMesEstadoRepository.save(TrabajadorMesEstado.builder()
+                        .trabajadorId(trabajador.getId())
+                        .importBatchId(batch.getId())
+                        .month(batch.getMonth())
+                        .year(batch.getYear())
+                        .estado("INACTIVO")
+                        .build());
+                importAuditLogRepository.save(ImportAuditLog.builder()
+                        .importBatchId(batch.getId())
+                        .trabajadorId(trabajador.getId())
+                        .action("DEACTIVATE")
+                        .beforeJson(before)
+                        .afterJson(om.writeValueAsString(trabajador))
+                        .build());
+                deactivated++;
             }
         }
 
-        // Process excel rows
-        for (Map.Entry<String, Map<String, String>> e : excelByDni.entrySet()) {
-            String dni = e.getKey();
-            Map<String, String> row = e.getValue();
-            try {
-                Trabajador existing = dbByDni.get(dni);
-                String nombre = row.getOrDefault("nombrecompleto", row.getOrDefault("nombre", "")).trim();
-                String telefono = row.getOrDefault("telefono", "").trim();
-                String correo = row.getOrDefault("correo", "").trim();
-                String sedeNombre = row.getOrDefault("sede", "").trim();
-                String cargoNombre = row.getOrDefault("cargo", "").trim();
+        int created = 0;
+        int reactivated = 0;
+        int updated = 0;
+        // asegurarse de que exista el rol TRABAJADOR; si no existe, crearlo automáticamente para evitar excepciones y 500s
+        Rol rolTrabajador = rolRepository.findByNombre(RoleName.TRABAJADOR)
+                .orElseGet(() -> rolRepository.save(Rol.builder().nombre(RoleName.TRABAJADOR).descripcion("Creado automáticamente").build()));
 
-                // find sede and cargo if exists
-                Sede sedeEnt = null;
-                if (!sedeNombre.isEmpty()) {
-                    var sede = sedeRepository.findByEstadoTrue().stream()
-                            .filter(s -> s.getNombre().equalsIgnoreCase(sedeNombre)).findFirst();
-                    if (sede.isPresent())
-                        sedeEnt = sede.get();
-                }
-                Cargo cargoEnt = null;
-                if (!cargoNombre.isEmpty()) {
-                    var cargo = cargoRepository.findByEstadoTrue().stream()
-                            .filter(c -> c.getNombre().equalsIgnoreCase(cargoNombre)).findFirst();
-                    if (cargo.isPresent())
-                        cargoEnt = cargo.get();
-                }
+        for (Map.Entry<String, Map<String, String>> entry : validRowsByDni.entrySet()) {
+            Map<String, String> row = entry.getValue();
+            String dni = entry.getKey();
+            Trabajador existing = dbByDni.get(dni);
 
-                if (existing == null) {
-                    // create user and trabajador
+            String nombre = row.getOrDefault("nombrecompleto", row.getOrDefault("nombre", "")).trim();
+            String telefono = row.getOrDefault("telefono", "").trim();
+            String correo = row.getOrDefault("correo", "").trim();
+            String sedeNombre = row.getOrDefault("sede", "").trim();
+            String cargoNombre = row.getOrDefault("cargo", "").trim();
+
+            Sede sedeEnt = null;
+            if (!sedeNombre.isEmpty()) {
+                sedeEnt = sedeRepository.findByEstadoTrue().stream()
+                        .filter(s -> s.getNombre().equalsIgnoreCase(sedeNombre))
+                        .findFirst()
+                        .orElse(null);
+            }
+
+            Cargo cargoEnt = null;
+            if (!cargoNombre.isEmpty()) {
+                cargoEnt = cargoRepository.findByEstadoTrue().stream()
+                        .filter(c -> c.getNombre().equalsIgnoreCase(cargoNombre))
+                        .findFirst()
+                        .orElse(null);
+            }
+
+            if (existing == null) {
+                Usuario user = Usuario.builder()
+                        .email(dni + "@sst.com")
+                        .password(passwordEncoder.encode(dni))
+                        .activo(true)
+                        .rol(rolTrabajador)
+                        .build();
+                user = usuarioRepository.save(user);
+
+                Trabajador nuevo = Trabajador.builder()
+                        .tipoDocumento("DNI")
+                        .numeroDocumento(dni)
+                        .nombreCompleto(nombre)
+                        .telefono(telefono.isEmpty() ? null : telefono)
+                        .correoNotificaciones(correo.isEmpty() ? null : correo)
+                        .tipoContrato("TEMPORAL")
+                        .sede(sedeEnt != null ? sedeEnt : sedeRepository.findByEstadoTrue().stream().findFirst().orElse(null))
+                        .cargo(cargoEnt != null ? cargoEnt : cargoRepository.findByEstadoTrue().stream().findFirst().orElse(null))
+                        .usuarioId(user.getId())
+                        .estado("ACTIVO")
+                        .build();
+                trabajadorRepository.save(nuevo);
+                trabajadorMesEstadoRepository.save(TrabajadorMesEstado.builder()
+                        .trabajadorId(nuevo.getId())
+                        .importBatchId(batch.getId())
+                        .month(batch.getMonth())
+                        .year(batch.getYear())
+                        .estado("ACTIVO")
+                        .build());
+                importAuditLogRepository.save(ImportAuditLog.builder()
+                        .importBatchId(batch.getId())
+                        .trabajadorId(nuevo.getId())
+                        .action("CREATE")
+                        .beforeJson(null)
+                        .afterJson(om.writeValueAsString(nuevo))
+                        .build());
+                created++;
+                continue;
+            }
+
+            if (existing.getEstado() != null && existing.getEstado().equalsIgnoreCase("INACTIVO")) {
+                existing.setEstado("ACTIVO");
+                Usuario usr = existing.getUsuarioId() != null ? usuarioRepository.findById(existing.getUsuarioId()).orElse(null) : null;
+                if (usr == null) {
                     Usuario user = Usuario.builder()
                             .email(dni + "@sst.com")
                             .password(passwordEncoder.encode(dni))
                             .activo(true)
-                            .rol(rolRepository.findByNombre(RoleName.TRABAJADOR).orElseThrow())
+                            .rol(rolTrabajador)
                             .build();
                     user = usuarioRepository.save(user);
-
-                    Trabajador nuevo = Trabajador.builder()
-                            .tipoDocumento("DNI")
-                            .numeroDocumento(dni)
-                            .nombreCompleto(nombre)
-                            .telefono(telefono.isEmpty() ? null : telefono)
-                            .correoNotificaciones(correo.isEmpty() ? null : correo)
-                            .tipoContrato("TEMPORAL")
-                            .sede(sedeEnt != null ? sedeEnt
-                                    : sedeRepository.findByEstadoTrue().stream().findFirst().orElse(null))
-                            .cargo(cargoEnt != null ? cargoEnt
-                                    : cargoRepository.findByEstadoTrue().stream().findFirst().orElse(null))
-                            .usuarioId(user.getId())
-                            .estado("ACTIVO")
-                            .build();
-                    // Save trabajador
-                    trabajadorRepository.save(nuevo);
-                    trabajadorMesEstadoRepository.save(TrabajadorMesEstado.builder()
-                            .trabajadorId(nuevo.getId())
-                            .importBatchId(batch.getId())
-                            .month(batch.getMonth())
-                            .year(batch.getYear())
-                            .estado("ACTIVO")
-                            .build());
-                    // audit create
-                    try {
-                        String after = om.writeValueAsString(nuevo);
-                        ImportAuditLog log = ImportAuditLog
-                                .builder()
-                                .importBatchId(batch.getId())
-                                .trabajadorId(nuevo.getId())
-                                .action("CREATE")
-                                .beforeJson(null)
-                                .afterJson(after)
-                                .build();
-                        importAuditLogRepository.save(log);
-                    } catch (Exception ex) {
-                    }
-                    created++;
+                    existing.setUsuarioId(user.getId());
                 } else {
-                    // exists
-                    if (existing.getEstado() != null && existing.getEstado().equalsIgnoreCase("INACTIVO")) {
-                        existing.setEstado("ACTIVO");
-                        // reset or create user
-                        Usuario usr = null;
-                        if (existing.getUsuarioId() != null) {
-                            usr = usuarioRepository.findById(existing.getUsuarioId()).orElse(null);
-                        }
-                        if (usr == null) {
-                            Usuario user = Usuario.builder()
-                                    .email(dni + "@sst.com")
-                                    .password(passwordEncoder.encode(dni))
-                                    .activo(true)
-                                    .rol(rolRepository.findByNombre(RoleName.TRABAJADOR).orElseThrow())
-                                    .build();
-                            user = usuarioRepository.save(user);
-                            existing.setUsuarioId(user.getId());
-                        } else {
-                            usr.setEmail(dni + "@sst.com");
-                            usr.setPassword(passwordEncoder.encode(dni));
-                            usr.setActivo(true);
-                            usuarioRepository.save(usr);
-                        }
-
-                        // update fields
-                        try {
-                            String before = om.writeValueAsString(existing);
-                            existing.setNombreCompleto(nombre.isEmpty() ? existing.getNombreCompleto() : nombre);
-                            existing.setTelefono(telefono.isEmpty() ? existing.getTelefono() : telefono);
-                            existing.setCorreoNotificaciones(
-                                    correo.isEmpty() ? existing.getCorreoNotificaciones() : correo);
-                            if (sedeEnt != null)
-                                existing.setSede(sedeEnt);
-                            if (cargoEnt != null)
-                                existing.setCargo(cargoEnt);
-                            trabajadorRepository.save(existing);
-                            trabajadorMesEstadoRepository.save(TrabajadorMesEstado.builder()
-                                    .trabajadorId(existing.getId())
-                                    .importBatchId(batch.getId())
-                                    .month(batch.getMonth())
-                                    .year(batch.getYear())
-                                    .estado("ACTIVO")
-                                    .build());
-                            // audit
-                            ImportAuditLog log = ImportAuditLog
-                                    .builder()
-                                    .importBatchId(batch.getId())
-                                    .trabajadorId(existing.getId())
-                                    .action("REACTIVATE_OR_UPDATE")
-                                    .beforeJson(before)
-                                    .afterJson(om.writeValueAsString(existing))
-                                    .build();
-                            importAuditLogRepository.save(log);
-                        } catch (Exception ex) {
-                        }
-                        reactivated++;
-                    } else {
-                        // active: update selected fields
-                        try {
-                            String before = om.writeValueAsString(existing);
-                            existing.setNombreCompleto(nombre.isEmpty() ? existing.getNombreCompleto() : nombre);
-                            existing.setTelefono(telefono.isEmpty() ? existing.getTelefono() : telefono);
-                            existing.setCorreoNotificaciones(
-                                    correo.isEmpty() ? existing.getCorreoNotificaciones() : correo);
-                            if (sedeEnt != null)
-                                existing.setSede(sedeEnt);
-                            if (cargoEnt != null)
-                                existing.setCargo(cargoEnt);
-                            trabajadorRepository.save(existing);
-                            trabajadorMesEstadoRepository.save(TrabajadorMesEstado.builder()
-                                    .trabajadorId(existing.getId())
-                                    .importBatchId(batch.getId())
-                                    .month(batch.getMonth())
-                                    .year(batch.getYear())
-                                    .estado("ACTIVO")
-                                    .build());
-                            ImportAuditLog log = ImportAuditLog
-                                    .builder()
-                                    .importBatchId(batch.getId())
-                                    .trabajadorId(existing.getId())
-                                    .action("UPDATE")
-                                    .beforeJson(before)
-                                    .afterJson(om.writeValueAsString(existing))
-                                    .build();
-                            importAuditLogRepository.save(log);
-                        } catch (Exception ex) {
-                        }
-                        updated++;
-                    }
+                    usr.setEmail(dni + "@sst.com");
+                    usr.setPassword(passwordEncoder.encode(dni));
+                    usr.setActivo(true);
+                    usuarioRepository.save(usr);
                 }
-            } catch (Exception ex) {
-                errors++;
+
+                String before = om.writeValueAsString(existing);
+                existing.setNombreCompleto(nombre.isEmpty() ? existing.getNombreCompleto() : nombre);
+                existing.setTelefono(telefono.isEmpty() ? existing.getTelefono() : telefono);
+                existing.setCorreoNotificaciones(correo.isEmpty() ? existing.getCorreoNotificaciones() : correo);
+                if (sedeEnt != null) existing.setSede(sedeEnt);
+                if (cargoEnt != null) existing.setCargo(cargoEnt);
+                trabajadorRepository.save(existing);
+                trabajadorMesEstadoRepository.save(TrabajadorMesEstado.builder()
+                        .trabajadorId(existing.getId())
+                        .importBatchId(batch.getId())
+                        .month(batch.getMonth())
+                        .year(batch.getYear())
+                        .estado("ACTIVO")
+                        .build());
+                importAuditLogRepository.save(ImportAuditLog.builder()
+                        .importBatchId(batch.getId())
+                        .trabajadorId(existing.getId())
+                        .action("REACTIVATE_OR_UPDATE")
+                        .beforeJson(before)
+                        .afterJson(om.writeValueAsString(existing))
+                        .build());
+                reactivated++;
+                continue;
             }
+
+            String before = om.writeValueAsString(existing);
+            existing.setNombreCompleto(nombre.isEmpty() ? existing.getNombreCompleto() : nombre);
+            existing.setTelefono(telefono.isEmpty() ? existing.getTelefono() : telefono);
+            existing.setCorreoNotificaciones(correo.isEmpty() ? existing.getCorreoNotificaciones() : correo);
+            if (sedeEnt != null) existing.setSede(sedeEnt);
+            if (cargoEnt != null) existing.setCargo(cargoEnt);
+            trabajadorRepository.save(existing);
+            trabajadorMesEstadoRepository.save(TrabajadorMesEstado.builder()
+                    .trabajadorId(existing.getId())
+                    .importBatchId(batch.getId())
+                    .month(batch.getMonth())
+                    .year(batch.getYear())
+                    .estado("ACTIVO")
+                    .build());
+            importAuditLogRepository.save(ImportAuditLog.builder()
+                    .importBatchId(batch.getId())
+                    .trabajadorId(existing.getId())
+                    .action("UPDATE")
+                    .beforeJson(before)
+                    .afterJson(om.writeValueAsString(existing))
+                    .build());
+            updated++;
         }
 
         batch.setSummaryCreated(created);
         batch.setSummaryReactivated(reactivated);
         batch.setSummaryDeactivated(deactivated);
         batch.setSummaryUpdated(updated);
-        batch.setSummaryErrors(errors);
+        batch.setSummaryErrors(errors.size() + duplicateDnis.size());
         batch.setStatus("COMPLETED");
         importBatchRepository.save(batch);
 
-        return ImportPreviewResult.builder()
-                .batchId(batch.getId())
-                .totalRows(rowDataIssues.size())
-                .newCount(created)
-                .reactivatedCount(reactivated)
+        return ImportResultDTO.builder()
+                .totalRows(rows.size())
+                .correctRows(created + reactivated + updated)
+                .errorsCount(errors.size())
+                .duplicates(duplicateDnis.size())
                 .wouldDeactivateCount(deactivated)
                 .errors(errors)
+                .build();
+    }    @Override
+    @Transactional
+    public void processSingleRow(InvalidRowDetail rowDetail) throws Exception {
+        if (rowDetail == null || rowDetail.getDni() == null || rowDetail.getDni().isBlank()) {
+            throw new IllegalArgumentException("El DNI no puede estar vacío");
+        }
+
+        Map<String, String> row = new HashMap<>();
+        row.put("dni", rowDetail.getDni().trim());
+        row.put("nombrecompleto", rowDetail.getTrabajador() != null ? rowDetail.getTrabajador().trim() : "");
+        row.put("telefono", rowDetail.getTelefono() != null ? rowDetail.getTelefono().trim() : "");
+        row.put("sede", rowDetail.getSede() != null ? rowDetail.getSede().trim() : "");
+        row.put("cargo", rowDetail.getCargo() != null ? rowDetail.getCargo().trim() : "");
+
+        String dni = row.get("dni");
+        if (dni.isEmpty() || !dni.matches("^[0-9]{6,20}$")) {
+            throw new IllegalArgumentException("DNI inválido (debe tener entre 6 y 20 dígitos numéricos)");
+        }
+
+        String nombre = row.getOrDefault("nombrecompleto", "").trim();
+        if (nombre.isEmpty()) {
+            throw new IllegalArgumentException("El nombre del trabajador no puede estar vacío");
+        }
+
+        String sedeNombre = row.getOrDefault("sede", "").trim();
+        if (sedeNombre.isEmpty()) {
+            throw new IllegalArgumentException("La sede no puede estar vacía");
+        }
+        Sede sedeEnt = sedeRepository.findByEstadoTrue().stream()
+                .filter(s -> s.getNombre().equalsIgnoreCase(sedeNombre))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Sede no encontrada: " + sedeNombre));
+
+        String cargoNombre = row.getOrDefault("cargo", "").trim();
+        if (cargoNombre.isEmpty()) {
+            throw new IllegalArgumentException("El cargo no puede estar vacío");
+        }
+        Cargo cargoEnt = cargoRepository.findByEstadoTrue().stream()
+                .filter(c -> c.getNombre().equalsIgnoreCase(cargoNombre))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Cargo no encontrado: " + cargoNombre));
+
+        String telefono = row.getOrDefault("telefono", "").trim();
+        String correo = row.getOrDefault("correo", "").trim();
+
+        Trabajador existing = trabajadorRepository.findByNumeroDocumento(dni).orElse(null);
+
+        if (existing == null) {
+            Usuario user = Usuario.builder()
+                    .email(dni + "@sst.com")
+                    .password(passwordEncoder.encode(dni))
+                    .activo(true)
+                    .rol(rolRepository.findByNombre(RoleName.TRABAJADOR).orElseGet(() -> rolRepository.save(Rol.builder().nombre(RoleName.TRABAJADOR).descripcion("Creado automáticamente").build())))
+                    .build();
+            user = usuarioRepository.save(user);
+
+            Trabajador nuevo = Trabajador.builder()
+                    .tipoDocumento("DNI")
+                    .numeroDocumento(dni)
+                    .nombreCompleto(nombre)
+                    .telefono(telefono.isEmpty() ? null : telefono)
+                    .correoNotificaciones(correo.isEmpty() ? null : correo)
+                    .tipoContrato("TEMPORAL")
+                    .sede(sedeEnt)
+                    .cargo(cargoEnt)
+                    .usuarioId(user.getId())
+                    .estado("ACTIVO")
+                    .build();
+            trabajadorRepository.save(nuevo);
+
+            // si procesamos correctamente la fila, borrar cualquier error pendiente para este dni
+            java.util.List<pe.edu.sst.backend.modules.importaciones.entity.ImportError> existingErrors = importErrorRepository.findByDni(dni);
+            if (existingErrors != null && !existingErrors.isEmpty()) {
+                importErrorRepository.deleteAll(existingErrors);
+            }
+            return;
+        }
+
+        existing.setNombreCompleto(nombre);
+        existing.setTelefono(telefono.isEmpty() ? null : telefono);
+        existing.setCorreoNotificaciones(correo.isEmpty() ? null : correo);
+        existing.setSede(sedeEnt);
+        existing.setCargo(cargoEnt);
+        existing.setEstado("ACTIVO");
+        trabajadorRepository.save(existing);
+
+        // si se procesó correctamente, borrar errores pendientes para este dni
+        java.util.List<pe.edu.sst.backend.modules.importaciones.entity.ImportError> existingErrors = importErrorRepository.findByDni(dni);
+        if (existingErrors != null && !existingErrors.isEmpty()) {
+            importErrorRepository.deleteAll(existingErrors);
+        }
+    }
+
+    private InvalidRowDetail buildInvalidRow(Map<String, String> row, String message) {
+        return InvalidRowDetail.builder()
+                .dni(row.getOrDefault("dni", "").trim())
+                .trabajador(row.getOrDefault("nombrecompleto", row.getOrDefault("nombre", "")).trim())
+                .telefono(row.getOrDefault("telefono", "").trim())
+                .sede(row.getOrDefault("sede", "").trim())
+                .cargo(row.getOrDefault("cargo", "").trim())
+                .errorMessage(message)
                 .build();
     }
 
     @Override
-    public List<ImportRowIssue> listIssues(Long batchId) {
-        return importRowIssueRepository.findByImportBatchId(batchId);
+    public java.util.List<pe.edu.sst.backend.modules.importaciones.entity.ImportError> getPendingErrors() {
+        return importErrorRepository.findByOrderByCreatedAtDesc();
     }
 
     @Override
-    @Transactional
-    public void resolveIssue(Long batchId, Long issueId, String action) {
-        ImportRowIssue issue = importRowIssueRepository
-                .findById(issueId).orElseThrow();
-        // support some automatic actions
-        if ("CREATE_MISSING".equalsIgnoreCase(action) || action != null && action.startsWith("CREATE_MISSING")) {
-            // attempt to parse rawRowJson to extract sede/cargo names
-            try {
-                ObjectMapper om = new ObjectMapper();
-                Map<String, String> row = om.readValue(issue.getRawRowJson(), Map.class);
-                String sedeNombre = row.getOrDefault("sede", "").trim();
-                String cargoNombre = row.getOrDefault("cargo", "").trim();
-                if (!sedeNombre.isEmpty()) {
-                    boolean exists = sedeRepository.findByEstadoTrue().stream()
-                            .anyMatch(s -> s.getNombre().equalsIgnoreCase(sedeNombre));
-                    if (!exists) {
-                        Sede newSede = Sede
-                                .builder()
-                                .nombre(sedeNombre)
-                                .estado(true)
-                                .build();
-                        sedeRepository.save(newSede);
-                    }
-                }
-                if (!cargoNombre.isEmpty()) {
-                    boolean exists = cargoRepository.findAll().stream()
-                            .anyMatch(c -> c.getNombre().equalsIgnoreCase(cargoNombre));
-                    if (!exists) {
-                        Cargo newCargo = Cargo
-                                .builder()
-                                .nombre(cargoNombre)
-                                .estado(true)
-                                .build();
-                        cargoRepository.save(newCargo);
-                    }
-                }
-            } catch (Exception ex) {
-                // ignore parse errors
-            }
-        }
-        issue.setResolved(true);
-        issue.setActionTaken(action);
-        issue.setResolvedAt(java.time.LocalDateTime.now());
-        importRowIssueRepository.save(issue);
+    public void deletePendingError(Long id) {
+        if (id == null) return;
+        importErrorRepository.deleteById(id);
     }
+
+    @Override
+    public void retryPendingError(Long id) throws Exception {
+        var opt = importErrorRepository.findById(id);
+        if (opt.isEmpty()) return;
+        var ie = opt.get();
+        InvalidRowDetail row = InvalidRowDetail.builder()
+                .dni(ie.getDni())
+                .trabajador(ie.getTrabajador())
+                .telefono(ie.getTelefono())
+                .sede(ie.getSede())
+                .cargo(ie.getCargo())
+                .build();
+        // intentar procesar la fila
+        processSingleRow(row);
+        // si no lanza excepción, borrar el error pendiente
+        importErrorRepository.deleteById(id);
+    }
+
 
     private YearMonth resolveYearMonth(String monthOption) {
         YearMonth now = YearMonth.now();
@@ -533,13 +484,50 @@ public class ImportServiceImpl implements ImportService {
         }
     }
 
+    private String normalizeHeader(String header) {
+        if (header == null) return "";
+        // Remove accents/diacritics
+        String normalized = java.text.Normalizer.normalize(header, java.text.Normalizer.Form.NFD);
+        normalized = normalized.replaceAll("\\p{M}", "");
+        
+        // Lowercase and trim
+        normalized = normalized.trim().toLowerCase();
+        
+        // Remove non-alphanumeric characters
+        normalized = normalized.replaceAll("[^a-z0-9]", "");
+        
+        // Map common aliases
+        if (normalized.equals("nombres") || normalized.equals("nombre") || normalized.equals("nombrecompleto") 
+                || normalized.equals("nombresyapellidos") || normalized.equals("apellidosynombres") 
+                || normalized.equals("trabajador")) {
+            return "nombrecompleto";
+        }
+        if (normalized.equals("dni") || normalized.equals("documento") || normalized.equals("nrodocumento") 
+                || normalized.equals("numerodocumento") || normalized.equals("nrodoc")) {
+            return "dni";
+        }
+        if (normalized.equals("telefono") || normalized.equals("celular") || normalized.equals("telf")) {
+            return "telefono";
+        }
+        if (normalized.equals("sede") || normalized.equals("oficina") || normalized.equals("local")) {
+            return "sede";
+        }
+        if (normalized.equals("cargo") || normalized.equals("puesto") || normalized.equals("funcion") || normalized.equals("rol")) {
+            return "cargo";
+        }
+        if (normalized.equals("correo") || normalized.equals("email") || normalized.equals("mail") 
+                || normalized.equals("correoelectronico") || normalized.equals("correonotificaciones")) {
+            return "correo";
+        }
+        
+        return normalized;
+    }
+
     private List<Map<String, String>> parseExcel(InputStream is) throws Exception {
         List<Map<String, String>> rows = new ArrayList<>();
         Workbook wb = WorkbookFactory.create(is);
         Sheet sheet = wb.getSheetAt(0);
 
-        // DataFormatter lee el valor de la celda tal como lo muestra Excel (evita .0 en
-        // números y respeta formatos)
         DataFormatter dataFormatter = new DataFormatter();
 
         Iterator<Row> it = sheet.rowIterator();
@@ -549,7 +537,7 @@ public class ImportServiceImpl implements ImportService {
         Row header = it.next();
         List<String> headers = new ArrayList<>();
         for (Cell c : header) {
-            headers.add(dataFormatter.formatCellValue(c).trim().toLowerCase());
+            headers.add(normalizeHeader(dataFormatter.formatCellValue(c)));
         }
 
         while (it.hasNext()) {
@@ -559,7 +547,6 @@ public class ImportServiceImpl implements ImportService {
                 Cell c = r.getCell(i);
                 String val = "";
                 if (c != null) {
-                    // Formatea la celda a texto plano de manera segura y moderna
                     val = dataFormatter.formatCellValue(c).trim();
                 }
                 map.put(headers.get(i), val);
@@ -570,3 +557,7 @@ public class ImportServiceImpl implements ImportService {
         return rows;
     }
 }
+
+
+
+

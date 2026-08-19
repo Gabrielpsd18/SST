@@ -11,6 +11,9 @@ import pe.edu.sst.backend.modules.identity.service.UserService;
 import pe.edu.sst.backend.modules.trabajadores.entity.Trabajador;
 import pe.edu.sst.backend.modules.trabajadores.repository.TrabajadorRepository;
 import pe.edu.sst.backend.shared.exception.ResourceNotFoundException;
+import pe.edu.sst.backend.shared.exception.BadRequestException;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import pe.edu.sst.backend.security.jwt.JwtService;
 
 @Service
 @RequiredArgsConstructor
@@ -18,6 +21,8 @@ public class UserServiceImpl implements UserService {
 
     private final UsuarioRepository usuarioRepository;
     private final TrabajadorRepository trabajadorRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
 
     @Override
     @Transactional(readOnly = true)
@@ -46,8 +51,34 @@ public class UserServiceImpl implements UserService {
             trabajador.setTelefono(request.getTelefono());
         }
 
+        String newToken = null;
+        boolean userChanged = false;
+
+        if (request.getEmail() != null && !request.getEmail().isBlank() && !request.getEmail().equalsIgnoreCase(usuario.getEmail())) {
+            String newEmail = request.getEmail().trim().toLowerCase();
+            if (usuarioRepository.existsByEmail(newEmail)) {
+                throw new BadRequestException("El correo corporativo ya está registrado por otro usuario");
+            }
+            usuario.setEmail(newEmail);
+            userChanged = true;
+        }
+
+        if (request.getPassword() != null && !request.getPassword().isBlank()) {
+            usuario.setPassword(passwordEncoder.encode(request.getPassword()));
+            userChanged = true;
+        }
+
+        if (userChanged) {
+            Usuario usuarioGuardado = usuarioRepository.save(usuario);
+            newToken = jwtService.generateToken(usuarioGuardado.getEmail());
+        }
+
         Trabajador guardado = trabajadorRepository.save(trabajador);
-        return mapToProfileResponse(usuario, guardado);
+        UserProfileResponse response = mapToProfileResponse(usuario, guardado);
+        if (newToken != null) {
+            response.setToken(newToken);
+        }
+        return response;
     }
 
     private UserProfileResponse mapToProfileResponse(Usuario usuario, Trabajador t) {

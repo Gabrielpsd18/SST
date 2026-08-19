@@ -1,0 +1,235 @@
+<section class="reports">
+
+  <header class="reports__header">
+    <div>
+      <h1>Reportes SST</h1>
+      <p>
+        Consulta las principales estadísticas del sistema
+        y descarga los resultados en formato CSV.
+      </p>
+    </div>
+  </header>
+
+
+  @if (loading()) {
+
+    <div class="reports__loading">
+      <p>Cargando estadísticas...</p>
+    </div>
+
+  } @else if (error()) {
+
+    <div class="reports__error">
+      <p>{{ error() }}</p>
+    </div>
+
+  } @else if (dashboard()) {
+
+    <!-- ========================= -->
+    <!-- RESUMEN -->
+    <!-- ========================= -->
+
+    <section class="reports-section">
+
+      <div class="reports-section__header">
+        <div>
+          <h2>Resumen general</h2>
+          <p>Indicadores principales del sistema SST.</p>
+        </div>
+
+        <button
+          type="button"
+          class="report-button"
+          (click)="descargarResumenCSV()"
+        >
+          Descargar CSV
+        </button>
+      </div>
+
+
+      <div class="summary-grid">
+
+        <div class="summary-card">
+          <span>Trabajadores</span>
+          <strong>
+            {{ dashboard()!.totalTrabajadores }}
+          </strong>
+        </div>
+
+        <div class="summary-card">
+          <span>Capacitaciones</span>
+          <strong>
+            {{ dashboard()!.totalCapacitaciones }}
+          </strong>
+        </div>
+
+        <div class="summary-card">
+          <span>Inspecciones</span>
+          <strong>
+            {{ dashboard()!.totalInspecciones }}
+          </strong>
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ========================= -->
+    <!-- TRABAJADORES -->
+    <!-- ========================= -->
+
+    <section class="reports-section">
+
+      <div class="reports-section__header">
+
+        <div>
+          <h2>Trabajadores</h2>
+          <p>
+            Distribución de trabajadores por sede.
+          </p>
+        </div>
+
+        <button
+          type="button"
+          class="report-button"
+          (click)="descargarTrabajadoresCSV()"
+        >
+          Descargar CSV
+        </button>
+
+      </div>
+
+
+      <div class="report-table">
+
+        @for (
+          item of dashboard()!.trabajadoresPorSede | keyvalue;
+          track item.key
+        ) {
+
+          <div class="report-row">
+
+            <span>
+              {{ item.key }}
+            </span>
+
+            <strong>
+              {{ item.value }}
+            </strong>
+
+          </div>
+
+        }
+
+      </div>
+
+    </section>
+
+
+    <!-- ========================= -->
+    <!-- CAPACITACIONES -->
+    <!-- ========================= -->
+
+    <section class="reports-section">
+
+      <div class="reports-section__header">
+
+        <div>
+          <h2>Capacitaciones</h2>
+          <p>
+            Distribución de capacitaciones por estado.
+          </p>
+        </div>
+
+        <button
+          type="button"
+          class="report-button"
+          (click)="descargarCapacitacionesCSV()"
+        >
+          Descargar CSV
+        </button>
+
+      </div>
+
+
+      <div class="report-table">
+
+        @for (
+          item of dashboard()!.capacitacionesPorEstado | keyvalue;
+          track item.key
+        ) {
+
+          <div class="report-row">
+
+            <span>
+              {{ item.key }}
+            </span>
+
+            <strong>
+              {{ item.value }}
+            </strong>
+
+          </div>
+
+        }
+
+      </div>
+
+    </section>
+
+
+    <!-- ========================= -->
+    <!-- INSPECCIONES -->
+    <!-- ========================= -->
+
+    <section class="reports-section">
+
+      <div class="reports-section__header">
+
+        <div>
+          <h2>Inspecciones</h2>
+          <p>
+            Distribución de inspecciones por estado.
+          </p>
+        </div>
+
+        <button
+          type="button"
+          class="report-button"
+          (click)="descargarInspeccionesCSV()"
+        >
+          Descargar CSV
+        </button>
+
+      </div>
+
+
+      <div class="report-table">
+
+        @for (
+          item of dashboard()!.inspeccionesPorEstado | keyvalue;
+          track item.key
+        ) {
+
+          <div class="report-row">
+
+            <span>
+              {{ item.key }}
+            </span>
+
+            <strong>
+              {{ item.value }}
+            </strong>
+
+          </div>
+
+        }
+
+      </div>
+
+    </section>
+
+  }
+
+</section>

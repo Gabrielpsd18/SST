@@ -13,7 +13,7 @@ import { DocumentosMainComponent } from './features/documentos/pages/documentos-
 import { ReportesMainComponent } from './features/reportes/pages/reportes-main/reportes-main.component';
 import { InspeccionesFormComponent } from './features/inspecciones/pages/inspecciones-form/inspecciones-form.component';
 import { CapacitacionesFormComponent } from './features/capacitaciones/pages/capacitaciones-form/capacitaciones-form.component';
-
+import { roleGuard } from "./features/auth/guards/role.guard";
 export const routes: Routes = [
   {
     path: 'login',
@@ -24,14 +24,17 @@ export const routes: Routes = [
     component: MainLayoutComponent,
     canActivate: [authGuard],
     children: [
+
       {
         path: 'home',
         component: HomeComponent
       },
+
       {
         path: 'profile',
         component: ProfileComponent
       },
+
       {
         path: 'trabajadores',
         children: [
@@ -41,25 +44,28 @@ export const routes: Routes = [
           },
           {
             path: 'nuevo',
-            component: TrabajadoresCreateComponent
+            component: TrabajadoresCreateComponent,
+            canActivate: [roleGuard(['ADMINISTRADOR'])]
           },
           {
             path: 'importar',
-            component: TrabajadoresImportComponent
+            component: TrabajadoresImportComponent,
+            canActivate: [roleGuard(['ADMINISTRADOR'])]
           }
         ]
       },
+
       {
         path: 'capacitaciones',
-        children:[
+        children: [
           {
             path: '',
             component: CapacitacionesComponent
-          
           },
           {
             path: 'crear',
-            component: CapacitacionesFormComponent
+            component: CapacitacionesFormComponent,
+            canActivate: [roleGuard(['ADMINISTRADOR'])]
           },
           {
             path: ':id/editar',
@@ -67,31 +73,36 @@ export const routes: Routes = [
           }
         ]
       },
+
       {
         path: 'inspecciones',
-        children:[
-            {
-              path: '',
-              component: InspeccionesListComponent
-            },
-            {
-              path: 'nuevo',
-              component: InspeccionesFormComponent
-            },
-            {
-              path: ':id/editar',
-              component: InspeccionesFormComponent
-            }
+        children: [
+          {
+            path: '',
+            component: InspeccionesListComponent
+          },
+          {
+            path: 'nuevo',
+            component: InspeccionesFormComponent,
+            canActivate: [roleGuard(['ADMINISTRADOR'])]
+          },
+          {
+            path: ':id/editar',
+            component: InspeccionesFormComponent
+          }
         ]
       },
+
       {
         path: 'documentos',
         component: DocumentosMainComponent
       },
+
       {
         path: 'reportes',
         component: ReportesMainComponent
       },
+
       {
         path: '',
         redirectTo: 'home',
@@ -99,6 +110,7 @@ export const routes: Routes = [
       }
     ]
   },
+
   {
     path: '**',
     redirectTo: 'login'

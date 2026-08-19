@@ -20,4 +20,5 @@ public class UserProfileResponse {
     private String telefono;
     private Integer capacitacionesCompletadas;
     private Integer capacitacionesPendientes;
+    private String token;
 }

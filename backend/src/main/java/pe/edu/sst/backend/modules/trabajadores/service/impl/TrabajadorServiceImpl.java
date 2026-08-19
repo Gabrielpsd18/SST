@@ -21,6 +21,8 @@ import pe.edu.sst.backend.modules.trabajadores.service.TrabajadorService;
 import pe.edu.sst.backend.shared.exception.BadRequestException;
 import pe.edu.sst.backend.shared.exception.ResourceNotFoundException;
 
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.Authentication;
 import java.util.List;
 
 @Service
@@ -141,14 +143,25 @@ public class TrabajadorServiceImpl implements TrabajadorService {
         @Override
         @Transactional(readOnly = true)
         public Page<TrabajadorResponse> listarPaginado(Pageable pageable) {
+                Long sedeId = obtenerSedeIdFiltro();
+                if (sedeId != null) {
+                        return trabajadorRepository.findBySedeId(sedeId, pageable).map(this::mapToResponse);
+                }
                 return trabajadorRepository.findAll(pageable).map(this::mapToResponse);
         }
 
         @Override
         @Transactional(readOnly = true)
         public Page<TrabajadorResponse> listarPaginadoFiltrado(Pageable pageable, String estado) {
+                Long sedeId = obtenerSedeIdFiltro();
                 if (estado == null || estado.isBlank() || "TODOS".equalsIgnoreCase(estado)) {
+                        if (sedeId != null) {
+                                return trabajadorRepository.findBySedeId(sedeId, pageable).map(this::mapToResponse);
+                        }
                         return trabajadorRepository.findAll(pageable).map(this::mapToResponse);
+                }
+                if (sedeId != null) {
+                        return trabajadorRepository.findBySedeIdAndEstadoIgnoreCase(sedeId, estado.trim(), pageable).map(this::mapToResponse);
                 }
                 return trabajadorRepository.findByEstadoIgnoreCase(estado.trim(), pageable).map(this::mapToResponse);
         }
@@ -164,8 +177,12 @@ public class TrabajadorServiceImpl implements TrabajadorService {
                 int safeLimit = Math.max(1, Math.min(limit, 20));
                 Pageable pageable = PageRequest.of(0, safeLimit);
 
-                return trabajadorRepository.findBySegmento(value, pageable)
-                                .stream()
+                Long sedeId = obtenerSedeIdFiltro();
+                List<Trabajador> list = (sedeId != null)
+                                ? trabajadorRepository.findBySedeIdAndSegmento(sedeId, value, pageable)
+                                : trabajadorRepository.findBySegmento(value, pageable);
+
+                return list.stream()
                                 .map(this::mapToResponse)
                                 .toList();
         }
@@ -181,15 +198,19 @@ public class TrabajadorServiceImpl implements TrabajadorService {
                 int safeLimit = Math.max(1, Math.min(limit, 20));
                 Pageable pageable = PageRequest.of(0, safeLimit);
 
+                Long sedeId = obtenerSedeIdFiltro();
+                List<Trabajador> list;
                 if (estado == null || estado.isBlank() || "TODOS".equalsIgnoreCase(estado)) {
-                        return trabajadorRepository.findBySegmento(value, pageable)
-                                        .stream()
-                                        .map(this::mapToResponse)
-                                        .toList();
+                        list = (sedeId != null)
+                                        ? trabajadorRepository.findBySedeIdAndSegmento(sedeId, value, pageable)
+                                        : trabajadorRepository.findBySegmento(value, pageable);
+                } else {
+                        list = (sedeId != null)
+                                        ? trabajadorRepository.findBySedeIdAndSegmentoAndEstado(sedeId, value, estado.trim(), pageable)
+                                        : trabajadorRepository.findBySegmentoAndEstado(value, estado.trim(), pageable);
                 }
 
-                return trabajadorRepository.findBySegmentoAndEstado(value, estado.trim(), pageable)
-                                .stream()
+                return list.stream()
                                 .map(this::mapToResponse)
                                 .toList();
         }
@@ -284,5 +305,26 @@ public class TrabajadorServiceImpl implements TrabajadorService {
                                 .usuarioId(t.getUsuarioId())
                                 .createdAt(t.getCreatedAt())
                                 .build();
+        }
+
+        private Long obtenerSedeIdFiltro() {
+                Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+                if (auth == null || !auth.isAuthenticated()) {
+                        return null;
+                }
+                String email = auth.getName();
+                if ("admin@sst.com".equals(email)) {
+                        return null;
+                }
+                java.util.Optional<Usuario> optUser = usuarioRepository.findByEmail(email);
+                if (optUser.isEmpty()) {
+                        return null;
+                }
+                Usuario user = optUser.get();
+                if (user.getRol().getNombre() == RoleName.ADMINISTRADOR) {
+                        return null;
+                }
+                java.util.Optional<Trabajador> optTrabajador = trabajadorRepository.findByUsuarioId(user.getId());
+                return optTrabajador.map(t -> t.getSede() != null ? t.getSede().getId() : null).orElse(null);
         }
 }

@@ -108,8 +108,8 @@
                                         <td>{{ t.nombreCompleto || (t.nombres + ' ' + (t.apellidos || '')) }}</td>
                                         <td>{{ t.sedeNombre || '-' }}</td>
                                         <td>
-                                            <button type="button" class="btn btn--secondary btn--sm" (click)="addTrabajador(t.id)"
-                                                [disabled]="isTrabajadorSelected(t.id)">
+                                            <button type="button" class="btn btn--secondary btn--sm"
+                                                (click)="addTrabajador(t.id)" [disabled]="isTrabajadorSelected(t.id)">
                                                 {{ isTrabajadorSelected(t.id) ? 'Seleccionado' : 'Agregar' }}
                                             </button>
                                         </td>
@@ -167,8 +167,8 @@
                 <div *ngIf="videoLinks().length > 0" class="links-list">
                     <div *ngFor="let link of videoLinks(); let i = index" class="link-item">
                         <a [href]="link" target="_blank" rel="noopener" class="link-text">{{ link }}</a>
-                        <button type="button" class="btn btn--danger btn--sm" (click)="removeVideoLink(i); $event.stopPropagation()"
-                            title="Eliminar video">
+                        <button type="button" class="btn btn--danger btn--sm"
+                            (click)="removeVideoLink(i); $event.stopPropagation()" title="Eliminar video">
                             Eliminar
                         </button>
                     </div>
@@ -193,8 +193,8 @@
                 <div *ngIf="formLinks().length > 0" class="links-list">
                     <div *ngFor="let link of formLinks(); let i = index" class="link-item">
                         <a [href]="link" target="_blank" rel="noopener" class="link-text">{{ link }}</a>
-                        <button type="button" class="btn btn--danger btn--sm" (click)="removeFormLink(i); $event.stopPropagation()"
-                            title="Eliminar formulario">
+                        <button type="button" class="btn btn--danger btn--sm"
+                            (click)="removeFormLink(i); $event.stopPropagation()" title="Eliminar formulario">
                             Eliminar
                         </button>
                     </div>

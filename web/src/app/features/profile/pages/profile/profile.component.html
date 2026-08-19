@@ -11,6 +11,7 @@
       <div class="profile-container__avatar">
         {{ getInitials(profileData()!.nombreCompleto) }}
       </div>
+
       <div class="profile-container__info">
         <h2>{{ profileData()!.nombreCompleto }}</h2>
         <span class="badge badge--success">{{ profileData()!.cargo }}</span>
@@ -29,88 +30,226 @@
       </div>
     }
 
-    <form [formGroup]="profileForm" (ngSubmit)="saveProfile()" class="profile-container__grid">
-      
-      <!-- Contacto editable -->
+    <form
+      [formGroup]="profileForm"
+      (ngSubmit)="saveProfile()"
+      class="profile-container__grid"
+    >
+
       <section class="card">
+
         <div class="card__header">
           <lucide-icon [img]="Mail"></lucide-icon>
-          <h3>Canales de Notificación SST (Editables)</h3>
-        </div>
-        <p class="card__subtext">A estas vías llegará la información de capacitaciones e inspecciones.</p>
-
-        <div class="form-group">
-          <label class="form-label">Correo Electrónico de Notificaciones</label>
-          <input type="email" formControlName="correoNotificaciones" class="form-control" />
+          <h3>Canales de Notificación SST</h3>
         </div>
 
+        <p class="card__subtext">
+          A estas vías llegará la información de capacitaciones e inspecciones.
+        </p>
+
         <div class="form-group">
-          <label class="form-label">Teléfono de Contacto</label>
-          <input type="text" formControlName="telefono" class="form-control" maxlength="9" />
+          <label class="form-label">
+            Correo Electrónico de Notificaciones
+          </label>
+
+          <input
+            type="email"
+            formControlName="correoNotificaciones"
+            class="form-control"
+          />
         </div>
+
+        <div class="form-group">
+          <label class="form-label">
+            Teléfono de Contacto
+          </label>
+
+          <input
+            type="text"
+            formControlName="telefono"
+            class="form-control"
+            maxlength="9"
+          />
+        </div>
+
       </section>
 
-      <!-- Ubicación y Puesto -->
+
       <section class="card">
+
+        <div class="card__header">
+          <lucide-icon [img]="Shield"></lucide-icon>
+          <h3>Credenciales de Acceso</h3>
+        </div>
+
+        <p class="card__subtext">
+          Actualiza el correo utilizado para iniciar sesión y, si lo deseas,
+          establece una nueva contraseña.
+        </p>
+
+        <div class="form-group">
+          <label class="form-label">
+            Correo de Acceso
+          </label>
+
+          <input
+            type="email"
+            formControlName="email"
+            class="form-control"
+            autocomplete="username"
+          />
+
+          @if (
+            profileForm.get('email')?.invalid &&
+            profileForm.get('email')?.touched
+          ) {
+            <small class="form-error">
+              Ingresa un correo electrónico válido.
+            </small>
+          }
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">
+            Nueva Contraseña
+          </label>
+
+          <input
+            type="password"
+            formControlName="password"
+            class="form-control"
+            placeholder="Dejar vacío para mantener la actual"
+            autocomplete="new-password"
+          />
+
+          <small class="form-help">
+            Si no deseas cambiar tu contraseña, deja este campo vacío.
+          </small>
+        </div>
+
+      </section>
+
+
+      <section class="card">
+
         <div class="card__header">
           <lucide-icon [img]="Building2"></lucide-icon>
           <h3>Ubicación y Puesto de Trabajo</h3>
         </div>
 
         <div class="form-group">
-          <label class="form-label">Sede Asignada</label>
-          <input type="text" formControlName="sede" class="form-control form-control--disabled" />
+          <label class="form-label">
+            Sede Asignada
+          </label>
+
+          <input
+            type="text"
+            formControlName="sede"
+            class="form-control form-control--disabled"
+          />
         </div>
 
         <div class="form-group">
-          <label class="form-label">Cargo / Función SST</label>
-          <input type="text" formControlName="cargo" class="form-control form-control--disabled" />
+          <label class="form-label">
+            Cargo / Función SST
+          </label>
+
+          <input
+            type="text"
+            formControlName="cargo"
+            class="form-control form-control--disabled"
+          />
         </div>
+
       </section>
 
-      <!-- Identificación -->
+
       <section class="card">
+
         <div class="card__header">
           <lucide-icon [img]="Shield"></lucide-icon>
           <h3>Identificación Institucional</h3>
         </div>
 
         <div class="form-group">
-          <label class="form-label">DNI / Documento</label>
-          <input type="text" formControlName="dni" class="form-control form-control--disabled" />
+          <label class="form-label">
+            DNI / Documento
+          </label>
+
+          <input
+            type="text"
+            formControlName="dni"
+            class="form-control form-control--disabled"
+          />
         </div>
 
         <div class="form-group">
-          <label class="form-label">Correo Corporativo</label>
-          <input type="email" formControlName="correoCorporativo" class="form-control form-control--disabled" />
+          <label class="form-label">
+            Correo Corporativo
+          </label>
+
+          <input
+            type="email"
+            formControlName="correoCorporativo"
+            class="form-control form-control--disabled"
+          />
         </div>
+
       </section>
 
-      <!-- Estado SST -->
+
       <section class="card">
+
         <div class="card__header">
           <lucide-icon [img]="Award"></lucide-icon>
           <h3>Estado de Capacitación SST</h3>
         </div>
 
         <div class="metrics-grid">
+
           <div class="metric-box metric-box--success">
-            <strong>{{ profileData()?.capacitacionesCompletadas ?? 0 }}</strong>
-            <span>Cursos Aprobados</span>
+            <strong>
+              {{ profileData()?.capacitacionesCompletadas ?? 0 }}
+            </strong>
+
+            <span>
+              Cursos Aprobados
+            </span>
           </div>
+
           <div class="metric-box metric-box--warning">
-            <strong>{{ profileData()?.capacitacionesPendientes ?? 0 }}</strong>
-            <span>Pendientes</span>
+            <strong>
+              {{ profileData()?.capacitacionesPendientes ?? 0 }}
+            </strong>
+
+            <span>
+              Pendientes
+            </span>
           </div>
+
         </div>
+
       </section>
 
-      <!-- Botón de guardar -->
+
       <div class="profile-container__actions">
-        <button type="submit" class="btn btn--primary" [disabled]="profileForm.invalid || saving()">
-          <lucide-icon [img]="Save"></lucide-icon>
-          {{ saving() ? 'Guardando...' : 'Guardar Cambios' }}
+
+        <button
+          type="submit"
+          class="btn btn--primary"
+          [disabled]="profileForm.invalid || saving()"
+        >
+
+          @if (saving()) {
+            <lucide-icon [img]="Loader2" class="spin"></lucide-icon>
+            Guardando...
+          } @else {
+            <lucide-icon [img]="Save"></lucide-icon>
+            Guardar Cambios
+          }
+
         </button>
+
       </div>
 
     </form>
