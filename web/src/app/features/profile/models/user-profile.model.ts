@@ -10,7 +10,7 @@ export interface UserProfile {
   fechaIngreso?: string;
   capacitacionesCompletadas?: number;
   capacitacionesPendientes?: number;
-
+  token?: string;
   email?: string;
 }
 

@@ -12,7 +12,7 @@ export interface SearchableSelectOption {
 @Component({
   selector: 'app-searchable-select',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, LucideChevronDown, LucideSearch, LucideLoader2],
   templateUrl: './searchable-select.component.html',
   styleUrl: './searchable-select.component.scss',
   providers: [

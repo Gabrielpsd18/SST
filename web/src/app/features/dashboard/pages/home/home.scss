@@ -1,5 +1,5 @@
 .dashboard {
-  max-width: 1200px;
+  max-inline-size: 1200px;
   margin: 0 auto;
   padding: var(--space-5);
 
@@ -8,7 +8,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 300px;
+    min-block-size: 300px;
     padding: var(--space-6);
     color: var(--color-text-secondary);
     text-align: center;
@@ -22,13 +22,13 @@
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: var(--space-5);
-    margin-bottom: var(--space-6);
+    margin-block-end: var(--space-6);
 
-    @media (max-width: 900px) {
+    @media (max-inline-size: 900px) {
       grid-template-columns: repeat(2, 1fr);
     }
 
-    @media (max-width: 600px) {
+    @media (max-inline-size: 600px) {
       grid-template-columns: 1fr;
     }
   }
@@ -38,7 +38,7 @@
     grid-template-columns: repeat(2, 1fr);
     gap: var(--space-5);
 
-    @media (max-width: 900px) {
+    @media (max-inline-size: 900px) {
       grid-template-columns: 1fr;
     }
   }
@@ -96,11 +96,11 @@
 
     position: absolute;
 
-    left: 0;
-    top: 0;
-    bottom: 0;
+    inset-inline-start: 0;
+    inset-block-start: 0;
+    inset-block-end: 0;
 
-    width: 5px;
+    inline-size: 5px;
 
     background-color: var(--color-primary);
   }
@@ -120,7 +120,7 @@
    ========================================= */
 
 .panel {
-  min-height: 300px;
+  min-block-size: 300px;
 
   padding: var(--space-5);
 
@@ -190,8 +190,8 @@
     align-items: center;
     justify-content: center;
 
-    width: 40px;
-    height: 40px;
+    inline-size: 40px;
+    block-size: 40px;
 
     flex-shrink: 0;
 
@@ -208,7 +208,7 @@
     flex-direction: column;
     gap: var(--space-1);
 
-    min-width: 0;
+    min-inline-size: 0;
     flex: 1;
 
     strong {
@@ -247,7 +247,7 @@
 
 .activity-item__action,
 .event-item__action {
-  margin-left: auto;
+  margin-inline-start: auto;
 
   flex-shrink: 0;
   align-self: center;
@@ -319,7 +319,7 @@
   }
 
   .panel {
-    min-height: auto;
+    min-block-size: auto;
   }
 
   .activity-item,
@@ -332,8 +332,8 @@
     }
 
     &__action {
-      margin-left: 0;
-      margin-top: var(--space-2);
+      margin-inline-start: 0;
+      margin-block-start: var(--space-2);
     }
   }
 }

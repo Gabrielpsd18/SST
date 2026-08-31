@@ -19,7 +19,8 @@ import {
   LucidePhone,
   LucideMail,
   LucideAward,
-  LucideLoader2
+  LucideLoader2,
+  LucideUpload
 } from '@lucide/angular';
 
 import { TrabajadorService } from '../../services/trabajador.service';
@@ -34,13 +35,35 @@ import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
 @Component({
   selector: 'app-trabajadores-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    RouterModule,
+    LucideUsers,
+    LucidePlus,
+    LucideSearch,
+    LucideEye,
+    LucideBookOpen,
+    LucideFileText,
+    LucideChevronLeft,
+    LucideChevronRight,
+    LucideX,
+    LucideShield,
+    LucideBuilding2,
+    LucideBriefcase,
+    LucidePhone,
+    LucideMail,
+    LucideAward,
+    LucideLoader2,
+    LucideUpload
+  ],
   templateUrl: './trabajadores-list.component.html',
   styleUrl: './trabajadores-list.component.scss'
 })
 export class TrabajadoresListComponent implements OnInit, OnDestroy {
   private readonly trabajadorService = inject(TrabajadorService);
   private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
 
   protected readonly Users = LucideUsers;
   protected readonly Plus = LucidePlus;
@@ -58,7 +81,7 @@ export class TrabajadoresListComponent implements OnInit, OnDestroy {
   protected readonly Mail = LucideMail;
   protected readonly Award = LucideAward;
   protected readonly Loader2 = LucideLoader2;
-  private readonly router = inject(Router);
+  protected readonly Upload = LucideUpload;
 
   protected trabajadores = signal<Trabajador[]>([]);
   protected totalElements = signal<number>(0);
@@ -90,7 +113,6 @@ export class TrabajadoresListComponent implements OnInit, OnDestroy {
   });
 
   constructor() {
-    // Subscribe to search input with debounce
     this.searchSubject
       .pipe(
         debounceTime(300),
@@ -98,10 +120,8 @@ export class TrabajadoresListComponent implements OnInit, OnDestroy {
       )
       .subscribe((term) => {
         if (term.trim().length > 0) {
-          // Search mode: query backend
           this.performSearch(term);
         } else {
-          // Normal mode: reset and load paginated list
           this.loadTrabajadores(0);
         }
       });
@@ -111,7 +131,6 @@ export class TrabajadoresListComponent implements OnInit, OnDestroy {
     const role = this.authService.getUserRole() || '';
     this.userRole.set(role);
     this.isAdmin.set(role.toUpperCase() === 'ADMINISTRADOR');
-
     this.loadTrabajadores();
   }
 
@@ -129,10 +148,10 @@ export class TrabajadoresListComponent implements OnInit, OnDestroy {
   private performSearch(segment: string): void {
     this.loading.set(true);
     this.currentPage.set(0);
-    this.totalPages.set(1); // Search results are not paginated
+    this.totalPages.set(1);
 
-    // Solo buscar activos si el filtro es ACTIVO
     const soloActivos = this.estadoFiltro() === 'ACTIVO';
+
     this.trabajadorService.searchTrabajadores(segment, 8, soloActivos).subscribe({
       next: (results) => {
         this.trabajadores.set(results || []);
@@ -152,7 +171,12 @@ export class TrabajadoresListComponent implements OnInit, OnDestroy {
     this.currentPage.set(page);
 
     const estado = this.estadoFiltro();
-    this.trabajadorService.getTrabajadores(page, this.pageSize(), estado === 'TODOS' ? undefined : estado).subscribe({
+
+    this.trabajadorService.getTrabajadores(
+      page,
+      this.pageSize(),
+      estado === 'TODOS' ? undefined : estado
+    ).subscribe({
       next: (response) => {
         if (response && response.content) {
           this.trabajadores.set(response.content);
@@ -185,18 +209,23 @@ export class TrabajadoresListComponent implements OnInit, OnDestroy {
     }
   }
 
-  inspectTrabajador(trabajador: Trabajador, defaultTab: 'perfil' | 'capacitaciones' | 'documentos' = 'perfil'): void {
+  inspectTrabajador(
+    trabajador: Trabajador,
+    defaultTab: 'perfil' | 'capacitaciones' | 'documentos' = 'perfil'
+  ): void {
     this.selectedTrabajador.set(trabajador);
     this.activeDrawerTab.set(defaultTab);
     this.loadingDetail.set(true);
 
-    this.trabajadorService.getCapacitacionesByTrabajador(trabajador.id).subscribe(caps => {
-      this.capacitaciones.set(caps);
+    this.trabajadorService.getCapacitacionesByTrabajador(trabajador.id).subscribe({
+      next: (caps) => this.capacitaciones.set(caps || []),
+      error: () => this.capacitaciones.set([])
     });
 
-    this.trabajadorService.getDocumentosByTrabajador(trabajador.id).subscribe(docs => {
-      this.documentos.set(docs);
-      this.loadingDetail.set(false);
+    this.trabajadorService.getDocumentosByTrabajador(trabajador.id).subscribe({
+      next: (docs) => this.documentos.set(docs || []),
+      error: () => this.documentos.set([]),
+      complete: () => this.loadingDetail.set(false)
     });
   }
 
@@ -210,8 +239,15 @@ export class TrabajadoresListComponent implements OnInit, OnDestroy {
 
   getInitials(nombreCompleto: string): string {
     const parts = nombreCompleto.trim().split(/\s+/);
-    if (parts.length === 0) return '?';
-    if (parts.length === 1) return parts[0][0]?.toUpperCase() ?? '?';
+
+    if (parts.length === 0 || !parts[0]) {
+      return '?';
+    }
+
+    if (parts.length === 1) {
+      return parts[0][0]?.toUpperCase() ?? '?';
+    }
+
     return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
   }
 
@@ -222,5 +258,4 @@ export class TrabajadoresListComponent implements OnInit, OnDestroy {
   goToImportarTrabajadores(): void {
     this.router.navigate(['/trabajadores/importar']);
   }
-
 }

@@ -6,7 +6,14 @@ import { NotificationService, Toast } from '../../core/services/notification.ser
 @Component({
   selector: 'app-toast-container',
   standalone: true,
-  imports: [CommonModule],
+  imports: [
+    CommonModule,
+    LucideAlertCircle,
+    LucideCheckCircle,
+    LucideInfo,
+    LucideAlertTriangle,
+    LucideX
+  ],
   template: `
     <div class="toast-container">
       @for (toast of notificationService.toasts$(); track toast.id) {

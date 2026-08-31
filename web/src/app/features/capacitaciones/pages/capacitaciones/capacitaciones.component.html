@@ -15,8 +15,8 @@
     <div class="page-header__actions">
       <!-- Badge de Rol Activo -->
       <span class="role-badge" [class.role-badge--admin]="isAdmin()" [class.role-badge--supervisor]="!isAdmin()">
-        <div><svg lucideShield></svg>></div>
-        <div>{{ isAdmin() ? 'Modo Administrador (Escritura)' : 'Modo Supervisor (Solo Lectura)' }}</div>
+        <svg lucideShield aria-hidden="true"></svg>
+        <span>{{ isAdmin() ? 'Modo Administrador (Escritura)' : 'Modo Supervisor (Solo Lectura)' }}</span>
       </span>
 
       @if (isAdmin()) {

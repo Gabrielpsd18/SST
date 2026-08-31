@@ -1,68 +1,81 @@
+version: '3.8'
+
 services:
 
   postgres:
     image: postgres:17
     container_name: sst-postgres
     restart: unless-stopped
-
     environment:
       POSTGRES_DB: sst_db
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 12345
-
     ports:
       - "5432:5432"
-
     volumes:
       - sst_postgres_data:/var/lib/postgresql/data
-
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d sst_db"]
       interval: 5s
       timeout: 5s
       retries: 10
 
+  minio:
+    image: minio/minio:RELEASE.2026-08-17T00-00-00Z
+    container_name: sst-minio
+    restart: unless-stopped
+    environment:
+      MINIO_ROOT_USER: ${S3_ACCESS_KEY:-miniouser}
+      MINIO_ROOT_PASSWORD: ${S3_SECRET_KEY:-miniopassword}
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000"   # S3 API
+      - "9001:9001"   # Web console
+    volumes:
+      - sst_minio_data:/data
 
   backend:
     build:
       context: ../..
       dockerfile: infrastructure/docker/Dockerfile.backend
-
     container_name: sst-backend
     restart: unless-stopped
-
+    env_file:
+      - ../../.env
     environment:
       DB_URL: jdbc:postgresql://postgres:5432/sst_db?currentSchema=public
       DB_USERNAME: postgres
       DB_PASSWORD: 12345
-
       SERVER_PORT: 8080
-
       JWT_SECRET: rPqfXJ0ktpW2uY4nD5sV8zBcM7LhQaEe1Rg6UiNo9PmKxYsTzAvCxDfGhJkLmNpQr
-      JWT_EXPIRATION: 3600000
-
+      JWT_EXPIRATION: 3600000 
+      FILE_UPLOAD_DIR: /app/uploads
+      STORAGE_TYPE: ${STORAGE_TYPE:-local}
+      S3_ENDPOINT: ${S3_ENDPOINT:-}
+      S3_REGION: ${S3_REGION:-us-east-1}
+      S3_BUCKET: ${S3_BUCKET:-sst-bucket}
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY:-}
+      S3_SECRET_KEY: ${S3_SECRET_KEY:-}
+    ports:
+      - "8080:8080"
+    volumes:
+      - sst_uploads_data:/app/uploads   
     depends_on:
       postgres:
         condition: service_healthy
-
-    ports:
-      - "8080:8080"
-
 
   frontend:
     build:
       context: ../..
       dockerfile: infrastructure/docker/Dockerfile.frontend
-
     container_name: sst-frontend
     restart: unless-stopped
-
     depends_on:
       - backend
-
     ports:
       - "80:80"
 
-
 volumes:
   sst_postgres_data:
+  sst_uploads_data:
+  sst_minio_data:    

@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { LucideCalendar, LucideClock, LucideUsers, LucideCheckCircle, LucidePlus, LucideLoader2, LucideBookOpen, LucideFileText } from '@lucide/angular';
+import { LucideUsers, LucideCheckCircle, LucidePlus, LucideLoader2, LucideBookOpen, LucideFileText } from '@lucide/angular';
 import { of, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { CapacitacionService } from '../../services/capacitacion.service';
@@ -15,7 +15,18 @@ import { NotificationService } from '../../../../core/services/notification.serv
 @Component({
   selector: 'app-capacitaciones-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule, SearchableSelectComponent],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    RouterModule,
+    SearchableSelectComponent,
+    LucideUsers,
+    LucideCheckCircle,
+    LucidePlus,
+    LucideLoader2,
+    LucideBookOpen,
+    LucideFileText
+  ],
   templateUrl: './capacitaciones-form.component.html',
   styleUrl: './capacitaciones-form.component.scss'
 })
@@ -28,8 +39,6 @@ export class CapacitacionesFormComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly notificationService = inject(NotificationService);
 
-  protected readonly Calendar = LucideCalendar;
-  protected readonly Clock = LucideClock;
   protected readonly Users = LucideUsers;
   protected readonly CheckCircle = LucideCheckCircle;
   protected readonly Plus = LucidePlus;

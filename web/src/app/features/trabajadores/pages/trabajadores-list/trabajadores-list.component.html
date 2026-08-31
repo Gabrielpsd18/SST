@@ -17,15 +17,14 @@
         {{ isAdmin() ? 'Modo Administrador (Escritura)' : 'Modo Supervisor (Solo Lectura)' }}
       </span>
 
-      <!-- Agrega el botón de crear aquí -->
       @if (isAdmin()) {
       <button class="btn btn--primary" (click)="goToNuevoTrabajador()">
-        <svg lucidePlus size="20" aria-hidden="true"></svg>
+        <svg lucidePlus aria-hidden="true"></svg>
         Nuevo Trabajador
       </button>
 
-      <button class="btn btn--primary" (click)="goToImportarTrabajadores()">
-        <svg lucidePlus size="20" aria-hidden="true"></svg>
+      <button class="btn btn--secondary" (click)="goToImportarTrabajadores()">
+        <svg lucideUpload aria-hidden="true"></svg>
         Importar Trabajadores
       </button>
       }
@@ -41,13 +40,16 @@
     <div class="toolbar__filters">
       <span class="filter-label">Estado:</span>
       <div class="filter-tabs">
-        <button class="filter-tab" [class.filter-tab--active]="estadoFiltro() === 'ACTIVO'" (click)="setEstadoFiltro('ACTIVO')">
+        <button class="filter-tab" [class.filter-tab--active]="estadoFiltro() === 'ACTIVO'"
+          (click)="setEstadoFiltro('ACTIVO')">
           <span class="filter-dot filter-dot--active"></span> Activos
         </button>
-        <button class="filter-tab" [class.filter-tab--active]="estadoFiltro() === 'INACTIVO'" (click)="setEstadoFiltro('INACTIVO')">
+        <button class="filter-tab" [class.filter-tab--active]="estadoFiltro() === 'INACTIVO'"
+          (click)="setEstadoFiltro('INACTIVO')">
           <span class="filter-dot filter-dot--cesado"></span> Inactivos
         </button>
-        <button class="filter-tab" [class.filter-tab--active]="estadoFiltro() === 'TODOS'" (click)="setEstadoFiltro('TODOS')">
+        <button class="filter-tab" [class.filter-tab--active]="estadoFiltro() === 'TODOS'"
+          (click)="setEstadoFiltro('TODOS')">
           Todos
         </button>
       </div>

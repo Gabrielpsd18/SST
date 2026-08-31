@@ -12,14 +12,12 @@ import { environment } from '../../../../environments/environment';
 export class UserService {
 
   private readonly http = inject(HttpClient);
-  private readonly API_URL =  `${environment.apiUrl}/inspecciones`;
+  private readonly API_URL = `${environment.apiUrl}/users`;
 
-  // Obtener la información del perfil del usuario logueado
   getProfile(): Observable<ApiResponse<UserProfile>> {
     return this.http.get<ApiResponse<UserProfile>>(`${this.API_URL}/me`);
   }
 
-  // Actualizar solo los campos de notificación/teléfono
   updateProfile(request: UpdateProfileRequest): Observable<ApiResponse<UserProfile>> {
     return this.http.patch<ApiResponse<UserProfile>>(`${this.API_URL}/me`, request);
   }

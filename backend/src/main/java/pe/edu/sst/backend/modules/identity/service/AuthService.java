@@ -60,4 +60,52 @@ public class AuthService {
 
         }
 
+        public JwtResponse loginMobile(LoginRequest request) {
+
+                authenticationManager.authenticate(
+                                new UsernamePasswordAuthenticationToken(
+                                                request.getEmail(),
+                                                request.getPassword())
+                );
+
+                Usuario usuario = userRepository.findByEmail(request.getEmail())
+                                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
+
+                if (Boolean.FALSE.equals(usuario.getActivo())) {
+                    throw new pe.edu.sst.backend.shared.exception.BadRequestException(
+                            "La cuenta de usuario se encuentra inactiva."
+                    );
+                }
+
+                String role = (usuario.getRol() != null) ? usuario.getRol().getNombre().name() : RoleName.TRABAJADOR.name();
+                if (!RoleName.TRABAJADOR.name().equalsIgnoreCase(role)) {
+                    throw new pe.edu.sst.backend.shared.exception.BadRequestException(
+                            "Acceso restringido: Esta aplicación móvil está destinada exclusivamente para trabajadores."
+                    );
+                }
+
+                Trabajador trabajador = trabajadorRepository.findByUsuarioId(usuario.getId())
+                                .orElse(null);
+
+                if (trabajador != null && !"ACTIVO".equalsIgnoreCase(trabajador.getEstado())) {
+                    throw new pe.edu.sst.backend.shared.exception.BadRequestException(
+                            "El trabajador se encuentra en estado inactivo. Consulte con el área de SST."
+                    );
+                }
+
+                String token = jwtService.generateToken(request.getEmail());
+                String nombreCompleto = (trabajador != null && trabajador.getNombreCompleto() != null)
+                                ? trabajador.getNombreCompleto()
+                                : usuario.getEmail();
+
+                return JwtResponse.builder()
+                                .accessToken(token)
+                                .tokenType("Bearer")
+                                .expiresIn(3600L)
+                                .email(usuario.getEmail())
+                                .nombreCompleto(nombreCompleto)
+                                .role(role)
+                                .build();
+        }
+
 }

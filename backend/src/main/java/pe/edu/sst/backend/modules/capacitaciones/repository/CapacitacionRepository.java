@@ -41,4 +41,17 @@ public interface CapacitacionRepository extends JpaRepository<Capacitacion, Long
 
     @Query("SELECT DISTINCT c FROM Capacitacion c JOIN c.trabajadoresAsignados ct WHERE ct.trabajador.sede.id = :sedeId AND c.fechaProgramada >= :now ORDER BY c.fechaProgramada ASC")
     java.util.List<Capacitacion> findTop5BySedeIdAndFechaProgramadaAfterOrderByFechaProgramadaAsc(@Param("sedeId") Long sedeId, @Param("now") java.time.LocalDateTime now, Pageable pageable);
+
+    @Query("SELECT DISTINCT c FROM Capacitacion c " +
+           "LEFT JOIN c.trabajadoresAsignados ct " +
+           "WHERE (:trabajadorId IS NULL OR ct.trabajador.id = :trabajadorId) " +
+           "AND (:filtro = 'TODOS' " +
+           "     OR (:filtro = 'PENDIENTES' AND (c.estado IN ('PROGRAMADO', 'EN_CURSO') OR c.fechaProgramada >= :now)) " +
+           "     OR (:filtro = 'REALIZADAS' AND (c.estado = 'COMPLETADO' OR c.fechaProgramada < :now))) " +
+           "ORDER BY c.fechaProgramada DESC")
+    Page<Capacitacion> findForMobileWithFilter(
+            @Param("trabajadorId") Long trabajadorId,
+            @Param("filtro") String filtro,
+            @Param("now") java.time.LocalDateTime now,
+            Pageable pageable);
 }

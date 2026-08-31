@@ -22,7 +22,19 @@ import { InspeccionesService } from '../../services/inspecciones.service';
 @Component({
   selector: 'app-inspecciones-list',
   standalone: true,
-  imports: [CommonModule],
+  imports: [
+    CommonModule,
+    LucideAlertCircle,
+    LucideCalendar,
+    LucideCheckCircle,
+    LucideChevronLeft,
+    LucideChevronRight,
+    LucideClock,
+    LucideLoader2,
+    LucidePencil,
+    LucidePlus,
+    LucideShield
+  ],
   templateUrl: './inspecciones-list.component.html',
   styleUrl: './inspecciones-list.component.scss'
 })

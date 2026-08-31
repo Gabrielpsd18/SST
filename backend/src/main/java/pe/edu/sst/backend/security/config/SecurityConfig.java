@@ -48,20 +48,41 @@ public class SecurityConfig {
                                 "/v3/api-docs/**")
                         .permitAll()
 
-                        // Reglas RBAC para Trabajadores: Administrador escribe, Supervisor solo lee
-                        .requestMatchers(HttpMethod.GET, "/api/v1/trabajadores/**", "/api/v1/capacitaciones/**", "/api/v1/capacitadores/**", "/api/v1/inspecciones/**")
+                        // Reglas RBAC para Trabajadores: Administrador escribe, Supervisor solo lee, Trabajador consulta y sube documentos propios
+                        .requestMatchers(HttpMethod.GET, "/api/v1/capacitaciones/**", "/api/v1/documentos/**", "/api/v1/dashboard/**")
+                        .hasAnyRole("ADMINISTRADOR", "SUPERVISOR", "TRABAJADOR")
+
+                        .requestMatchers(HttpMethod.GET, "/api/v1/trabajadores/**", "/api/v1/capacitadores/**", "/api/v1/inspecciones/**")
                         .hasAnyRole("ADMINISTRADOR", "SUPERVISOR")
+  
+                        .requestMatchers(HttpMethod.GET, "/api/v1/documentos/solicitudes/**")
+                        .hasAnyRole("ADMINISTRADOR", "SUPERVISOR", "TRABAJADOR")
+
+                        .requestMatchers(HttpMethod.POST, "/api/v1/documentos/personales")
+                        .hasAnyRole("ADMINISTRADOR", "SUPERVISOR", "TRABAJADOR")
+
+                        .requestMatchers(HttpMethod.POST, "/api/v1/documentos/solicitudes")
+                        .hasRole("ADMINISTRADOR")
+
+                        .requestMatchers(HttpMethod.POST, "/api/v1/documentos/solicitudes/*/subir")
+                        .hasAnyRole("ADMINISTRADOR", "SUPERVISOR", "TRABAJADOR")
 
                         .requestMatchers(HttpMethod.POST, "/api/v1/trabajadores/**", "/api/v1/capacitaciones/**", "/api/v1/capacitadores/**", "/api/v1/inspecciones/**")
+                        .hasAnyRole("ADMINISTRADOR", "SUPERVISOR")
+
+                        .requestMatchers(HttpMethod.POST, "/api/v1/documentos/generales")
+                        .hasRole("ADMINISTRADOR")
+  
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/trabajadores/**", "/api/v1/capacitaciones/**", "/api/v1/capacitadores/**", "/api/v1/inspecciones/**", "/api/v1/documentos/**")
+                        .hasRole("ADMINISTRADOR")
+  
+                        .requestMatchers(HttpMethod.PATCH, "/api/v1/trabajadores/**", "/api/v1/capacitaciones/**", "/api/v1/capacitadores/**", "/api/v1/inspecciones/**", "/api/v1/documentos/**")
                         .hasRole("ADMINISTRADOR")
 
-                        .requestMatchers(HttpMethod.PUT, "/api/v1/trabajadores/**", "/api/v1/capacitaciones/**", "/api/v1/capacitadores/**", "/api/v1/inspecciones/**")
+                        .requestMatchers(HttpMethod.PATCH, "/api/v1/documentos/solicitudes/*/validar")
                         .hasRole("ADMINISTRADOR")
-
-                        .requestMatchers(HttpMethod.PATCH, "/api/v1/trabajadores/**", "/api/v1/capacitaciones/**", "/api/v1/capacitadores/**", "/api/v1/inspecciones/**")
-                        .hasRole("ADMINISTRADOR")
-
-                        .requestMatchers(HttpMethod.DELETE, "/api/v1/trabajadores/**", "/api/v1/capacitaciones/**", "/api/v1/capacitadores/**", "/api/v1/inspecciones/**")
+  
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/trabajadores/**", "/api/v1/capacitaciones/**", "/api/v1/capacitadores/**", "/api/v1/inspecciones/**", "/api/v1/documentos/**")
                         .hasRole("ADMINISTRADOR")
 
                         .anyRequest().authenticated())
@@ -77,7 +98,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:4200"));
+        configuration.setAllowedOriginPatterns(List.of("*"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);

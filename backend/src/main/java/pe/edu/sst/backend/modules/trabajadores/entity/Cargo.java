@@ -1,4 +1,6 @@
 package pe.edu.sst.backend.modules.trabajadores.entity;
+
+
 import jakarta.persistence.*;
 import lombok.*;
 
