@@ -3,13 +3,23 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { LucideShield, LucideBuilding2, LucideMail, LucideAward, LucideSave, LucideLoader2 } from '@lucide/angular';
 
+import { STORAGE } from '../../../../core/constants/storage.constants';
 import { UserService } from '../../services/user.service';
 import { UserProfile, UpdateProfileRequest } from '../../models/user-profile.model';
 
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    LucideShield,
+    LucideBuilding2,
+    LucideMail,
+    LucideAward,
+    LucideSave,
+    LucideLoader2
+  ],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.scss'
 })
@@ -59,17 +69,19 @@ export class ProfileComponent implements OnInit {
       next: (response) => {
         if (response && response.data) {
           const data = response.data;
+          const corporateEmail = data.correoCorporativo ?? data.email ?? '';
+
           this.profileData.set(data);
 
           this.profileForm.patchValue({
             dni: data.dni,
             nombreCompleto: data.nombreCompleto,
-            correoCorporativo: data.correoCorporativo,
+            correoCorporativo: corporateEmail,
             sede: data.sede,
             cargo: data.cargo,
-            correoNotificaciones: data.correoNotificaciones,
-            telefono: data.telefono,
-            email: data.email
+            correoNotificaciones: data.correoNotificaciones ?? corporateEmail,
+            telefono: data.telefono ?? '',
+            email: corporateEmail
           });
         }
         this.loadingData.set(false);
@@ -89,27 +101,52 @@ export class ProfileComponent implements OnInit {
   }
 
   saveProfile(): void {
-    if (this.profileForm.invalid) return;
+    if (this.profileForm.invalid) {
+      this.profileForm.markAllAsTouched();
+      return;
+    }
 
     this.saving.set(true);
     this.successMessage.set('');
     this.errorMessage.set('');
 
+    const email = (this.profileForm.value.email ?? '').trim();
     const request: UpdateProfileRequest = {
-      correoNotificaciones: this.profileForm.value.correoNotificaciones,
-      telefono: this.profileForm.value.telefono,
-      email: this.profileForm.value.email,
-      password: this.profileForm.value.password || undefined
+      correoNotificaciones: (this.profileForm.value.correoNotificaciones ?? '').trim(),
+      telefono: (this.profileForm.value.telefono ?? '').trim(),
+      email: email || undefined,
+      password: (this.profileForm.value.password ?? '').trim() || undefined
     };
 
     this.userService.updateProfile(request).subscribe({
-      next: () => {
+      next: (response) => {
+        const updatedProfile = response?.data ?? this.profileData();
+        const corporateEmail = updatedProfile?.correoCorporativo ?? email;
+
+        if (updatedProfile?.token) {
+          localStorage.setItem(STORAGE.ACCESS_TOKEN, updatedProfile.token);
+        }
+
+        if (corporateEmail) {
+          localStorage.setItem(STORAGE.USER_EMAIL, corporateEmail);
+        }
+
+        this.profileData.set(updatedProfile ?? this.profileData());
+        this.profileForm.patchValue({
+          correoCorporativo: corporateEmail,
+          email: corporateEmail,
+          correoNotificaciones: updatedProfile?.correoNotificaciones ?? request.correoNotificaciones,
+          telefono: updatedProfile?.telefono ?? request.telefono
+        });
+
+        this.profileForm.get('password')?.reset('');
         this.saving.set(false);
-        this.successMessage.set('Perfil actualizado correctamente.');
+        this.successMessage.set(response?.message || 'Perfil actualizado correctamente.');
       },
-      error: () => {
+      error: (error) => {
+        const message = error?.error?.message || 'Error al actualizar los datos del perfil.';
         this.saving.set(false);
-        this.errorMessage.set('Error al actualizar los datos del perfil.');
+        this.errorMessage.set(message);
       }
     });
   }

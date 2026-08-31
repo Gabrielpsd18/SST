@@ -1,0 +1,274 @@
+﻿<section class="documentos-page">
+  <header class="page-header">
+    <div class="page-header__title">
+      <div class="page-header__icon">
+        <svg lucideFileText aria-hidden="true"></svg>
+      </div>
+      <div>
+        <p class="eyebrow">SST</p>
+        <h1>Gestión documental</h1>
+      </div>
+    </div>
+
+    <div class="page-header__actions">
+      <span class="role-badge role-badge--admin">
+        <svg lucideShieldCheck aria-hidden="true"></svg>
+        Módulo de documentos
+      </span>
+    </div>
+  </header>
+
+  <div class="stats-grid">
+    <div class="stat-card stat-card--primary">
+      <div class="stat-card__icon"><svg lucideFolderOpen aria-hidden="true"></svg></div>
+      <div>
+        <span>Generales</span>
+        <strong>{{ totalGenerales() }}</strong>
+      </div>
+    </div>
+
+    <div class="stat-card stat-card--secondary">
+      <div class="stat-card__icon"><svg lucideUsers aria-hidden="true"></svg></div>
+      <div>
+        <span>Personales</span>
+        <strong>{{ totalPersonales() }}</strong>
+      </div>
+    </div>
+
+    <div class="stat-card stat-card--success">
+      <div class="stat-card__icon"><svg lucideCheckCircle aria-hidden="true"></svg></div>
+      <div>
+        <span>Aprobados</span>
+        <strong>{{ aprobados() }}</strong>
+      </div>
+    </div>
+
+    <div class="stat-card stat-card--warning">
+      <div class="stat-card__icon"><svg lucideClock3 aria-hidden="true"></svg></div>
+      <div>
+        <span>Pendientes</span>
+        <strong>{{ pendientes() }}</strong>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel__header">
+      <div class="panel__title-wrap">
+        <svg lucideFileBadge2 aria-hidden="true"></svg>
+        <h2>Documentación</h2>
+      </div>
+
+      <div class="tab-switcher" role="tablist" aria-label="Tipos de documentos">
+        <button
+          type="button"
+          class="tab-button"
+          [class.tab-button--active]="activeTab() === 'generales'"
+          (click)="setTab('generales')"
+        >
+          Generales
+        </button>
+        <button
+          type="button"
+          class="tab-button"
+          [class.tab-button--active]="activeTab() === 'personales'"
+          (click)="setTab('personales')"
+        >
+          Personales
+        </button>
+      </div>
+    </div>
+
+    <div *ngIf="loading()" class="loading-state">
+      <svg lucideLoader2 class="spin" aria-hidden="true"></svg>
+      Cargando documentos...
+    </div>
+
+    <div *ngIf="error() && !loading()" class="error-state">
+      <svg lucideAlertCircle aria-hidden="true"></svg>
+      <span>{{ error() }}</span>
+    </div>
+
+    <div *ngIf="!loading() && !error() && activeTab() === 'generales'">
+      <form class="upload-form" *ngIf="canUploadGeneral()" (ngSubmit)="submitGeneralUpload()">
+        <div class="upload-form__header">
+          <div class="upload-form__title">
+            <svg lucideUpload aria-hidden="true"></svg>
+            <h3>Subir documento general</h3>
+          </div>
+        </div>
+
+        <div class="upload-form__grid">
+          <label class="field">
+            <span>Título</span>
+            <input type="text" [(ngModel)]="generalForm.title" name="generalTitle" placeholder="Ej. Política de seguridad" />
+          </label>
+
+          <label class="field">
+            <span>Categoría</span>
+            <select [(ngModel)]="generalForm.category" name="generalCategory">
+              <option value="NORMATIVA">Normativa</option>
+              <option value="PROCEDIMIENTO">Procedimiento</option>
+              <option value="MANUAL">Manual</option>
+              <option value="OTRO">Otro</option>
+            </select>
+          </label>
+
+          <label class="field field--full">
+            <span>Descripción</span>
+            <textarea rows="3" [(ngModel)]="generalForm.description" name="generalDescription" placeholder="Detalle del documento..."></textarea>
+          </label>
+
+          <label class="field">
+            <span>Versión</span>
+            <input type="text" [(ngModel)]="generalForm.version" name="generalVersion" placeholder="1.0" />
+          </label>
+
+          <label class="field">
+            <span>Archivo</span>
+            <input type="file" (change)="onGeneralFileSelected($event)" />
+          </label>
+        </div>
+
+        <div class="upload-form__actions">
+          <button type="submit" class="primary-button" [disabled]="submitting()">
+            <span *ngIf="submitting()" class="spinner-wrap">
+              <svg lucideLoader2 class="spin" aria-hidden="true"></svg>
+            </span>
+            {{ submitting() ? 'Subiendo...' : 'Guardar documento' }}
+          </button>
+        </div>
+      </form>
+
+      <div *ngIf="submitError()" class="form-error">{{ submitError() }}</div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Documento</th>
+              <th>Categoría</th>
+              <th>Versión</th>
+              <th>Responsable</th>
+              <th>Fecha</th>
+              <th>Archivo</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let documento of generales()">
+              <td>
+                <div class="cell-title">{{ documento.title }}</div>
+                <small *ngIf="documento.description">{{ documento.description }}</small>
+              </td>
+              <td>{{ documento.categoria }}</td>
+              <td>{{ documento.version || '1.0' }}</td>
+              <td>{{ documento.createdBy || 'Sistema' }}</td>
+              <td>{{ formatDate(documento.createdAt) }}</td>
+              <td>
+                <span class="file-path" *ngIf="documento.filePath; else sinArchivo">{{ documento.filePath }}</span>
+                <ng-template #sinArchivo>
+                  <span class="muted">Sin archivo</span>
+                </ng-template>
+              </td>
+            </tr>
+
+            <tr *ngIf="!generales().length">
+              <td colspan="6" class="empty-state">No hay documentos generales registrados.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div *ngIf="!loading() && !error() && activeTab() === 'personales'">
+      <form class="upload-form" *ngIf="canUploadPersonal()" (ngSubmit)="submitPersonalUpload()">
+        <div class="upload-form__header">
+          <div class="upload-form__title">
+            <svg lucideUpload aria-hidden="true"></svg>
+            <h3>Subir documento personal</h3>
+          </div>
+        </div>
+
+        <div class="upload-form__grid">
+          <label class="field">
+            <span>Tipo</span>
+            <select [(ngModel)]="personalForm.tipo" name="personalTipo">
+              <option value="CERTIFICADO_MEDICO">Certificado médico</option>
+              <option value="EXAMEN_MEDICO">Examen médico</option>
+              <option value="LICENCIA">Licencia</option>
+              <option value="OTRO">Otro</option>
+            </select>
+          </label>
+
+          <label class="field" *ngIf="isAdmin()">
+            <span>ID del trabajador</span>
+            <input type="number" [(ngModel)]="personalForm.userId" name="personalUserId" min="1" placeholder="Ej. 12" />
+          </label>
+
+          <label class="field">
+            <span>Fecha de emisión</span>
+            <input type="date" [(ngModel)]="personalForm.issueDate" name="personalIssueDate" />
+          </label>
+
+          <label class="field">
+            <span>Fecha de vencimiento</span>
+            <input type="date" [(ngModel)]="personalForm.expirationDate" name="personalExpirationDate" />
+          </label>
+
+          <label class="field field--full">
+            <span>Archivo</span>
+            <input type="file" (change)="onPersonalFileSelected($event)" />
+          </label>
+        </div>
+
+        <div class="upload-form__actions">
+          <button type="submit" class="primary-button" [disabled]="submitting()">
+            <span *ngIf="submitting()" class="spinner-wrap">
+              <svg lucideLoader2 class="spin" aria-hidden="true"></svg>
+            </span>
+            {{ submitting() ? 'Subiendo...' : 'Guardar documento' }}
+          </button>
+        </div>
+      </form>
+
+      <div *ngIf="submitError()" class="form-error">{{ submitError() }}</div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Trabajador</th>
+              <th>Tipo</th>
+              <th>Vigencia</th>
+              <th>Estado</th>
+              <th>Archivo</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let documento of personales()">
+              <td>
+                <div class="cell-title">#{{ documento.userId }}</div>
+                <small>{{ documento.issueDate ? 'Emitido: ' + formatDate(documento.issueDate) : 'Sin fecha de emisión' }}</small>
+              </td>
+              <td>{{ documento.tipo }}</td>
+              <td>{{ formatDate(documento.expirationDate) }}</td>
+              <td>
+                <span [class]="getStatusClass(documento.status)">{{ getStatusLabel(documento.status) }}</span>
+              </td>
+              <td>
+                <span class="file-path" *ngIf="documento.filePath; else sinArchivoPersonal">{{ documento.filePath }}</span>
+                <ng-template #sinArchivoPersonal>
+                  <span class="muted">Sin archivo</span>
+                </ng-template>
+              </td>
+            </tr>
+
+            <tr *ngIf="!personales().length">
+              <td colspan="5" class="empty-state">No hay documentos personales registrados.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>

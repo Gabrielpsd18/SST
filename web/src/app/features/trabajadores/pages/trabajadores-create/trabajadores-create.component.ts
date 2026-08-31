@@ -12,7 +12,7 @@ import { MaestraItem, CrearTrabajadorRequest } from '../../models/trabajador.mod
 @Component({
   selector: 'app-trabajadores-create',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule, SearchableSelectComponent],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, SearchableSelectComponent, LucidePlus],
   templateUrl: './trabajadores-create.component.html',
   styleUrl: './trabajadores-create.component.scss'
 })

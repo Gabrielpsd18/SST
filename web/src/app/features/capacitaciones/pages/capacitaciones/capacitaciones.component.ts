@@ -4,12 +4,10 @@ import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } 
 import {
   LucideGraduationCap,
   LucidePlus,
-  LucideSearch,
   LucideUserCheck,
   LucideBuilding2,
   LucideCalendar,
   LucideClock,
-  LucideBriefcase,
   LucideUsers,
   LucideShield,
   LucideLoader2,
@@ -19,8 +17,7 @@ import {
   LucidePhone,
   LucideMail,
   LucideAward,
-  LucideCheckCircle,
-  LucideAlertCircle
+  LucideCheckCircle
 } from '@lucide/angular';
 
 import { CapacitacionService } from '../../services/capacitacion.service';
@@ -38,7 +35,28 @@ import { Router } from '@angular/router';
 @Component({
   selector: 'app-capacitaciones',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, SearchableSelectComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
+    SearchableSelectComponent,
+    LucideGraduationCap,
+    LucidePlus,
+    LucideUserCheck,
+    LucideBuilding2,
+    LucideCalendar,
+    LucideClock,
+    LucideUsers,
+    LucideShield,
+    LucideLoader2,
+    LucideChevronLeft,
+    LucideChevronRight,
+    LucideX,
+    LucidePhone,
+    LucideMail,
+    LucideAward,
+    LucideCheckCircle
+  ],
   templateUrl: './capacitaciones.component.html',
   styleUrl: './capacitaciones.component.scss'
 })
@@ -51,12 +69,10 @@ export class CapacitacionesComponent implements OnInit {
   // Iconos
   protected readonly GraduationCap = LucideGraduationCap;
   protected readonly Plus = LucidePlus;
-  protected readonly Search = LucideSearch;
   protected readonly UserCheck = LucideUserCheck;
   protected readonly Building2 = LucideBuilding2;
   protected readonly Calendar = LucideCalendar;
   protected readonly Clock = LucideClock;
-  protected readonly Briefcase = LucideBriefcase;
   protected readonly Users = LucideUsers;
   protected readonly Shield = LucideShield;
   protected readonly Loader2 = LucideLoader2;
@@ -67,7 +83,6 @@ export class CapacitacionesComponent implements OnInit {
   protected readonly Mail = LucideMail;
   protected readonly Award = LucideAward;
   protected readonly CheckCircle = LucideCheckCircle;
-  protected readonly AlertCircle = LucideAlertCircle;
 
   // Control de Pestaña Principal (Sesiones vs Capacitadores)
   protected activeMainTab = signal<'sesiones' | 'capacitadores'>('sesiones');

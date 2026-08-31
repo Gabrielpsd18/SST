@@ -1,10 +1,10 @@
 .reports {
-  max-width: 1200px;
+  max-inline-size: 1200px;
   margin: 0 auto;
   padding: var(--space-5);
 
   &__header {
-    margin-bottom: var(--space-6);
+    margin-block-end: var(--space-6);
 
     h1 {
       margin: 0 0 var(--space-2);
@@ -29,7 +29,7 @@
     align-items: center;
     justify-content: center;
 
-    min-height: 300px;
+    min-block-size: 300px;
     padding: var(--space-6);
 
     text-align: center;
@@ -47,7 +47,7 @@
    ========================================= */
 
 .reports-section {
-  margin-bottom: var(--space-6);
+  margin-block-end: var(--space-6);
 
   padding: var(--space-5);
 
@@ -65,7 +65,7 @@
 
     gap: var(--space-4);
 
-    margin-bottom: var(--space-5);
+    margin-block-end: var(--space-5);
 
     h2 {
       margin: 0 0 var(--space-1);
@@ -83,7 +83,7 @@
       color: var(--color-text-secondary);
     }
 
-    @media (max-width: 600px) {
+    @media (max-inline-size: 600px) {
       flex-direction: column;
       align-items: flex-start;
     }
@@ -102,7 +102,7 @@
 
   gap: var(--space-4);
 
-  @media (max-width: 800px) {
+  @media (max-inline-size: 800px) {
     grid-template-columns: 1fr;
   }
 }
@@ -133,11 +133,11 @@
 
     position: absolute;
 
-    left: 0;
-    top: 0;
-    bottom: 0;
+    inset-inline-start: 0;
+    inset-block-start: 0;
+    inset-block-end: 0;
 
-    width: 4px;
+    inline-size: 4px;
 
     background-color: var(--color-primary);
   }
@@ -153,7 +153,7 @@
   span {
     display: block;
 
-    margin-bottom: var(--space-2);
+    margin-block-end: var(--space-2);
 
     font-size: var(--font-size-sm);
     color: var(--color-text-secondary);
@@ -197,10 +197,10 @@
 
   background-color: var(--color-background);
 
-  border-bottom: 1px solid var(--color-border);
+  border-block-end: 1px solid var(--color-border);
 
   &:last-child {
-    border-bottom: none;
+    border-block-end: none;
   }
 
   &:hover {
@@ -213,9 +213,9 @@
   }
 
   strong {
-    min-width: 50px;
+    min-inline-size: 50px;
 
-    text-align: right;
+    text-align: end;
 
     font-size: var(--font-size-sm);
     font-weight: var(--font-weight-bold);
@@ -284,7 +284,7 @@
     padding: var(--space-4);
 
     &__header {
-      margin-bottom: var(--space-5);
+      margin-block-end: var(--space-5);
 
       h1 {
         font-size: var(--font-size-xl);
@@ -294,7 +294,7 @@
 
   .reports-section {
     padding: var(--space-4);
-    margin-bottom: var(--space-4);
+    margin-block-end: var(--space-4);
   }
 
   .summary-card {
@@ -315,6 +315,6 @@
   }
 
   .report-button {
-    width: 100%;
+    inline-size: 100%;
   }
 }

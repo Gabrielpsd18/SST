@@ -1,11 +1,11 @@
 .trabajadores-import-container {
-  max-width: 1100px;
+  max-inline-size: 1100px;
   margin: 0 auto;
   padding: 2rem 1.5rem;
 }
 
 .page-header {
-  margin-bottom: 2rem;
+  margin-block-end: 2rem;
 
   h2 {
     margin: 0 0 0.5rem;
@@ -56,7 +56,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  max-width: 250px;
+  max-inline-size: 250px;
 
   label {
     font-size: var(--font-size-sm);
@@ -84,13 +84,13 @@
 .actions {
   display: flex;
   justify-content: flex-start;
-  margin-top: 0.5rem;
+  margin-block-start: 0.5rem;
 }
 
 /* --- Summary Cards Grid --- */
 .summary-section {
-  border-top: 1px solid var(--color-border);
-  padding-top: 1.5rem;
+  border-block-start: 1px solid var(--color-border);
+  padding-block-start: 1.5rem;
 
   h3 {
     margin: 0 0 1rem;
@@ -123,7 +123,7 @@
     font-weight: var(--font-weight-bold);
     color: var(--color-text-primary);
     line-height: 1.2;
-    margin-bottom: 0.25rem;
+    margin-block-end: 0.25rem;
   }
 
   &__label {
@@ -134,25 +134,25 @@
 
   /* Modifiers */
   &--success {
-    border-left: 4px solid #10b981;
+    border-inline-start: 4px solid #10b981;
     background-color: #f0fdf4;
     .summary-card__value { color: #065f46; }
   }
 
   &--warning {
-    border-left: 4px solid #f59e0b;
+    border-inline-start: 4px solid #f59e0b;
     background-color: #fffbeb;
     .summary-card__value { color: #92400e; }
   }
 
   &--info {
-    border-left: 4px solid #3b82f6;
+    border-inline-start: 4px solid #3b82f6;
     background-color: #eff6ff;
     .summary-card__value { color: #1e40af; }
   }
 
   &--danger {
-    border-left: 4px solid #ef4444;
+    border-inline-start: 4px solid #ef4444;
     background-color: #fef2f2;
     .summary-card__value { color: #991b1b; }
   }
@@ -160,8 +160,8 @@
 
 /* --- Incidences Section --- */
 .errors-section {
-  border-top: 1px solid var(--color-border);
-  padding-top: 1.5rem;
+  border-block-start: 1px solid var(--color-border);
+  padding-block-start: 1.5rem;
   display: flex;
   flex-direction: column;
   gap: 1rem;
@@ -184,7 +184,7 @@
 
 /* --- Responsive Scrollable Table Container --- */
 .table-responsive {
-  width: 100%;
+  inline-size: 100%;
   overflow-x: auto;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
@@ -193,7 +193,7 @@
   
   /* Scrollbar styling */
   &::-webkit-scrollbar {
-    height: 8px;
+    block-size: 8px;
   }
   &::-webkit-scrollbar-track {
     background: #f1f1f1;
@@ -209,14 +209,14 @@
 }
 
 .error-table {
-  width: 100%;
+  inline-size: 100%;
   border-collapse: collapse;
   font-size: var(--font-size-sm);
 
   th, td {
     padding: 0.75rem 1rem;
     vertical-align: middle;
-    border-bottom: 1px solid var(--color-border);
+    border-block-end: 1px solid var(--color-border);
   }
 
   th {
@@ -236,14 +236,14 @@
     }
 
     &:last-child td {
-      border-bottom: none;
+      border-block-end: none;
     }
   }
 }
 
 /* --- Compact Inputs in Table Cells --- */
 .form-control-sm {
-  width: 100%;
+  inline-size: 100%;
   padding: 0.4rem 0.6rem;
   font-size: var(--font-size-sm);
   border-radius: var(--radius-sm);
@@ -283,7 +283,7 @@
   border: 1px solid #fee2e2;
   white-space: normal;
   word-break: break-word;
-  max-width: 250px;
+  max-inline-size: 250px;
 }
 
 /* --- Actions Cell --- */

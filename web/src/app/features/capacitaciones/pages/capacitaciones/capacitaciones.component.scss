@@ -2,7 +2,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-5);
-  max-width: 1280px;
+  max-inline-size: 1280px;
   margin: 0 auto;
 }
 
@@ -18,6 +18,7 @@
     display: flex;
     align-items: center;
     gap: var(--space-4);
+    min-inline-size: 0;
 
     h2 {
       font-size: var(--font-size-2xl);
@@ -29,25 +30,28 @@
     p {
       font-size: var(--font-size-sm);
       color: var(--color-text-secondary);
-      margin-top: var(--space-1);
+      margin-block-start: var(--space-1);
     }
   }
 
   &__icon {
-    width: 48px;
-    height: 48px;
+    inline-size: 48px;
+    block-size: 48px;
     border-radius: var(--radius-md);
     background-color: var(--blue-50);
     color: var(--color-primary);
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
   }
 
   &__actions {
     display: flex;
     align-items: center;
     gap: var(--space-3);
+    flex-wrap: wrap;
+    justify-content: flex-end;
   }
 }
 
@@ -55,8 +59,9 @@
 .module-tabs {
   display: flex;
   gap: var(--space-2);
-  border-bottom: 2px solid var(--color-border);
-  padding-bottom: 2px;
+  border-block-end: 2px solid var(--color-border);
+  padding-block-end: 2px;
+  overflow-x: auto;
 
   button {
     display: flex;
@@ -69,12 +74,14 @@
     background: none;
     border: none;
     cursor: pointer;
-    border-bottom: 3px solid transparent;
+    border-block-end: 3px solid transparent;
     transition: all 0.2s ease;
+    white-space: nowrap;
 
     lucide-icon, svg {
-      width: 18px;
-      height: 18px;
+      inline-size: 18px;
+      block-size: 18px;
+      flex-shrink: 0;
     }
 
     &:hover {
@@ -83,7 +90,7 @@
 
     &.active {
       color: var(--color-primary);
-      border-bottom-color: var(--color-primary);
+      border-block-end-color: var(--color-primary);
       background-color: var(--color-surface);
       border-radius: var(--radius-md) var(--radius-md) 0 0;
     }
@@ -95,15 +102,21 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: var(--space-1);
+  gap: var(--space-2);
   padding: var(--space-2) var(--space-3);
   border-radius: var(--radius-full);
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-semibold);
+  max-inline-size: 100%;
 
-  lucide-icon, svg {
-    width: 14px;
-    height: 14px;
+  svg {
+    inline-size: 14px;
+    block-size: 14px;
+    flex-shrink: 0;
+  }
+
+  span {
+    white-space: normal;
   }
 
   &--admin {
@@ -134,18 +147,19 @@
 }
 
 .table {
-  width: 100%;
+  inline-size: 100%;
   border-collapse: collapse;
-  text-align: left;
+  text-align: start;
   font-size: var(--font-size-sm);
   background: var(--color-surface);
+  table-layout: fixed;
 
   thead th {
     background: linear-gradient(180deg, var(--color-background), rgba(148, 163, 184, 0.04));
     color: var(--color-text-secondary);
     font-weight: var(--font-weight-semibold);
     padding: var(--space-3) var(--space-4);
-    border-bottom: 1px solid var(--color-border);
+    border-block-end: 1px solid var(--color-border);
     white-space: nowrap;
     letter-spacing: 0.02em;
     text-transform: uppercase;
@@ -154,9 +168,11 @@
 
   tbody td {
     padding: var(--space-4);
-    border-bottom: 1px solid var(--color-border);
+    border-block-end: 1px solid var(--color-border);
     vertical-align: middle;
     color: var(--color-text-primary);
+    word-break: break-word;
+    overflow-wrap: anywhere;
   }
 
   tbody tr {
@@ -168,7 +184,7 @@
   }
 
   tbody tr:last-child td {
-    border-bottom: none;
+    border-block-end: none;
   }
 }
 
@@ -222,8 +238,8 @@
 }
 
 .actions-cell {
-  width: 120px;
-  text-align: right;
+  inline-size: 120px;
+  text-align: end;
 }
 
 .meta-cell {
@@ -235,8 +251,8 @@
   color: var(--color-text-primary);
 
   lucide-icon, svg {
-    width: 14px;
-    height: 14px;
+    inline-size: 14px;
+    block-size: 14px;
     color: var(--color-primary);
   }
 }
@@ -258,8 +274,8 @@
 }
 
 .trainer-avatar {
-  width: 36px;
-  height: 36px;
+  inline-size: 36px;
+  block-size: 36px;
   border-radius: var(--radius-full);
   background-color: var(--color-primary);
   color: #fff;
@@ -275,7 +291,7 @@
   gap: var(--space-3);
   font-size: var(--font-size-xs);
 
-  lucide-icon, svg { width: 14px; height: 14px; color: var(--color-primary); }
+  lucide-icon, svg { inline-size: 14px; block-size: 14px; color: var(--color-primary); }
 }
 
 .user-audit {
@@ -285,7 +301,7 @@
   font-size: var(--font-size-xs);
   color: var(--color-text-secondary);
 
-  lucide-icon, svg { width: 13px; height: 13px; }
+  lucide-icon, svg { inline-size: 13px; block-size: 13px; }
 }
 
 .especialidad-tag {
@@ -295,7 +311,7 @@
   font-size: var(--font-size-xs);
   color: var(--gray-700);
 
-  lucide-icon, svg { width: 14px; height: 14px; }
+  lucide-icon, svg { inline-size: 14px; block-size: 14px; }
 }
 
 /* Pagination */
@@ -305,7 +321,7 @@
   justify-content: space-between;
   padding: var(--space-4);
   background-color: var(--color-surface);
-  border-top: 1px solid var(--color-border);
+  border-block-start: 1px solid var(--color-border);
 }
 
 .pagination-info {
@@ -333,9 +349,9 @@
   color: var(--color-text-secondary);
 
   .state-icon {
-    width: 36px;
-    height: 36px;
-    margin-bottom: var(--space-3);
+    inline-size: 36px;
+    block-size: 36px;
+    margin-block-end: var(--space-3);
     color: var(--color-primary);
   }
 }
@@ -345,7 +361,7 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   padding: var(--space-4);
-  margin-top: var(--space-4);
+  margin-block-start: var(--space-4);
   background-color: var(--color-background);
 
   legend {
@@ -361,7 +377,7 @@
   .box-desc {
     font-size: var(--font-size-xs);
     color: var(--color-text-secondary);
-    margin-bottom: var(--space-3);
+    margin-block-end: var(--space-3);
   }
 }
 
@@ -369,7 +385,7 @@
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  margin-top: var(--space-3);
+  margin-block-start: var(--space-3);
   padding: var(--space-3) var(--space-3);
   background-color: #f0fdf4;
   border: 1px solid #bbf7d0;
@@ -377,7 +393,7 @@
   color: #15803d;
   font-size: var(--font-size-xs);
 
-  lucide-icon, svg { width: 16px; height: 16px; }
+  lucide-icon, svg { inline-size: 16px; block-size: 16px; }
 }
 
 /* Modals */
@@ -391,12 +407,12 @@
 
 .modal {
   position: fixed;
-  top: 50%;
-  left: 50%;
+  inset-block-start: 50%;
+  inset-inline-start: 50%;
   transform: translate(-50%, -50%);
-  width: 620px;
-  max-width: 92vw;
-  max-height: 90vh;
+  inline-size: 620px;
+  max-inline-size: 92vw;
+  max-block-size: 90vh;
   overflow-y: auto;
   z-index: 1001;
 
@@ -404,7 +420,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: var(--space-4);
+    margin-block-end: var(--space-4);
 
     h3 { margin: 0; font-size: var(--font-size-md); }
     button { background: none; border: none; cursor: pointer; }
@@ -414,7 +430,7 @@
     display: flex;
     justify-content: flex-end;
     gap: var(--space-3);
-    margin-top: var(--space-5);
+    margin-block-start: var(--space-5);
   }
 }
 
@@ -423,7 +439,7 @@
   grid-template-columns: repeat(2, 1fr);
   gap: var(--space-3);
 
-  @media (max-width: 600px) {
+  @media (max-inline-size: 600px) {
     grid-template-columns: 1fr;
   }
 }

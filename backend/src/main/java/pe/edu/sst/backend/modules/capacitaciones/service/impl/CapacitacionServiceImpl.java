@@ -238,6 +238,59 @@ public class CapacitacionServiceImpl implements CapacitacionService {
                 .build();
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public Page<pe.edu.sst.backend.modules.capacitaciones.dto.CapacitacionMobileResponse> listarParaMobile(String filtro, Pageable pageable) {
+        String filtroNormalizado = (filtro == null || filtro.isBlank()) ? "TODOS" : filtro.trim().toUpperCase();
+
+        Long trabajadorId = null;
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.isAuthenticated()) {
+            String email = auth.getName();
+            java.util.Optional<Usuario> optUser = usuarioRepository.findByEmail(email);
+            if (optUser.isPresent()) {
+                Usuario user = optUser.get();
+                if (user.getRol() != null && user.getRol().getNombre() == RoleName.TRABAJADOR) {
+                    trabajadorId = trabajadorRepository.findByUsuarioId(user.getId())
+                            .map(Trabajador::getId)
+                            .orElse(null);
+                }
+            }
+        }
+
+        java.time.LocalDateTime now = java.time.LocalDateTime.now();
+        Page<Capacitacion> pagina = capacitacionRepository.findForMobileWithFilter(trabajadorId, filtroNormalizado, now, pageable);
+
+        final Long currentTrabajadorId = trabajadorId;
+        return pagina.map(c -> {
+            String capacitadorNombre = (c.getCapacitadores() != null && !c.getCapacitadores().isEmpty())
+                    ? c.getCapacitadores().iterator().next().getNombres() + " " + c.getCapacitadores().iterator().next().getApellidos()
+                    : "Por asignar";
+
+            String asistencia = "PENDIENTE";
+            if (currentTrabajadorId != null && c.getTrabajadoresAsignados() != null) {
+                asistencia = c.getTrabajadoresAsignados().stream()
+                        .filter(ct -> ct.getTrabajador() != null && currentTrabajadorId.equals(ct.getTrabajador().getId()))
+                        .map(CapacitacionTrabajador::getAsistencia)
+                        .findFirst()
+                        .orElse("PENDIENTE");
+            }
+
+            return pe.edu.sst.backend.modules.capacitaciones.dto.CapacitacionMobileResponse.builder()
+                    .id(c.getId())
+                    .tema(c.getTema())
+                    .tipo(c.getTipo())
+                    .fechaProgramada(c.getFechaProgramada())
+                    .duracionHoras(c.getDuracionHoras())
+                    .estado(c.getEstado())
+                    .asistencia(asistencia)
+                    .capacitadorPrincipal(capacitadorNombre)
+                    .linksVideo(c.getLinksVideo() != null ? new java.util.ArrayList<>(c.getLinksVideo()) : java.util.List.of())
+                    .linksEvaluacion(c.getLinksEvaluacion() != null ? new java.util.ArrayList<>(c.getLinksEvaluacion()) : java.util.List.of())
+                    .build();
+        });
+    }
+
     private Long obtenerSedeIdFiltro() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null || !auth.isAuthenticated()) {

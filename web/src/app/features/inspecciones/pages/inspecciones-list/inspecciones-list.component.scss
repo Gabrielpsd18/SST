@@ -6,7 +6,7 @@
     display: flex;
     flex-direction: column;
     gap: var(--space-5);
-    max-width: 1280px;
+    max-inline-size: 1280px;
     margin: 0 auto;
     padding: 1.5rem;
 }
@@ -32,8 +32,8 @@
     }
 
     &__icon {
-        width: 48px;
-        height: 48px;
+        inline-size: 48px;
+        block-size: 48px;
         border-radius: var(--radius-md);
         background-color: var(--blue-50);
         color: var(--color-primary);
@@ -127,8 +127,8 @@ p {
 }
 
 .stat-card__icon {
-    width: 2.8rem;
-    height: 2.8rem;
+    inline-size: 2.8rem;
+    block-size: 2.8rem;
     display: grid;
     place-items: center;
     border-radius: 0.8rem;
@@ -139,7 +139,7 @@ p {
     display: block;
     font-size: 0.8rem;
     color: var(--color-text-secondary);
-    margin-bottom: 0.2rem;
+    margin-block-end: 0.2rem;
 }
 
 .stat-card strong {
@@ -179,8 +179,10 @@ p {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 1rem;
     padding: 1rem 1.25rem;
-    border-bottom: 1px solid var(--color-border);
+    border-block-end: 1px solid var(--color-border);
+    flex-wrap: wrap;
 }
 
 .pagination-footer {
@@ -190,7 +192,7 @@ p {
     gap: var(--space-3);
     padding: var(--space-4);
     background-color: var(--color-surface);
-    border-top: 1px solid var(--color-border);
+    border-block-start: 1px solid var(--color-border);
     flex-wrap: wrap;
 }
 
@@ -216,26 +218,36 @@ p {
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    min-height: 220px;
+    min-block-size: 220px;
     color: var(--color-text-secondary);
 }
 
 .table-wrap {
     overflow-x: auto;
+    border-block-end: 1px solid var(--color-border);
 }
 
 table {
-    width: 100%;
+    inline-size: 100%;
+    min-inline-size: 760px;
     border-collapse: collapse;
+    table-layout: fixed;
 }
 
 th,
 td {
     padding: 0.9rem 1rem;
-    text-align: left;
-    border-bottom: 1px solid var(--color-border);
+    text-align: start;
+    border-block-end: 1px solid var(--color-border);
     vertical-align: middle;
     font-size: var(--font-size-sm);
+    word-break: break-word;
+    overflow-wrap: anywhere;
+    color: var(--color-text-primary);
+}
+
+th {
+    white-space: nowrap;
 }
 
 th {
@@ -304,7 +316,7 @@ small {
 }
 
 .modal {
-    width: min(800px, 100%);
+    inline-size: min(800px, 100%);
     background: var(--color-surface);
     border-radius: 1rem;
     border: 1px solid var(--color-border);
@@ -317,7 +329,7 @@ small {
     align-items: center;
     justify-content: space-between;
     padding: 1rem 1.25rem;
-    border-bottom: 1px solid var(--color-border);
+    border-block-end: 1px solid var(--color-border);
 }
 
 .inspection-form {
@@ -344,7 +356,7 @@ small {
 .field input,
 .field select,
 .field textarea {
-    width: 100%;
+    inline-size: 100%;
     border: 1px solid var(--color-border);
     border-radius: 0.75rem;
     padding: 0.75rem 0.9rem;
@@ -362,7 +374,7 @@ small {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: 0.75rem;
-    max-height: 250px;
+    max-block-size: 250px;
     overflow: auto;
     padding: 0.5rem;
     border: 1px solid var(--color-border);
@@ -382,7 +394,7 @@ small {
 }
 
 .responsable-item input {
-    width: auto;
+    inline-size: auto;
     margin: 0;
 }
 
@@ -403,7 +415,7 @@ small {
     display: flex;
     justify-content: flex-end;
     gap: 0.75rem;
-    margin-top: 0.5rem;
+    margin-block-start: 0.5rem;
 }
 
 .spin {

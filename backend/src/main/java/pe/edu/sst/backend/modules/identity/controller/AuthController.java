@@ -32,4 +32,20 @@ public class AuthController {
 
     }
 
+    @PostMapping("/mobile/login")
+    public ApiResponse<JwtResponse> loginMobile(
+            @Valid @RequestBody LoginRequest request
+    ) {
+
+        JwtResponse response =
+                authService.loginMobile(request);
+
+        return ApiResponse.<JwtResponse>builder()
+                .success(true)
+                .message("Inicio de sesión móvil exitoso")
+                .data(response)
+                .build();
+
+    }
+
 }

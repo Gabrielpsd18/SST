@@ -26,6 +26,13 @@ public class CapacitacionController {
         return ResponseEntity.ok(capacitacionService.listarPaginado(pageable));
     }
 
+    @GetMapping("/mobile")
+    public ResponseEntity<Page<pe.edu.sst.backend.modules.capacitaciones.dto.CapacitacionMobileResponse>> listarParaMobile(
+            @RequestParam(required = false, defaultValue = "TODOS") String filtro,
+            Pageable pageable) {
+        return ResponseEntity.ok(capacitacionService.listarParaMobile(filtro, pageable));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<CapacitacionResponse> obtenerPorId(@PathVariable Long id) {
         return ResponseEntity.ok(capacitacionService.obtenerPorId(id));

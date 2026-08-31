@@ -2,7 +2,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-5);
-  max-width: 1280px;
+  max-inline-size: 1280px;
   margin: 0 auto;
 }
 
@@ -29,13 +29,13 @@
     p {
       font-size: var(--font-size-sm);
       color: var(--color-text-secondary);
-      margin-top: var(--space-1);
+      margin-block-start: var(--space-1);
     }
   }
 
   &__icon {
-    width: 48px;
-    height: 48px;
+    inline-size: 48px;
+    block-size: 48px;
     border-radius: var(--radius-md);
     background-color: var(--blue-50);
     color: var(--color-primary);
@@ -51,7 +51,7 @@
   grid-template-columns: repeat(2, 1fr);
   gap: var(--space-3);
 
-  @media (max-width: 600px) {
+  @media (max-inline-size: 600px) {
     grid-template-columns: 1fr;
   }
 }
